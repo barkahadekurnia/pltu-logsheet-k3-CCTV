@@ -1,0 +1,66 @@
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="w-full min-h-full bg-white dark:bg-gray-900 flex flex-col justify-start items-start">
+    <ion-header class="w-full ion-no-border" mode="ios">
+      <ion-toolbar class="ion-bg-white dark:ion-bg-gray-900 p-2">
+        <ion-buttons slot="end" mode="md">
+          <ion-button color="dark" (click)="openSettings()">
+            <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <div class="w-full flex-grow flex items-center">
+      <ion-grid>
+        <ion-row class="justify-center">
+          <ion-col size="10" sizeSm="7" sizeMd="6" sizeLg="5" sizeXl="4">
+            <div class="pb-8 flex flex-col justify-center items-center space-y-8">
+              <img class="m-auto" src="assets/img/fire-prevention.svg" alt="App Icon" />
+              <h3 class="text-gray-900 text-2xl text-center font-bold">Sign in to continue</h3>
+
+              <div class="w-full flex flex-col justify-center items-start space-y-4">
+                <div class="
+                    w-full pl-3 pr-1 pt-1 pb-0 text-sm focus-within:text-primary border
+                    border-gray-900 focus-within:border-primary focus-within:border-2
+                    rounded-lg flex justify-between items-center
+                  ">
+                  <ion-input class="text-gray-900 text-base" type="text" placeholder="Username" [(ngModel)]="form.username">
+                  </ion-input>
+
+                  <button class="btn btn-ghost btn-sm btn-circle text-xl pb-1">
+                    <ion-icon name="mail-outline" color="dark"></ion-icon>
+                  </button>
+                </div>
+
+                <div class="
+                    w-full pl-3 pr-1 pt-1 pb-0 text-sm focus-within:text-primary border
+                    border-gray-600 focus-within:border-2 focus-within:border-primary
+                    rounded-lg flex justify-between items-center
+                  ">
+                  <ion-input class="text-gray-900 text-base" [type]="isPasswordVisible ? 'text' : 'password'"
+                    placeholder="Password" clearOnEdit="false" [(ngModel)]="form.password"></ion-input>
+
+                  <button class="btn btn-ghost btn-sm btn-circle text-xl pb-1 focus:outline-none"
+                    (click)="isPasswordVisible = !isPasswordVisible">
+                    <ion-icon [name]="isPasswordVisible ? 'eye-outline' : 'eye-off-outline'" color="dark"></ion-icon>
+                  </button>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-block capitalize rounded-full font-bold text-white"
+                (click)="login()">Sign In</button>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+
+    <div class="w-full p-4">
+      <p *ngIf="appVersion" class="text-center text-xs font-medium">Version {{ appVersion }}</p>
+    </div>
+  </div>
+</ion-content>

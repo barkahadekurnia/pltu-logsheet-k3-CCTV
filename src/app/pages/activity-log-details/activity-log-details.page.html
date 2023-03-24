@@ -1,0 +1,73 @@
+<ion-header mode="ios">
+  <ion-toolbar class="ion-bg-white dark:ion-bg-gray-900">
+    <ion-buttons slot="start" mode="md">
+      <ion-back-button defaultHref="/activity-logs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold">Log Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="w-full min-h-full bg-white dark:bg-gray-900">
+    <ion-grid>
+      <ion-row class="justify-center">
+        <ion-col size="12" sizeSm="10" sizeMd="8" sizeLg="6" sizeXl="4">
+          <div class="w-full p-2 flex flex-col justify-start items-start space-y-4">
+            <div class="w-full">
+              <div class="w-full flex justify-between items-center space-x-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Operator</p>
+                <p class="text-sm flex-grow text-right">{{ log?.username }}</p>
+              </div>
+            </div>
+
+            <div class="w-full">
+              <div class="w-full flex justify-between items-center space-x-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Timestamp</p>
+                <p class="text-sm flex-grow text-right">{{ log?.timestamp }}</p>
+              </div>
+            </div>
+
+            <div class="w-full">
+              <div class="w-full flex justify-between items-center space-x-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Activity</p>
+                <p class="text-sm flex-grow text-right">{{ log?.activity }}</p>
+              </div>
+            </div>
+
+            <div class="w-full">
+              <div class="w-full mb-2 flex justify-between items-center space-x-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Data</p>
+                <p *ngIf="!log?.data?.length" class="text-sm flex-grow text-right">-</p>
+              </div>
+
+              <div *ngIf="log?.data?.length" class="flex flex-col justify-center items-center space-y-2">
+                <div *ngFor="let item of log.data" class="w-full flex justify-between items-center">
+                  <div class="
+                      w-full p-4 pr-6 bg-white dark:bg-gray-800 border border-gray-300
+                      dark:border-gray-800 rounded-xl
+                    ">
+                    <h2 class="mb-1 text-xs text-gray-500 dark:text-gray-400 font-medium">#{{ item.logId }}</h2>
+
+                    <p class="text-sm" [ngClass]="[item.status === 'success' ? 'text-success' : 'text-error']">
+                      {{ item.message }}
+                    </p>
+                  </div>
+
+                  <div class="relative w-4 h-8">
+                    <div class="absolute right-0 w-8 h-8 bg-success-500 rounded-full flex justify-center items-center"
+                      [ngClass]="[item.status === 'success' ? 'bg-success' : 'bg-error']">
+                      <ion-icon class="text-xl text-white"
+                        [name]="item.status === 'success' ? 'checkmark-outline' : 'close-outline'">
+                      </ion-icon>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

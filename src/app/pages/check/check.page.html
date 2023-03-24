@@ -1,0 +1,77 @@
+<ion-header
+  class="ion-no-border shadow fixed transition-none"
+  [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
+>
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" class="p-2" mode="ios">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold text-center">FIRE ASSET</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <div class="w-full flex flex-col bghover">
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="ion-bg-white">
+        <ion-buttons slot="start" class="p-2" mode="ios">
+          <ion-back-button
+            defaultHref="/tabs"
+            color="primary"
+          ></ion-back-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <div class="pl-6 pt-2">
+      <h4 class="text-2xl font-bold">FIRE ASSET</h4>
+    </div>
+  </div>
+
+  <app-screen-view
+    *ngIf="loading"
+    type="loading"
+    message="Loading data ..."
+  ></app-screen-view>
+
+  <div class="relative min-h-screen pt-2 pb-12 bghover">
+    <ion-grid
+      class="w-full ion-padding flex flex-col justify-center items-center space-y-4"
+    >
+      <ion-row class="w-full pt-3 justify-center items-center">
+        <ion-col
+          *ngFor="let kategori of datakategori"
+          size="6"
+          sizeMd="6"
+          sizeLg="6"
+        >
+          <div
+            class="flex items-center justify-between overflow-y-scroll text-gray-500 cursor-pointer space-x-3"
+          >
+            <div
+              class="flex flex-col items-center justify-center w-50 h-50 bg-green-200 rounded-2xl shadow hover:shadow-md cursor-pointer mb-2 p-1 bg-white transition ease-in duration-300"
+            >
+              <img src="{{ kategori.urlImage }}" alt="" />
+              <p class="text-sm mt-1">{{ kategori.assetCategoryName }}</p>
+            </div>
+          </div>
+
+          <!-- <app-badge-stat
+            label="{{ kategori.assetCategoryName }}"
+            theme="info"
+            icon="{{ kategori.urlImage }}"
+            type="outline"
+            [ripple]="true"
+            [vertical]="true"
+            [large]="true"
+            (click)="openPage(['schedules'])"
+          >
+          </app-badge-stat> -->
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

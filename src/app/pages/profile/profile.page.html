@@ -1,0 +1,99 @@
+<ion-header mode="ios">
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" mode="md">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="text-lg font-bold">Profil Saya</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="pt-12 px-4 pb-4">
+    <img class="profile-picture w-32 mx-auto mb-4 bg-primary rounded-full" src="assets/img/engineer.png" />
+    <h2 class="text-center text-xl font-semibold">{{ user?.name }}</h2>
+    <p class="text-center text-gray-500">{{ user?.email }}</p>
+  </div>
+
+  <div class="p-4">
+    <div class="border border-gray-800 rounded-box overflow-hidden">
+      <ion-item *ngIf="user?.parameter?.fullname" class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Fullname</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ user?.parameter?.fullname }}</ion-note>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Group</p>
+        <ion-badge color="primary" slot="end">{{ user?.group }}</ion-badge>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Login at</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ loginAt || '-' }}</ion-note>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Country</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ user?.parameter?.country || '-' }}</ion-note>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">City</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ user?.parameter?.city || '-' }}</ion-note>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Company</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ user?.parameter?.company || '-' }}</ion-note>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Postal Code</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ user?.parameter?.postalCode || '-' }}</ion-note>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Phone</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ user?.parameter?.noTelp || '-' }}</ion-note>
+      </ion-item>
+
+      <!-- <ion-item class="dark:ion-border-gray-600" [lines]="tags?.length ? 'none' : undefined">
+        <p class="text-base font-semibold">Tag</p>
+        <ion-note class="text-base text-gray-500" *ngIf="!tags?.length" slot="end">-</ion-note>
+      </ion-item>
+
+      <ion-item *ngIf="tags?.length" class="dark:ion-border-gray-600">
+        <div>
+          <div *ngFor="let tag of tags" class="badge badge-primary mx-0.5 mb-1 p-3 px-2 rounded-md">
+            {{ tag.tagName }}
+          </div>
+        </div>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" lines="none">
+        <p class="text-base font-semibold">Tag Location</p>
+        <ion-note class="text-base text-gray-500" *ngIf="!tagLocations?.length" slot="end">-</ion-note>
+      </ion-item>
+
+      <ion-item *ngIf="tagLocations?.length" class="dark:ion-border-gray-600" lines="none">
+        <div>
+          <div *ngFor="let tagLocation of tagLocations"
+            class="badge badge-primary mx-0.5 mb-1 p-3 px-2 rounded-md">
+            {{ tagLocation.tagLocationName }}
+          </div>
+        </div>
+      </ion-item> -->
+    </div>
+  </div>
+
+  <ion-row class="p-6 w-full">
+    <ion-col size="12">
+      <button class="btn btn-block btn-error rounded-full text-white capitalize
+        space-x-1 focus:outline-none" (click)="checkRecords()">
+        <span class="text-xl mr-2">Logout</span>
+        <ion-icon name="log-out-outline" size="large"></ion-icon>
+      </button>
+    </ion-col>
+  </ion-row>
+  
+  <div class="mb-24"></div>
+</ion-content>

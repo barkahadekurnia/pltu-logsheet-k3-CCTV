@@ -1,0 +1,32 @@
+<ion-header class="ion-bo-border shadow fixed" [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
+  position="fixed">
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" class="p-2" mode="ios">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold text-center">
+      Laporan Harian
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-header class="ion-no-border">
+    <ion-toolbar class="ion-bg-white">
+      <ion-buttons slot="start" class="p-2" mode="ios">
+        <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <div class="pl-6">
+    <h4 class="text-2xl font-bold">Laporan Harian</h4>
+  </div>
+
+  <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
+
+</ion-content>

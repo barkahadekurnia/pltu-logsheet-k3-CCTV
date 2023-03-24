@@ -1,0 +1,155 @@
+<ion-header
+  class="ion-no-border shadow fixed transition-none"
+  [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
+>
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" class="p-2" mode="ios">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold text-center"
+      >Alat Pemadam Api</ion-title
+    >
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="w-full flex flex-col">
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="ion-bg-white">
+        <ion-buttons slot="start" class="p-2" mode="ios">
+          <ion-back-button
+            defaultHref="/tabs"
+            color="primary"
+          ></ion-back-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <div class="pl-6">
+      <h4 class="text-2xl font-bold">APA List</h4>
+    </div>
+  </div>
+
+  <app-screen-view
+    *ngIf="loading"
+    type="loading"
+    message="Loading data ..."
+  ></app-screen-view>
+
+  <app-screen-view
+    *ngIf="!loading && !sourceAssets?.length"
+    type="no-data"
+    message="Empty Data"
+    description="Synchronize with server to get data"
+  >
+  </app-screen-view>
+
+  <div
+    *ngIf="!loading && sourceAssets.length"
+    class="w-full min-h-full bg-white dark:bg-gray-900"
+  >
+    <ion-grid class="w-full p-2">
+      <ion-row class="justify-center">
+        <ion-col size="12" sizeLg="8">
+          <ion-row *ngIf="!sourceAssets.length">
+            <ion-col size="12">
+              <app-screen-view
+                type="no-data"
+                message="Data Not found"
+              ></app-screen-view>
+            </ion-col>
+          </ion-row>
+
+          <br />
+          <ion-row *ngIf="sourceAssets.length">
+            <ion-col
+              *ngFor="let asset of sourceAssets"
+              size="12"
+              sizeSm="6"
+              sizeXl="4"
+            >
+              <div
+                class="w-full p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl"
+              >
+                <div class="w-full flex justify-between items-center space-x-2">
+                  <h2 class="text-lg font-medium line-clamp-1">
+                    {{ asset.assetNumber }}
+                  </h2>
+                  <!-- <h5>{{asset.asset_number}}</h5> -->
+                  <ion-badge color="success" mode="ios"
+                    >{{ asset.assetStatusName }}</ion-badge
+                  >
+                </div>
+
+                <ion-list>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Merk</ion-label>
+                    <ion-input
+                      class="text-right"
+                      readonly
+                      [value]="asset?.merk"
+                    ></ion-input>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Kapasitas</ion-label>
+                    <ion-input
+                      class="text-right"
+                      readonly
+                      [value]="asset?.capacityValue"
+                    ></ion-input>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Kondisi</ion-label>
+                    <ion-input
+                      class="text-right"
+                      readonly
+                      [value]="asset?.condition"
+                    ></ion-input>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Unit</ion-label>
+                    <ion-input
+                      class="text-right"
+                      readonly
+                      [value]="asset?.unit"
+                    ></ion-input>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Type Scan </ion-label>
+                    <ion-input
+                      class="text-right"
+                      readonly
+                      [value]="asset?.schType"
+                    ></ion-input>
+                  </ion-item>
+                </ion-list>
+
+                <button
+                  class="btn btn-sm btn-primary text-white btn-block rounded-lg space-x-1 focus:outline-none"
+                  (click)="showDetails(asset)"
+                >
+                  <p class="text-xs font-medium capitalize">Details</p>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </button>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <ion-infinite-scroll
+    *ngIf="!loading && assets?.length"
+    (ionInfinite)="pushData($event)"
+  >
+    <ion-infinite-scroll-content
+      class="bg-white dark:bg-gray-900"
+      loadingSpinner="dots"
+    ></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

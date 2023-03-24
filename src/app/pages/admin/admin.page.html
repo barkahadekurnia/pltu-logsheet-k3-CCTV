@@ -1,0 +1,123 @@
+<ion-content [scrollEvents]="true">
+  <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <div class="w-full min-h-full flex flex-col bgbiru">
+    <div class="flex mt-6 mb-4 justify-between">
+      <button
+        *ngIf="shared.user.group == 'ADMIN'"
+        type="button"
+        class="inline-flex items-center relative text-gray-300 hover:text-white mr-3"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-8 w-8"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h8m-8 6h16"
+          ></path>
+        </svg>
+      </button>
+      <h1 class="font-black text-white text-lg mr-2">Settings</h1>
+    </div>
+
+    <div class="min-h-24"></div>
+    <div class="w-full flex-grow bg-white rounded-t-3xl bgcard">
+      <!-- <ion-list mode="ios" class="mt-2"> -->
+      <!-- <div class="w-full ml-2 mt-6  p-4 bg-white  dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl">
+          <ion-item lines="none">
+            <ion-icon slot="start" name="text-outline"></ion-icon>
+            <p class="text-lg font-semibold">Font Size</p>
+          </ion-item>
+          <ion-item>
+            <ion-range [min]="7" [max]="13" [pin]="true" [snaps]="true"
+            [pinFormatter]="textZoomFormatter"
+            [(ngModel)]="textZoom" (ionChange)="onTextZoomChanged($event)">
+            </ion-range>
+          </ion-item>
+        </div> -->
+      <div class="w-full mt-6">
+        <div
+          class="ml-2 mt-6 mr-2 p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl"
+        >
+          <ion-item
+            *ngIf="isAuthenticated"
+            class="dark:ion-border-gray-600"
+            [detail]="true"
+            (click)="openScan()"
+          >
+            <ion-icon
+              name="id-card-outline"
+              slot="start"
+              color="dark"
+            ></ion-icon>
+            <p class="text-lg font-semibold">RFID APAR</p>
+          </ion-item>
+        </div>
+        <div
+          class="ml-2 mt-2 mr-2 p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl"
+        >
+          <ion-item>
+            <ion-icon
+              name="images-outline"
+              slot="start"
+              color="dark"
+            ></ion-icon>
+            <p class="text-lg font-semibold">Offline Images</p>
+            <ion-toggle
+              slot="end"
+              [checked]="offlinePhotos"
+              (ionChange)="onOfflinePhotosChanged($event)"
+            ></ion-toggle>
+          </ion-item>
+        </div>
+        <div
+          class="ml-2 mt-2 mr-2 p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl"
+        >
+          <ion-item>
+            <ion-icon
+              name="cloud-upload-outline"
+              slot="start"
+              color="dark"
+            ></ion-icon>
+            <p class="text-lg font-semibold">Auto upload</p>
+            <ion-toggle
+              slot="end"
+              [checked]="autoUpload"
+              (ionChange)="onAutoUploadChanged($event)"
+            ></ion-toggle>
+          </ion-item>
+        </div>
+        <!-- <ion-item class="dark:ion-border-gray-600" button [detail]="true" (click)="openPage(['attachment-settings'])">
+          <ion-icon name="extension-puzzle-outline" slot="start" color="dark"></ion-icon>
+          <ion-label>Attachment Config</ion-label>
+        </ion-item> -->
+        <div
+          class="ml-2 mt-2 mr-2 p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl"
+        >
+          <ion-item
+            *ngIf="isAuthenticated"
+            class="dark:ion-border-gray-600"
+            button
+            [detail]="true"
+            (click)="openPage(['test-connection'])"
+          >
+            <ion-icon name="globe-outline" slot="start" color="dark"></ion-icon>
+            <p class="text-lg font-semibold">Test Connection</p>
+          </ion-item>
+        </div>
+      </div>
+      <!-- </ion-list> -->
+    </div>
+  </div>
+
+  <!-- <app-screen-view *ngIf="!loading" type="no-data" message="Empty Data"
+    description="Synchronize with server to get data">
+  </app-screen-view> -->
+</ion-content>

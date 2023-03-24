@@ -1,0 +1,66 @@
+<ion-tabs mode="md">
+  <!-- <ion-fab vertical="bottom" horizontal="center" (click)="openScanPage()">
+    <ion-fab-button>
+      <ion-icon name="scan-outline" class="text-white" size="large"></ion-icon>
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full border-4 opacity-40"></span>
+    </ion-fab-button>
+  </ion-fab> -->
+  <div class="flex flex-col items-center  hover:text-blue-400 z-50 " (click)="openScanPage()">
+    <div
+      class="absolute bottom-2 shadow-2xl text-center flex items-center justify-center rounded-full border-4 text-xl border-gray-300 hover:border-blue-500 bg-blue-500 p-2 text-white transition ease-in duration-200 "
+      style="background: #020281; width: 4.3rem; height: 4.3rem;">
+      <ion-icon name="scan-outline" class="text-white" size="large"></ion-icon>
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full border-4 opacity-50"></span>
+    </div>
+  </div>
+  <!-- <ion-row class="pt-6 w-full">
+                <ion-col size="12">
+                    <button class="btn btn-block rounded-full text-white capitalize space-x-1"
+                        [ngClass]="[application?.bgSyncButton || 'btn-primary']" (click)="synchronize()">
+                        <span class="text-xl mr-2 uppercase">Synchronize</span>
+                        <ion-icon name="sync-outline" size="large"></ion-icon>
+                    </button>
+
+                    <p *ngIf="application.lastSync" class="mt-2 text-center text-xs text-gray-500">
+                        Last Synchronize: {{ application.lastSync }}
+                    </p>
+
+                    <p *ngIf="!application.lastSync" class="mt-2 text-center text-xs text-gray-500">
+                        Never synced before
+                    </p>
+                </ion-col>
+            </ion-row> -->
+
+  <ion-tab-bar slot="bottom" class="ion-no-border">
+    <ion-tab-button tab="home">
+      <ion-icon name="home"></ion-icon>
+    </ion-tab-button>
+
+    <ion-tab-button tab="schedules" class="comments">
+      <ion-icon name="calendar"></ion-icon>
+      <!-- <ion-badge color="danger">16</ion-badge> -->
+    </ion-tab-button>
+
+    <svg height="50" viewBox="0 0 100 50" width="100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M100 0v50H0V0c.543 27.153
+        22.72 49 50 49S99.457 27.153 99.99 0h.01z" fill="red" fill-rule="evenodd"></path>
+    </svg>
+
+    <!-- <ion-tab-button *ngIf="gruprole == 'ADMIN'" tab="admin" class="notifs">
+      <ion-icon name="settings"></ion-icon>
+    </ion-tab-button> -->
+    <!-- <ion-tab-button
+      *ngIf="gruprole == 'PETUGAS'"
+      tab="activity-logs"
+      class="notifs"
+    >
+      <ion-icon name="receipt"></ion-icon>
+    </ion-tab-button> -->
+    <ion-tab-button tab="activity-logs" class="notifs">
+      <ion-icon name="receipt"></ion-icon>
+    </ion-tab-button>
+    <ion-tab-button tab="settings">
+      <ion-icon name="person"></ion-icon>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>

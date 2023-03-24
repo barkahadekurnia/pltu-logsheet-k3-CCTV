@@ -1,0 +1,31 @@
+{
+    "status": 200,
+    "message": "Success Get Data Schedule",
+    "data": [
+        {
+            "scheduleTrxId": "0f66ebb0-e821-11ec-804e-c2e637634a4a",
+            "assetName": "APAR",
+            "assetNumber": "Co2-06-U12-0008",
+            "assetStatus": "STAND BY",
+            "unit": "U12",
+            "area": "Jalur Conveyor",
+            "tagNumber": "TP-U1223-ALL-001",
+            "latitude": "0.000000",
+            "longitude": "109.333336",
+            "supplyDate": "2022-06-09"
+        },
+        {
+            "scheduleTrxId": "0f66e66a-e821-11ec-804e-c2e637634a4a",
+            "assetName": "APAR",
+            "assetNumber": "Co2-06-U12-0009",
+            "assetStatus": "STAND BY",
+            "unit": "U12",
+            "area": "Jalur Conveyor",
+            "tagNumber": "TP-U1223-ALL-001",
+            "latitude": "0.000000",
+            "longitude": "109.333336",
+            "supplyDate": "2022-06-09"
+        }
+    ],
+    "rows": 2
+}

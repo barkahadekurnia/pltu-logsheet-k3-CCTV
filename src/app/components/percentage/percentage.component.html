@@ -1,0 +1,3 @@
+<div class="w-full" [ngClass]="[className || '']">
+  <div class="w-full h-48" echarts (chartInit)="onChartInit($event)" [options]="options"></div>
+</div>

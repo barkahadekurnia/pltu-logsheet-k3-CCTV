@@ -1,0 +1,290 @@
+<ion-app class="scanner-hide">
+  <div
+    #appLoader
+    *ngIf="progress < 100"
+    class="fixed top-0 left-0 right-0 bottom-0 z-50 w-full min-h-screen bg-white dark:bg-gray-900 flex justify-center items-center"
+  >
+    <div
+      class="text-center flex flex-col justify-center items-center space-y-8 animate__animated animate__zoomIn"
+    >
+      <img class="h-16" src="assets/img/s2p-logo.png" alt="Logo" />
+      <!-- <progress class="w-48 progress progress-primary" [value]="progress" max="100"></progress> -->
+      <ion-spinner></ion-spinner>
+    </div>
+  </div>
+
+  <ion-menu
+    menuId="filter-assets"
+    contentId="main"
+    side="end"
+    [swipeGesture]="false"
+    [disabled]="true"
+  >
+    <ion-header class="ion-no-border" mode="md">
+      <ion-toolbar>
+        <ion-title class="font-bold">Filter</ion-title>
+
+        <ion-buttons slot="end" class="p-2">
+          <ion-button color="primary" (click)="filterOptions?.onReset()">
+            <ion-icon slot="icon-only" name="reload-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <div *ngFor="let filter of filterOptions.data" class="w-full px-3.5 mb-4">
+        <p class="mb-2 px-0.5 text-xs text-gray-500 dark:text-gray-400">
+          {{ filter.label }}
+        </p>
+
+        <div>
+          <div
+            *ngFor="let item of filter.values"
+            class="badge mx-0.5 mb-1 p-3 px-2 rounded-full"
+            [ngClass]="[
+              item.selected
+                ? 'badge-primary'
+                : 'badge-outline text-black dark:text-gray-100 border-gray-300 dark:border-gray-600'
+            ]"
+            (click)="onFilterClick(item)"
+          >
+            {{ item.text }}
+          </div>
+        </div>
+      </div>
+    </ion-content>
+  </ion-menu>
+
+  <ion-menu
+    menuId="asset-information"
+    contentId="main"
+    side="end"
+    [swipeGesture]="false"
+    [disabled]="true"
+    (ionDidClose)="assetInfoDidClose($event)"
+    (ionWillOpen)="assetInfoWillOpen()"
+    (ionDidOpen)="assetInfoDidOpen($event)"
+  >
+    <ion-header class="ion-no-border" mode="md">
+      <ion-toolbar>
+        <ion-title class="font-bold">APA Information</ion-title>
+
+        <ion-buttons slot="end" class="p-2">
+          <ion-button color="danger" (click)="closeMenu('asset-information')">
+            <ion-icon slot="icon-only" name="close-circle"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <br />
+    <ion-content class="ion-padding-bottom">
+      <ion-list mode="ios">
+        <ion-item *ngIf="asset?.photo" lines="none">
+          <ion-label>
+            <img
+              class="w-48 max-w-full m-auto rounded-btn"
+              [src]="asset?.offlinePhoto || asset?.photo"
+              alt="Asset Info"
+              onerror="this.src='assets/img/empty.jpg'"
+              (click)="showImageViewer($event)"
+            />
+          </ion-label>
+        </ion-item>
+
+        <ion-item class="text-xs dark:ion-border-gray-600">
+          <ion-label>APA Number</ion-label>
+          <ion-input
+            class="text-right"
+            readonly
+            [value]="asset?.assetNumber"
+          ></ion-input>
+        </ion-item>
+        <ion-item class="text-xs dark:ion-border-gray-600">
+          <ion-label>Type</ion-label>
+          <ion-input
+            class="text-right"
+            readonly
+            [value]="asset?.schType"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item class="text-xs dark:ion-border-gray-600">
+          <ion-label>Merk</ion-label>
+          <ion-input
+            class="text-right"
+            readonly
+            [value]="asset?.merk"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item class="text-xs dark:ion-border-gray-600">
+          <ion-label>APA Status</ion-label>
+          <ion-input
+            class="text-right"
+            readonly
+            [value]="asset?.assetStatusName"
+          ></ion-input>
+        </ion-item>
+        <ion-item class="text-xs dark:ion-border-gray-600">
+          <ion-label>Unit</ion-label>
+          <ion-input
+            class="text-right"
+            readonly
+            [value]="asset?.unit"
+          ></ion-input>
+        </ion-item>
+        <ion-item class="text-xs dark:ion-border-gray-600">
+          <ion-label>Area</ion-label>
+          <ion-input
+            class="text-right"
+            readonly
+            [value]="asset?.area"
+          ></ion-input>
+        </ion-item>
+        <ion-item class="text-xs" lines="none">
+          <ion-label>Map</ion-label>
+        </ion-item>
+
+        <ion-item lines="none">
+          <div
+            id="map"
+            class="w-full h-80 bg-gray-300 dark:bg-gray-700 rounded-lg"
+          ></div>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <ion-menu
+    menuId="sidebar"
+    contentId="main"
+    side="start"
+    [swipeGesture]="false"
+    [disabled]="true"
+    (ionDidClose)="assetInfoDidClose($event)"
+    (ionWillOpen)="assetInfoWillOpen()"
+    (ionDidOpen)="assetInfoDidOpen($event)"
+  >
+    <ion-header class="ion-no-border" mode="md" >
+      <ion-toolbar class="new-background-color">
+        <ion-title class="new-background-color"
+          ><p class="text-xs text-gray-500 text-center">
+            <ion-badge color="warning" mode="ios">{{ shared.user.group }}</ion-badge>
+          </p></ion-title
+        >
+        <div id="profile" class="space-y-3">
+          <img
+            src="assets/img/engineer.png"
+            alt="Avatar user"
+            class="w-20 md:w-16 rounded-full mx-auto"
+          />
+          <div>
+            <h2
+              class="font-medium text-xs md:text-sm text-center text-teal-500"
+            >
+            {{ shared.user.name }}
+            </h2>
+
+          <h2
+              class="font-medium text-xs md:text-sm text-center text-teal-500"
+            >
+            {{ shared.user.namaperusahaan }}
+            </h2>
+
+
+          </div>
+        </div>
+      </ion-toolbar>
+    </ion-header>
+    <br />
+    <ion-content class="ion-padding-bottom">
+      <div class="space-y-6 md:space-y-10 mt-10">
+        <div id="menu" class="flex flex-col space-y-2">
+          <a
+            class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
+            (click)="openPage(['profile'])"
+          >
+            <img class="w-6 h-6 fill-current inline-block"
+            src="assets/icon/user.png"
+            alt="Avatar user"
+          />
+            <span class=""> Akun</span>
+          </a>
+          <a
+            (click)="openPage(['schedule'])"
+            class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
+          >
+          <img class="w-6 h-6 fill-current inline-block"
+          src="assets/icon/calendar.png"
+          alt="Avatar user"
+        />
+            <span class=""> Jadwal Pengecekan</span>
+          </a>
+          <!-- <a
+            (click)="openPage(['check'])"
+            class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
+          >
+            <svg
+              class="w-6 h-6 fill-current inline-block"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z"
+              ></path>
+            </svg>
+            <span class="">Check Sheet</span>
+          </a> -->
+          <!-- <a
+            (click)="openPage(['report'])"
+            class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
+          >
+          <img class="w-6 h-6 fill-current inline-block"
+          src="assets/icon/report.png"
+          alt="Avatar user"
+        />
+            <span class=""> Reports</span>
+          </a> -->
+          <!-- <a
+            (click)="openPage(['tabs/admin'])"
+            class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
+          >
+          <img class="w-6 h-6 fill-current inline-block"
+          src="assets/icon/settings.png"
+          alt="Avatar user"
+        />
+            <span class=""> Pengaturan</span>
+          </a> -->
+        </div>
+      </div>
+    </ion-content>
+  </ion-menu>
+
+  <ion-router-outlet id="main"></ion-router-outlet>
+</ion-app>
+
+<div class="scanner-ui">
+  <div class="container">
+    <div class="barcode-scanner--area--container">
+      <div class="relative">
+        <p>Arahkan Kamera pada QR-Code</p>
+      </div>
+
+      <div class="square surround-cover">
+        <div class="barcode-scanner--area--outer surround-cover">
+          <div class="barcode-scanner--area--inner"></div>
+        </div>
+      </div>
+      <div class="text-center mt-8">
+        <button
+          class="btn btn-block btn-warning text-white focus:outline-none"
+          (click)="closeReader()"
+        >
+          Kembali
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

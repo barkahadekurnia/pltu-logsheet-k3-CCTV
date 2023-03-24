@@ -1,0 +1,44 @@
+<ion-header mode="ios">
+  <ion-toolbar class="ion-bg-white dark:ion-bg-gray-900">
+    <ion-buttons slot="start" mode="md">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold">Test Connection</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher *ngIf="testList.length" slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="testList.length" class="w-full min-h-full flex flex-col justify-start items-start">
+    <ion-grid class="w-full ion-padding flex flex-col justify-center items-center">
+      <ion-row class="w-full flex-grow justify-center">
+        <ion-col size="12" sizeSm="10" sizeMd="8" sizeLg="6" sizeXl="4">
+          <div class="w-full min-h-full flex flex-col justify-start items-start">
+            <div class="w-full flex-grow p-4 flex flex-col justify-center items-center">
+              <div *ngIf="connecting" class="p-4 flex flex-col justify-center items-center space-y-4">
+                <div class="w-24 h-24 flex justify-center items-center">
+                  <ion-spinner class="transform scale-250" name="dots" color="warning"></ion-spinner>
+                </div>
+
+                <h1 class="text-xl font-semibold">Connecting</h1>
+                <p class="text-sm text-center">Trying to connect to the server...</p>
+              </div>
+
+              <div *ngIf="!connecting" class="p-4 flex flex-col justify-center items-center space-y-4">
+                <img class="w-24" [src]="result.ok ? 'assets/img/check.svg' : 'assets/img/remove.svg'"
+                  [alt]="result.ok ? 'Connected' : 'Disconnected'" />
+
+                <h1 class="text-xl text-center font-semibold">{{ result.ok ? 'Connected' : 'Disconnected' }}</h1>
+                <p class="text-sm text-center">{{ result.message }}</p>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

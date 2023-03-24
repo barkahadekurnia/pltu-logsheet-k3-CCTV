@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   height="512pt"
+   viewBox="0 0 512 512"
+   width="512pt"
+   version="1.1"
+   id="svg16"
+   sodipodi:docname="success.svg"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <metadata
+     id="metadata22">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs20" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1280"
+     inkscape:window-height="704"
+     id="namedview18"
+     showgrid="false"
+     inkscape:zoom="0.388058"
+     inkscape:cx="325.9822"
+     inkscape:cy="296.34745"
+     inkscape:window-x="0"
+     inkscape:window-y="23"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg16"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="pt" />
+  <path
+     d="m512 256c0 141.386719-114.613281 256-256 256s-256-114.613281-256-256 114.613281-256 256-256 256 114.613281 256 256zm0 0"
+     fill="#e4edfb"
+     id="path10"
+     style="fill:#34d399;fill-opacity:1" />
+  <path
+     d="m480 256c0 123.710938-100.289062 224-224 224s-224-100.289062-224-224 100.289062-224 224-224 224 100.289062 224 224zm0 0"
+     fill="#6ae5d3"
+     id="path12"
+     style="fill:#34d391;fill-opacity:1" />
+  <path
+     d="m192 374.625-64-64c-6.246094-6.25-6.246094-16.378906 0-22.625s16.375-6.246094 22.625 0l41.375 41.375 169.375-169.375c6.25-6.246094 16.378906-6.246094 22.625 0s6.246094 16.375 0 22.625zm0 0"
+     fill="#0ac1a7"
+     id="path14"
+     style="fill:#ffffff" />
+</svg>

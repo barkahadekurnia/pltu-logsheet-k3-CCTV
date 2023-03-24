@@ -1,0 +1,207 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "~@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "~@ionic/angular/css/normalize.css";
+@import "~@ionic/angular/css/structure.css";
+@import "~@ionic/angular/css/typography.css";
+@import "~@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "~@ionic/angular/css/padding.css";
+@import "~@ionic/angular/css/float-elements.css";
+@import "~@ionic/angular/css/text-alignment.css";
+@import "~@ionic/angular/css/text-transformation.css";
+@import "~@ionic/angular/css/flex-utils.css";
+
+/* Tailwind CSS */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* Animate CSS */
+@import "animate.css";
+
+/* Mapbox CSS */
+@import "mapbox-gl/dist/mapbox-gl.css";
+
+/* Viewer.js CSS */
+@import "viewerjs/dist/viewer.css";
+
+* {
+    font-family: "Boston", sans-serif;
+}
+
+ion-label,
+ion-input,
+h1,
+h2,
+h3 {
+    font-family: "Pieta", sans-serif !important;
+}
+
+ion-title,
+h4 {
+    font-family: "Claremont", sans-serif !important;
+}
+
+ion-toolbar {
+    --border-color: #fff;
+}
+
+ion-back-button {
+    --color: #000000;
+}
+
+.pt-android-safe {
+    --padding-top: var(--android-safe-area-inset-top);
+    padding-top: var(--android-safe-area-inset-top);
+}
+
+.pt-native-safe {
+    --padding-top: var(--android-safe-area-inset-top, env(safe-area-inset-top));
+    padding-top: var(--android-safe-area-inset-top, env(safe-area-inset-top));
+}
+
+.shadow {
+    box-shadow: 0px 0px 14px 0px rgba(0, 0, 0, 0.14) !important;
+}
+
+.scanner-ui {
+    display: none;
+}
+.scanner-hide {
+    visibility: visible;
+}
+.max-w-4\/5 {
+    max-width: 80%;
+}
+.min-w-12 {
+    min-width: 3rem;
+}
+.ion-bg-white {
+    --background: white;
+}
+
+.scale-250 {
+    --tw-scale-x: 2.5;
+    --tw-scale-y: 2.5;
+}
+
+body.qrscanner {
+    background-color: transparent;
+}
+body.qrscanner .scanner-ui {
+    display: block;
+}
+body.qrscanner .scanner-hide {
+    visibility: hidden;
+}
+
+.above-top {
+    top: -144px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.fixed-top {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+ion-popover.alert-popover {
+    --backdrop-opacity: 0.5;
+    --min-width: 8rem;
+    --width: 80vw;
+    --max-width: 24rem;
+    --max-height: 80vh;
+}
+
+ion-popover.select-popover {
+    --backdrop-opacity: 0.5;
+    --min-width: 8rem;
+    --width: 72vw;
+    --max-width: 24rem;
+    --max-height: 80vh;
+}
+
+ion-popover.center-popover::part(content) {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+ion-toggle.toggle-sm {
+    width: 2.4rem;
+    height: 1.2rem;
+    --handle-width: 1rem;
+    --handle-height: 1rem;
+}
+
+ion-segment {
+    --background: transparent;
+    padding: 0 15px;
+
+    ion-segment-button {
+        --color: #4f50c5;
+        --color-checked: #ffffff;
+        --background-checked: #4f50c5;
+        --border-color: none !important;
+        --border-radius: 0;
+        --border-style: none;
+        --indicator-color: none;
+        --indicator-box-shadow: none;
+        min-width: auto !important;
+        border: 0px;
+        border-radius: 0px;
+        font-weight: 500;
+        letter-spacing: 0.75px;
+        border-radius: 31px;
+        padding: 5px 2.5px;
+    }
+
+    .expanded {
+        --background-checked: transparent !important;
+        --border-radius: 100px !important;
+        --transition: none !important;
+    }
+
+    .active {
+        font-weight: 600;
+    }
+}
+
+ion-searchbar {
+    --border-radius: 10px !important;
+    --box-shadow: none !important;
+    --background: #e5e7eb !important;
+    --color: var(--ion-color-primary) !important;
+    --icon-color: var(--ion-color-primary) !important;
+    --placeholder-font-weight: 600 !important;
+    --clear-button-color: gray !important;
+
+    input {
+        font-weight: 600 !important;
+    }
+}
+
+ion-accordion-group {
+    ion-accordion {
+        .ion-accordion-toggle-icon {
+            font-size: 30px;
+            color: gray;
+        }
+    }
+}

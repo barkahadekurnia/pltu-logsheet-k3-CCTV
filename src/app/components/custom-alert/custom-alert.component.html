@@ -1,0 +1,68 @@
+<div *ngIf="options" class="p-4 bg-white dark:bg-gray-800">
+  <div
+    *ngIf="options?.img || options?.type != 'radio'"
+    class="my-4 text-center"
+  >
+    <img class="w-16 max-w-4/5 m-auto" [src]="options.img" alt="Image" />
+  </div>
+
+  <div *ngIf="options?.main" class="my-4 text-center">
+    <ion-text [color]="options.color">
+      <h1 class="text-4xl font-bold">{{ options?.main }}</h1>
+    </ion-text>
+  </div>
+
+  <div
+    *ngIf="options?.spinner && !options?.img"
+    class="h-24 text-center flex justify-center items-center"
+  >
+    <ion-spinner
+      class="transform scale-250"
+      name="crescent"
+      [color]="options.color"
+    ></ion-spinner>
+  </div>
+
+  <div class="my-4">
+    <h2 *ngIf="options?.header" class="text-2xl text-center font-bold">
+      {{ options.header }}
+    </h2>
+    <ion-radio-group
+      *ngIf="options?.type == 'radio'"
+      (ionChange)="radioSelect($event)"
+    >
+      <ion-item *ngFor="let item of options.param">
+        <ion-label>{{ item.label }}</ion-label>
+        <ion-radio slot="end" [value]="item.label"></ion-radio>
+      </ion-item>
+    </ion-radio-group>
+    <p
+      *ngIf="options?.message"
+      class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400 font-medium"
+    >
+      {{ options.message }}
+    </p>
+  </div>
+
+  <ion-button
+    *ngIf="primaryButton"
+    class="uppercase font-bold"
+    expand="block"
+    [color]="options.color"
+    (click)="primaryButton?.handler()"
+  >
+    {{ primaryButton?.text || "" }}
+  </ion-button>
+
+  <div *ngIf="primaryButton && !secondaryButton" class="p-2"></div>
+
+  <ion-button
+    *ngIf="secondaryButton"
+    expand="block"
+    fill="clear"
+    [color]="options.color"
+    (click)="secondaryButton?.handler()"
+  >
+    {{ secondaryButton?.text || "" }}
+  </ion-button>
+</div>

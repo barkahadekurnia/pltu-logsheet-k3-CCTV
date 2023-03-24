@@ -1,0 +1,183 @@
+<ion-header class="ion-no-border shadow fixed" [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
+  position="fixed">
+  <ion-toolbar class="dark:ion-base-gray-800" color="primary">
+    <ion-buttons slot="start" class="p-2" mode="ios">
+      <ion-back-button defaultHref="/tabs" icon="chevron-back"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold text-center text-white">Transactions</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar class="dark:ion-base-gray-800" color="primary">
+    <ion-segment class="W-11/12 bg-primary" [value]="segment" (ionChange)="onSegmentChanged($event)">
+      <!-- <ion-segment-button class="font-bold uppercase expanded" value="holded">Holded</ion-segment-button> -->
+      <ion-segment-button class="font-bold uppercase expanded" value="unuploaded">Belum Di Upload</ion-segment-button>
+      <ion-segment-button class="font-bold uppercase expanded" value="uploaded">Sudah Di Upload</ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-header class="ion-no-border">
+    <ion-toolbar class="ion-bg-white">
+      <ion-buttons slot="start" class="p-2" mode="ios">
+        <ion-back-button defaultHref="/tabs" icon="chevron-back" color="primary"></ion-back-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <div class="pl-6">
+    <h4 class="text-2xl font-bold">Transactions</h4>
+  </div>
+  <div class="py-4">
+    <ion-toolbar class="dark:ion-base-gray-800 ion-bg-white">
+      <ion-segment class="w-11/12" [value]="segment" (ionChange)="onSegmentChanged($event)">
+        <!-- <ion-segment-button class="font-bold uppercase" value="holded">Holded</ion-segment-button> -->
+        <ion-segment-button class="font-bold uppercase" value="unuploaded">Belum Di Upload</ion-segment-button>
+        <ion-segment-button class="font-bold uppercase" value="uploaded">Sudah Di Upload</ion-segment-button>
+      </ion-segment>
+    </ion-toolbar>
+  </div>
+
+  <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
+
+  <app-screen-view *ngIf="!loading && !sourceSchedules?.length" type="no-data" message="Empty Data"
+    description="Synchronize with server to get data"></app-screen-view>
+
+  <div *ngIf="!loading && sourceSchedules.length" class="w-full h-full bg-white dark:bg-gray-900">
+    <ion-grid class="w-full p-2">
+      <ion-row class="justify-center">
+        <ion-col size="12" sizeLg="8">
+          <ion-row>
+            <ion-col size="12">
+              <ion-searchbar class="p-2 ion-no-margin ion-no-padding text-xs" placeholder="Search ..." inputmode="text"
+                type="text" mode="ios" (ionChange)="onSearch($event)"></ion-searchbar>
+            </ion-col>
+          </ion-row>
+
+          <ion-row *ngIf="!schedules.length">
+            <ion-col size="12">
+              <app-screen-view type="no-data" message="Data Kosong"></app-screen-view>
+            </ion-col>
+          </ion-row>
+
+          <ion-accordion-group expand="inset" *ngIf="schedules.length">
+            <ion-accordion [value]="item?.assetId" toggleIcon="chevron-down-circle" *ngFor="let item of schedules">
+              <ion-item slot="header" class="accordion">
+                <p class="text-base font-semibold">{{ item?.assetNumber }}</p>
+              </ion-item>
+              <div class="ion-no-padding" slot="content">
+                <ion-row>
+                  <ion-col size="12" sizeSm="6" sizeXl="4">
+                    <div class="w-full p-4 bg-white border border-gray-300 rounded-xl">
+                      <ion-list>
+                        <ion-item>
+                          <ion-label>Status</ion-label>
+                          <ion-badge [color]="segment === 'uploaded' ? 'success' : 'danger'" mode="ios" slot="end">
+                            {{ segment === 'uploaded' ? 'Sudah Di Upload' : 'Belum Di Upload' }}
+                          </ion-badge>
+                        </ion-item>
+                        <ion-item class="text-xs">
+                          <ion-label>Shift</ion-label>
+                          <ion-input class="text-right" readonly [value]="item?.shift"></ion-input>
+                        </ion-item>
+                        <ion-item class="text-xs">
+                          <ion-label>Jadwal</ion-label>
+                          <ion-input class="text-right" readonly [value]="item?.scheduleFrom"></ion-input>
+                        </ion-item>
+                        <ion-item class="text-xs">
+                          <ion-label>Unit</ion-label>
+                          <ion-input class="text-right" readonly [value]="item?.unit"></ion-input>
+                        </ion-item>
+                        <ion-item class="text-xs">
+                          <ion-label>Area</ion-label>
+                          <ion-input class="text-right" readonly [value]="item?.area"></ion-input>
+                        </ion-item>
+                      </ion-list>
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </div>
+            </ion-accordion>
+          </ion-accordion-group>
+          <!-- <ion-row *ngIf="schedules.length">
+            <ion-col *ngFor="let schedule of schedules" size="12" sizeSm="6" sizeXl="4">
+              <div class="w-full p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl">
+                <div class="w-full mb-2 flex justify-between items-center space-x-2">
+                  <h2 class="text-lg font-semibold">
+                    {{ schedule.assetName }}
+                  </h2>
+                  <div *ngIf="schedule.shift" class="badge rounded-md" [ngClass]="{
+                      'badge-success': segment === 'uploaded',
+                      'badge-warning bg-lime-100 text-lime-500 border-lime-100': segment === 'unuploaded',
+                      'badge-warning': segment === 'unuploaded'
+                    }">
+                    {{ schedule.shift }}
+                  </div>
+                </div>
+
+                <p class="text-2xs text-gray-500 dark:text-gray-400">
+                  {{ schedule.scheduleFrom }} - {{ schedule.scheduleTo }}
+                </p>
+
+                <div class="w-full mt-4 flex flex-col justify-start items-start space-y-2">
+                  <div class="w-full flex justify-between items-center space-x-2">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Type</p>
+                    <p class="text-sm">{{ schedule.scheduleType }}</p>
+                  </div>
+
+                  <div class="w-full flex justify-between items-center space-x-2">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      Status
+                    </p>
+                    <p class="text-sm">{{ schedule.assetStatusName }}</p>
+                  </div>
+
+                  <div class="w-full flex justify-between items-center space-x-2">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      Scanned
+                    </p>
+                    <p class="text-sm">{{ schedule.scannedEnd }}</p>
+                  </div>
+
+                  <div class="w-full flex justify-between items-center space-x-2">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                      Uploaded
+                    </p>
+                    <p class="text-sm">{{ schedule.uploadedOn }}</p>
+                  </div>
+                </div>
+
+                <div *ngIf="schedule.hasRecordHold || schedule.hasPreview"
+                  class="w-full mt-4 flex justify-end items-center">
+                  <button *ngIf="schedule.hasRecordHold"
+                    class="btn btn-warning btn-sm text-white font-medium capitalize space-x-1 rounded-full"
+                    (click)="openForm(schedule)">
+                    <span>Data Hold</span>
+                    <ion-icon name="play"></ion-icon>
+                  </button>
+
+                  <button *ngIf="schedule.hasPreview"
+                    class="btn btn-sm text-white font-medium capitalize space-x-1 rounded-full" [ngClass]="{
+                      'btn-success': segment === 'uploaded',
+                      'btn-warning bg-lime-500 hover:bg-lime-500': segment === 'unuploaded'
+                    }" (click)="openPreview(schedule.scheduleTrxId)">
+                    <span>Preview</span>
+                    <ion-icon name="chevron-forward-outline"></ion-icon>
+                  </button>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row> -->
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <ion-infinite-scroll *ngIf="!loading && schedules?.length" (ionInfinite)="pushData($event)">
+    <ion-infinite-scroll-content class="bg-white dark:bg-gray-900" loadingSpinner="dots"></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

@@ -1,0 +1,306 @@
+<ion-header mode="ios">
+  <ion-toolbar class="ion-bg-white dark:ion-bg-gray-900">
+    <ion-buttons slot="start" mode="md">
+      <ion-back-button defaultHref="/tabs"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold"
+      >{{ schedule?.assetNumber || 'Preview' }}</ion-title
+    >
+
+    <ion-buttons *ngIf="!loading" slot="end" mode="md">
+      <ion-button (click)="showAssetInfo()">
+        <ion-icon slot="icon-only" name="information-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <app-screen-view
+    *ngIf="loading"
+    type="loading"
+    message="Loading data ..."
+  ></app-screen-view>
+  <app-screen-view
+    *ngIf="!loading && !datasc.schedule"
+    type="no-data"
+    message="Asset not found"
+  ></app-screen-view>
+
+  <app-screen-view
+    *ngIf="!loading && !datasc.schedule"
+    type="no-data"
+    message="Empty Data"
+    description="There is no schedule at this time"
+  ></app-screen-view>
+
+  <div *ngIf="!loading" class="w-full min-h-full p-4 bg-white dark:bg-gray-900">
+    <ion-grid>
+      <ion-row class="mb-2 justify-center">
+        <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
+          <h2 class="text-center text-lg font-semibold">Preview Inspection</h2>
+        </ion-col>
+      </ion-row>
+
+      <ion-row class="justify-center">
+        <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
+          <ion-row>
+            <ion-col
+              *ngFor="let parameter of datasc.schedule"
+              size="12"
+              sizeSm="6"
+            >
+              <div
+                class="w-full bg-white dark:bg-gray-800 border overflow-hidden"
+                [ngClass]="[
+                  parameter.isDeviation ? 'border-error' : 'border-gray-300 dark:border-gray-800',
+                  parameter.isExpanded ? 'rounded-2xl' : 'rounded-xl'
+                ]"
+              >
+                <div
+                  class="w-full p-3 pr-4 flex justify-between items-center space-x-2"
+                >
+                  <div
+                    class="flex-grow flex justify-start items-center space-x-2"
+                    (click)="parameter.isExpanded = !parameter.isExpanded"
+                  >
+                    <ion-icon
+                      [name]="parameter.isExpanded ? 'chevron-down-outline' : 'chevron-forward-outline'"
+                    >
+                    </ion-icon>
+
+                    <div
+                      class="flex-grow flex flex-col justify-start items-start"
+                    >
+                      <p class="text-sm font-medium">
+                        {{ parameter.parameterName }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <ion-input
+                    *ngIf="!parameter.isExpanded"
+                    class="ion-no-padding min-w-12 flex-grow text-sm text-right"
+                    type="text"
+                    readonly
+                    [value]="parameter.value"
+                  >
+                  </ion-input>
+                </div>
+
+                <div
+                  *ngIf="parameter.isExpanded"
+                  class="w-full p-2 flex flex-col justify-start items-start space-y-2"
+                >
+                  <!-- <div *ngIf="parameter?.photo" class="w-full">
+                    <img class="w-24 m-auto rounded-btn" [src]="parameter?.offlinePhoto || parameter?.photo" alt="Image"
+                      onerror="this.src='assets/img/empty.jpg'" (click)="showImageViewer($event)">
+                  </div> -->
+
+                  <div
+                    class="w-full flex flex-col justify-start items-start space-y-1"
+                  >
+                    <div
+                      class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl"
+                    >
+                      <ion-input
+                        class="ion-no-padding min-w-12 flex-grow"
+                        type="text"
+                        readonly
+                        [value]="parameter.value"
+                      >
+                      </ion-input>
+                    </div>
+                  </div>
+                  <div class="overflow-auto whitespace-nowrap">
+                    <div
+                      class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl"
+                    >
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Catatan
+                      </p>
+
+                      <ion-textarea
+                        class="ion-no-padding text-xs"
+                        rows="3"
+                        autoGrow="true"
+                        >{{parameter.notes}}
+                      </ion-textarea>
+                    </div>
+
+                    <div
+                      *ngFor="let attachment of parameter.attachments"
+                      class="relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent overflow-hidden cursor-pointer"
+                      (click)="onMediaSelected(attachment, parameter.attachments)"
+                    >
+                      <img
+                        class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
+                        src="assets/img/wave.png"
+                        alt="Wave"
+                      />
+
+                      <div
+                        class="relative w-16 h-16 z-10 flex justify-center items-center"
+                      >
+                        <ion-icon
+                          *ngIf="attachment.type.startsWith('image')"
+                          class="text-3xl text-primary-content"
+                          name="image-outline"
+                        ></ion-icon>
+
+                        <ion-icon
+                          *ngIf="attachment.type.startsWith('audio')"
+                          class="text-3xl text-primary-content"
+                          name="volume-high-outline"
+                        ></ion-icon>
+
+                        <ion-icon
+                          *ngIf="attachment.type.startsWith('video')"
+                          class="text-3xl text-primary-content"
+                          name="play-circle-outline"
+                        ></ion-icon>
+                      </div>
+
+                      <ion-ripple-effect
+                        style="margin: 0 !important"
+                      ></ion-ripple-effect>
+                    </div>
+
+                    <div
+                      class="relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent overflow-hidden cursor-pointer"
+                    >
+                      <img
+                        class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
+                        src="assets/img/wave.png"
+                        alt="Wave"
+                      />
+
+                      <!-- <div class="relative w-16 h-16 z-10 flex justify-center items-center">
+                        <ion-icon class="text-3xl text-primary-content" name="add"></ion-icon>
+                      </div> -->
+
+                      <ion-ripple-effect
+                        style="margin: 0 !important"
+                      ></ion-ripple-effect>
+                    </div>
+                  </div>
+                  <div *ngIf="datasc.record.scannedNotes" class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Notes</p>
+
+                    <ion-textarea class="ion-no-padding text-xs" rows="3" autoGrow="true"
+                      readonly [value]="datasc.record.scannedNotes">
+                    </ion-textarea>
+                  </div>
+
+                  <div *ngIf="datasc.attachmentsapar.length" class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl">
+                    <p class="p-2 text-xs text-gray-500 dark:text-gray-400">Media Files</p>
+
+                    <div class="overflow-auto whitespace-nowrap">
+                      <div *ngFor="let foto of datasc.attachmentsapar"
+                        class="
+                          relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent
+                          overflow-hidden cursor-pointer
+                        "
+                        (click)="onMediaSelected(foto)">
+                        <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
+                          src="assets/img/wave.png" alt="Wave">
+
+                        <div class="relative w-16 h-16 z-10 flex justify-center items-center">
+                          <ion-icon *ngIf="foto.type.startsWith('image')" class="text-3xl text-primary-content"
+                            name="image-outline"></ion-icon>
+
+                          <ion-icon *ngIf="foto.type.startsWith('audio')" class="text-3xl text-primary-content"
+                            name="volume-high-outline"></ion-icon>
+
+                          <ion-icon *ngIf="foto.type.startsWith('video')" class="text-3xl text-primary-content"
+                            name="play-circle-outline"></ion-icon>
+                        </div>
+
+                        <ion-ripple-effect style="margin: 0 !important;"></ion-ripple-effect>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ion-col>
+
+          </ion-row>
+        </ion-col>
+
+      </ion-row>
+
+      <ion-row *ngIf="record.scannedNotes || attachments?.length" class="justify-center">
+        <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
+          <ion-row>
+            <ion-col *ngIf="record.scannedNotes" size="12" sizeSm="6">
+              <div class="
+                  w-full h-full p-4 bg-white dark:bg-gray-800 border border-gray-300
+                  dark:border-gray-800 rounded-2xl
+                ">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Notes</p>
+
+                <ion-textarea class="ion-no-padding text-xs" rows="3" autoGrow="true"
+                  readonly [value]="record.scannedNotes"></ion-textarea>
+              </div>
+            </ion-col>
+
+            <ion-col *ngIf="attachments.length" size="12" sizeSm="6">
+              <div class="
+                  w-full h-full p-2 bg-white dark:bg-gray-800 border border-gray-300
+                  dark:border-gray-800 rounded-2xl
+                ">
+                <p class="m-2 text-xs text-gray-500 dark:text-gray-400">Media Files</p>
+
+                <div class="overflow-auto whitespace-nowrap">
+                  <div *ngFor="let attachment of attachments"
+                    class="
+                      relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent
+                      overflow-hidden cursor-pointer
+                    "
+                    (click)="onMediaSelected(attachment)">
+                    <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
+                      src="assets/img/wave.png" alt="Wave">
+
+                    <div class="relative w-16 h-16 z-10 flex justify-center items-center">
+                      <ion-icon *ngIf="attachment.type.startsWith('image')" class="text-3xl text-primary-content"
+                        name="image-outline"></ion-icon>
+
+                      <ion-icon *ngIf="attachment.type.startsWith('audio')" class="text-3xl text-primary-content"
+                        name="volume-high-outline"></ion-icon>
+
+                      <ion-icon *ngIf="attachment.type.startsWith('video')" class="text-3xl text-primary-content"
+                        name="play-circle-outline"></ion-icon>
+                    </div>
+
+                    <ion-ripple-effect style="margin: 0 !important;"></ion-ripple-effect>
+                  </div>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+      </ion-row>
+
+      <ion-row *ngIf="!readonly" class="mt-4 justify-center">
+        <ion-col size="6" sizeMd="5" sizeLg="4" sizeXl="3">
+          <button
+            class="btn btn-error text-white btn-block rounded-full"
+            (click)="back()"
+          >
+            <span>Cancel</span>
+          </button>
+        </ion-col>
+
+        <ion-col size="6" sizeMd="5" sizeLg="4" sizeXl="3">
+          <button
+            class="btn btn-success text-white btn-block rounded-full"
+            (click)="saveRecords()"
+          >
+            <span>Save</span>
+          </button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

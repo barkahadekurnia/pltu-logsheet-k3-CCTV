@@ -1,0 +1,51 @@
+<ion-header class="ion-no-border shadow fixed transition-none"
+  [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']">
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" class="p-2" mode="ios" >
+      <ion-back-button defaultHref="/tabs" icon="chevron-back" color="primary"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="text-lg text-center font-bold">Activities</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <!-- <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher> -->
+
+  <div class="w-full flex flex-col">
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="ion-bg-white">
+        <ion-buttons slot="start" class="p-2" mode="ios" >
+          <ion-back-button defaultHref="/tabs" icon="chevron-back" color="primary"></ion-back-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <div class="pl-6">
+      <h4 class="text-2xl font-bold">Activities</h4>
+    </div>
+  </div>
+
+  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
+
+  <app-screen-view *ngIf="!loading && !activityLogs.length" type="no-data" message="Empty Data">
+  </app-screen-view>
+
+  <div *ngIf="!loading && activityLogs?.length" class="w-full pl-2 min-h-full bg-white dark:bg-gray-900 pb-4 pt-12">
+    <div class="w-full flex flex-col justify-center items-center">
+      <div *ngFor="let log of activityLogs" class="
+          relative w-full px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-300
+          dark:border-gray-600 ion-activatable ripple-parent overflow-hidden cursor-pointer
+        " (click)="openDetails(log)">
+        <h2 class="mb-1 text-sm font-semibold">{{ log.timestamp }}</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400">{{ log.activity }}</p>
+
+        <ion-ripple-effect style="margin: 0 !important;"></ion-ripple-effect>
+      </div>
+    </div>
+  </div>
+
+  <ion-infinite-scroll *ngIf="!loading && activityLogs?.length" (ionInfinite)="pushData($event)">
+    <ion-infinite-scroll-content class="bg-white dark:bg-gray-900" loadingSpinner="dots"></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

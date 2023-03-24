@@ -1,0 +1,241 @@
+<ion-header class="ion-bo-border shadow fixed transition-none"
+  [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']">
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" class="p-2" mode="ios" >
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold text-center">Jadwal Scan</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-header class="ion-no-border">
+    <ion-toolbar class="ion-bg-white">
+      <ion-buttons slot="start" class="p-2" mode="ios" >
+        <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <div class="pl-6">
+    <h4 class="text-2xl font-bold">Jadwal Scan</h4>
+  </div>
+
+  <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
+
+  <app-screen-view *ngIf="!loading && segment === 'automatic' && !sourceAssets?.length" type="no-data"
+    message="Data Kosong" description="Synchronize untuk mendapatkan schedule">
+  </app-screen-view>
+
+  <div *ngIf="!loading" class="w-full min-h-full pb-24 bg-white dark:bg-gray-900">
+    <ion-grid class="w-full space-y-4">
+      <ion-row class="justify-center">
+        <ion-col size="12" sizeLg="12">
+          <ion-row class="justify-center">
+            <ion-col size="12">
+              <div class="w-full px-4 mb-2 flex justify-between items-center space-x-2">
+                <button class="btn btn-ghost btn-sm font-medium capitalize" (click)="showLastMonth()">
+                  <ion-icon name="chevron-back-outline"></ion-icon>
+                </button>
+
+                <h2 class="text-center text-xl font-semibold">
+                  {{ calendar?.title }}
+                </h2>
+
+                <button class="btn btn-ghost btn-sm font-medium capitalize" (click)="showNextMonth()">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </button>
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col class="col-1/7">
+              <div class="relative h-12 flex flex-col justify-center items-center">
+                <p class="relative z-10 text-center text-xs font-medium">Sun</p>
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md">
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col class="col-1/7">
+              <div class="relative h-12 flex flex-col justify-center items-center">
+                <p class="relative z-10 text-center text-xs font-medium">Mon</p>
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md">
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col class="col-1/7">
+              <div class="relative h-12 flex flex-col justify-center items-center">
+                <p class="relative z-10 text-center text-xs font-medium">Tue</p>
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md">
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col class="col-1/7">
+              <div class="relative h-12 flex flex-col justify-center items-center">
+                <p class="relative z-10 text-center text-xs font-medium">Wed</p>
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md">
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col class="col-1/7">
+              <div class="relative h-12 flex flex-col justify-center items-center">
+                <p class="relative z-10 text-center text-xs font-medium">Thu</p>
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md">
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col class="col-1/7">
+              <div class="relative h-12 flex flex-col justify-center items-center">
+                <p class="relative z-10 text-center text-xs font-medium">Fri</p>
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md">
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col class="col-1/7">
+              <div class="relative h-12 flex flex-col justify-center items-center">
+                <p class="relative z-10 text-center text-xs font-medium">Sat</p>
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md">
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col *ngFor="let item of calendar?.daysInLastMonth" class="col-1/7">
+              <div class="group relative h-14 flex flex-col justify-center items-center cursor-pointer"
+                (click)="showLastMonth(item)">
+                <p class="relative z-10 text-gray-500 dark:text-gray-400 text-center text-sm">
+                  {{ item.date }}
+                </p>
+
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 group-hover:bg-opacity rounded-md">
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col *ngFor="let item of calendar?.daysInThisMonth" class="col-1/7">
+              <div class="group relative h-14 flex flex-col justify-center items-center cursor-pointer"
+                (click)="selectDate(item)">
+                <p class="relative z-10 text-center text-sm">{{ item.date }}</p>
+
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md flex justify-center items-end space-x-1"
+                  [ngClass]="{'bg-opacity': item.selected}">
+                  <div
+                    class="absolute left-1/2 -bottom-2 transform -translate-x-1/2 flex justify-center items-center space-x-1">
+                    <div *ngIf="item.hasUnscanned" class="w-1 h-1 bg-error rounded-full"></div>
+                    <div *ngIf="item.hasRecordHold" class="w-1 h-1 bg-warning rounded-full"></div>
+                    <div *ngIf="item.hasUnuploaded" class="w-1 h-1 bg-lime-500 rounded-full"></div>
+                    <div *ngIf="item.hasUploaded" class="w-1 h-1 bg-success rounded-full"></div>
+                  </div>
+                </div>
+
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 group-hover:bg-opacity rounded-md">
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col *ngFor="let item of calendar?.daysInNextMonth" class="col-1/7">
+              <div class="group relative h-14 flex flex-col justify-center items-center cursor-pointer"
+                (click)="showNextMonth(item)">
+                <p class="relative z-10 text-gray-500 dark:text-gray-400 text-center text-sm">
+                  {{ item.date }}
+                </p>
+
+                <div
+                  class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 group-hover:bg-opacity rounded-md">
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row class="justify-center">
+            <ion-col size="12">
+              <h2 class="pt-4 px-4 text-center text-lg font-semibold">
+                {{ selectedDate?.label }}
+              </h2>
+            </ion-col>
+          </ion-row>
+
+          <ion-row *ngIf="!selectedDate?.schedules?.length">
+            <ion-col size="12">
+              <app-screen-view className="space-y-0 pt-0" type="no-data" message="Tidak ada jadwal hari ini">
+              </app-screen-view>
+            </ion-col>
+          </ion-row>
+          <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full pt-3 justify-center items-center">
+            <div class="center" *ngFor="let kat of selectedDate?.lokasi; index as idx;">
+              <ul (click)="navPageAset('schedule-lokasi', kat, selectedDate, datakategori, countsc)">
+                <li>
+                  <div class="image">
+                    <ion-icon slot="icon-only" name="location-outline"></ion-icon>{{kat.unit}}
+                  </div>
+
+                  <div class="text-group">
+
+                  </div>
+
+                  <div class="date-group">
+                    <h5>{{kat.area}}</h5>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </ion-row>
+          <!-- <ion-row *ngIf="selectedDate?.schedules?.length" class="w-full pt-3 justify-center items-center">
+            <div class="relative min-h-screen pt-2 pb-12">
+              <div class="max-w-md mx-auto bg-white shadow-xl min-w-0 dark:bg-slate-800 dark:highlight-white/5">
+                <ion-grid class="w-full ion-padding flex flex-col justify-center items-center space-y-4">
+                  <ion-row class="w-full pt-3 justify-center items-center">
+                    <ion-col *ngFor="let kat of datakategori; index as idx;" size="6" sizeMd="6" sizeLg="6">
+                      <div class="flex-none py-6 px-3 first:pl-6 last:pr-6"
+                        (click)="navPage('schedule-detail', kat, countsc[idx])">
+                        <div class="flex space-x-5 space-y-5 flex-wrap justify-center items-baseline">
+                          <button class="relative bg-blue hover:bg-blue-800 duration-300 py-2 px-4 text-blue-100 rounded"
+                            style="width: 120px">
+                            <img [src]="kat.urlOffline" alt="" width="80px" />
+                            <label style="width: 80px" for="">{{kat.assetCategoryName}}
+                            </label>
+
+                            <span
+                              class="absolute px-2 py-1 text-xs font-bold rounded-full -top-3 -right-3 bg-success text-white">
+                              {{countsc[idx].countScanned}}
+                            </span>
+                            <span
+                              class="absolute px-2 py-1 text-xs font-bold rounded-full top-4 -right-3 bg-error text-white">
+                              {{countsc[idx].countUnscanned}}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+            </div>
+          </ion-row> -->
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

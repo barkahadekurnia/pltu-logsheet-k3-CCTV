@@ -1,0 +1,92 @@
+<ion-header class="ion-bo-border shadow fixed" [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
+  position="fixed">
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" class="p-2" mode="ios">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold text-center">
+      {{ params?.assetCategoryName }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-header class="ion-no-border">
+    <ion-toolbar class="ion-bg-white">
+      <ion-buttons slot="start" class="p-2" mode="ios">
+        <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <div class="pl-6">
+    <h4 class="text-2xl font-bold">{{ params?.assetCategoryName }}</h4>
+  </div>
+  <div class="py-0">
+    <ion-toolbar class="ion-bg-white">
+      <ion-segment class="w-11/12" [value]="segment" (ionChange)="onSegmentChanged($event)">
+        <ion-segment-button class="font-bold uppercase" value="scanned">Sudah Di Scan</ion-segment-button>
+        <ion-segment-button class="font-bold uppercase" value="unscanned">Belum Di Scan</ion-segment-button>
+      </ion-segment>
+    </ion-toolbar>
+  </div>
+
+  <div class="w-full pb-24 bg-white">
+    <ion-row class="px-4">
+      <ion-col size="12">
+        <ion-searchbar class="ion-no-margin ion-no-padding text-xs" animated="true" placeholder="Pencarian..."
+          inputmode="text" type="text" mode="ios" [(ngModel)]="searchTerm"
+          (ionChange)="onSearch($event)"></ion-searchbar>
+      </ion-col>
+    </ion-row>
+
+    <ion-accordion-group expand="inset" *ngIf="filteredData?.length">
+      <ion-accordion [value]="item?.assetId" toggleIcon="chevron-down-circle" *ngFor="let item of filteredData">
+        <ion-item slot="header" class="accordion">
+          <p class="text-base font-semibold">{{ item?.assetName }}</p>
+        </ion-item>
+        <div class="ion-no-padding" slot="content">
+          <ion-row>
+            <ion-col size="12" sizeSm="6" sizeXl="4">
+              <div class="w-full p-4 bg-white border border-gray-300 rounded-xl">
+                <ion-list>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Status</ion-label>
+                    <ion-badge [color]="segment === 'scanned' ? 'success' : 'danger'" mode="ios" slot="end">
+                      {{ segment === 'scanned' ? 'Sudah Di Scan' : 'Belum Di Scan' }}
+                    </ion-badge>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Nama</ion-label>
+                    <ion-input class="text-right" readonly [value]="item?.assetName"></ion-input>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Kategori</ion-label>
+                    <ion-input class="text-right" readonly [value]="item?.assetCategoryName"></ion-input>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Unit</ion-label>
+                    <ion-input class="text-right" readonly [value]="item?.unit"></ion-input>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Area</ion-label>
+                    <ion-input class="text-right" readonly [value]="item?.area"></ion-input>
+                  </ion-item>
+                </ion-list>
+              </div>
+            </ion-col>
+          </ion-row>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+    <div *ngIf="!filteredData?.length">
+      <app-screen-view type="no-data" message="Data Kosong" description="Data tidak ditemukan"></app-screen-view>
+    </div>
+  </div>
+
+  <ion-infinite-scroll *ngIf="filteredData?.length > 10" (ionInfinite)="pushData($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles"
+      loadingText="Sedang memuat data..."></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+</ion-content>

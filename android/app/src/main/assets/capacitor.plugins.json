@@ -1,0 +1,70 @@
+[
+	{
+		"pkg": "@capacitor-community/barcode-scanner",
+		"classpath": "com.getcapacitor.community.barcodescanner.BarcodeScanner"
+	},
+	{
+		"pkg": "@capacitor-community/http",
+		"classpath": "com.getcapacitor.plugin.http.Http"
+	},
+	{
+		"pkg": "@capacitor/app",
+		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
+	},
+	{
+		"pkg": "@capacitor/camera",
+		"classpath": "com.capacitorjs.plugins.camera.CameraPlugin"
+	},
+	{
+		"pkg": "@capacitor/clipboard",
+		"classpath": "com.capacitorjs.plugins.clipboard.ClipboardPlugin"
+	},
+	{
+		"pkg": "@capacitor/device",
+		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
+	},
+	{
+		"pkg": "@capacitor/geolocation",
+		"classpath": "com.capacitorjs.plugins.geolocation.GeolocationPlugin"
+	},
+	{
+		"pkg": "@capacitor/haptics",
+		"classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin"
+	},
+	{
+		"pkg": "@capacitor/keyboard",
+		"classpath": "com.capacitorjs.plugins.keyboard.KeyboardPlugin"
+	},
+	{
+		"pkg": "@capacitor/local-notifications",
+		"classpath": "com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin"
+	},
+	{
+		"pkg": "@capacitor/splash-screen",
+		"classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin"
+	},
+	{
+		"pkg": "@capacitor/status-bar",
+		"classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin"
+	},
+	{
+		"pkg": "@capacitor/storage",
+		"classpath": "com.capacitorjs.plugins.storage.StoragePlugin"
+	},
+	{
+		"pkg": "@capacitor/text-zoom",
+		"classpath": "com.capacitorjs.plugins.textzoom.TextZoomPlugin"
+	},
+	{
+		"pkg": "@hiloenergie/capacitor-plugin-safe-area",
+		"classpath": "com.getcapacitor.community.plugins.safearea.SafeAreaPlugin"
+	},
+	{
+		"pkg": "@robingenz/capacitor-app-update",
+		"classpath": "dev.robingenz.capacitor.appupdate.AppUpdatePlugin"
+	},
+	{
+		"pkg": "capacitor-blob-writer",
+		"classpath": "com.equimaps.capacitorblobwriter.BlobWriter"
+	}
+]

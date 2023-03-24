@@ -1,0 +1,160 @@
+<ion-header class="ion-no-border shadow fixed transition-none"
+  [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']">
+  <ion-toolbar class="ion-bg-white dark:ion-bg-gray-900">
+    <ion-buttons slot="start" class="p-2">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-medium text-center">{{ asset.assetNumber }}</ion-title>
+
+    <ion-buttons *ngIf="!loading && asset.scheduleGroups.length" slot="end" class="p-1">
+      <ion-button (click)="showAssetInfo()">
+        <ion-icon slot="icon-only" name="information-circle-outline" color="primary"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="w-full flex flex-col">
+    <ion-header class="ion-no-border">
+      <ion-toolbar class="ion-bg-white">
+        <ion-buttons slot="start" class="p-2">
+          <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+        </ion-buttons>
+
+        <ion-buttons *ngIf="!loading && asset.scheduleGroups.length" slot="end" class="p-1">
+          <ion-button (click)="showAssetInfo()">
+            <ion-icon slot="icon-only" name="information-circle-outline" color="primary"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <div class="pl-6">
+      <h4 class="text-2xl font-medium">{{ asset.assetNumber }}</h4>
+    </div>
+  </div>
+
+  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
+
+  <app-screen-view *ngIf="!loading && !asset.scheduleGroups.length" type="no-data" message="Empty Data"
+    description="There is no schedule at this time"></app-screen-view>
+
+  <div *ngIf="!loading && asset.scheduleGroups.length" class="w-full min-h-full bg-white dark:bg-gray-900">
+    <ion-grid class="w-full">
+      <ion-row class="justify-center">
+        <ion-col size="12" sizeSm="10" sizeMd="8" sizeLg="6" sizeXl="4">
+          <ion-row class="my-4">
+            <ion-col size="6">
+              <app-badge-stat [count]="count.uploaded" label="Uploaded" theme="success" icon="cloud-done-outline"
+                type="outline">
+              </app-badge-stat>
+            </ion-col>
+
+            <ion-col size="6">
+              <app-badge-stat [count]="count.unuploaded" label="Unuploaded" theme="lime" icon="cloud-upload-outline"
+                type="outline">
+              </app-badge-stat>
+            </ion-col>
+
+            <ion-col size="6">
+              <app-badge-stat [count]="count.holded" label="Holded" theme="warning" icon="document-text-outline"
+                type="outline">
+              </app-badge-stat>
+            </ion-col>
+
+            <ion-col size="6">
+              <app-badge-stat [count]="count.unscanned" label="Unscanned" theme="error" icon="document-outline"
+                type="outline">
+              </app-badge-stat>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+      </ion-row>
+
+      <ion-row class="justify-center">
+        <ion-col *ngFor="let group of asset.scheduleGroups" size="12" sizeSm="10" sizeMd="8" sizeLg="6" sizeXl="4">
+          <div *ngIf="asset.scheduleGroups.length > 1 || group.label !== 'Others'"
+            class="pl-4 mb-4 flex justify-start items-center space-x-2">
+            <ion-icon name="calendar-clear-outline" class="text-2xl"></ion-icon>
+            <ion-label class="font-medium">{{ group.label }}</ion-label>
+          </div>
+
+          <ion-row>
+            <ion-col *ngFor="let schedule of group.schedules" size="12">
+              <div class="w-full flex justify-between items-center">
+                <div class="relative w-4 h-8">
+                  <div class="absolute left-0 w-8 h-8 rounded-full flex justify-center items-center" [ngClass]="{
+                      'bg-success': schedule.isUploaded,
+                      'bg-lime-500': schedule.isUnuploaded,
+                      'bg-warning': schedule.hasRecordHold,
+                      'bg-error': schedule.isUnscanned
+                    }">
+                    <ion-icon *ngIf="schedule.isUploaded" class="text-xl text-white" name="checkmark-outline">
+                    </ion-icon>
+
+                    <ion-icon *ngIf="schedule.isUnuploaded" class="text-xl text-white" name="cloud-upload-outline">
+                    </ion-icon>
+
+                    <ion-icon *ngIf="schedule.hasRecordHold" class="text-xl text-white" name="document-text-outline">
+                    </ion-icon>
+
+                    <ion-icon *ngIf="schedule.isUnscanned" class="text-xl text-white" name="close-outline">
+                    </ion-icon>
+                  </div>
+                </div>
+
+                <div
+                  class="w-full p-4 pl-6 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl">
+                  <div class="mb-2 flex justify-between items-center space-x-2">
+                    <h2 class="text-xl font-medium" [ngClass]="{
+                        'text-success': schedule.isUploaded,
+                        'text-lime-500': schedule.isUnuploaded,
+                        'text-warning': schedule.hasRecordHold,
+                        'text-error': schedule.isUnscanned
+                      }">
+                      {{ asset.assetStatusName }}
+                    </h2>
+
+                    <button *ngIf="schedule.hasCoordinatTagging"
+                      class="btn btn-xs btn-error text-white rounded-full space-x-1" (click)="openForm('coordinat')">
+                      <p class="text-xs font-medium">Open Form</p>
+                      <ion-icon name="play"></ion-icon>
+                    </button>
+
+                    <button *ngIf="schedule.hasRecordHold"
+                      class="btn btn-xs btn-warning text-white rounded-full space-x-1" (click)="openForm()">
+                      <p class="text-xs font-medium">Data Hold</p>
+                      <ion-icon name="play"></ion-icon>
+                    </button>
+
+                    <button *ngIf="schedule.hasPreview" class="btn btn-xs text-white rounded-full space-x-1"
+                      [ngClass]="[schedule.isUploaded ? 'btn-success' : 'btn-warning bg-lime-500 hover:bg-lime-500']"
+                      (click)="openPreview(asset.assetId)">
+                      <p class="text-xs font-medium">Preview</p>
+                      <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </button>
+                  </div>
+
+                  <p *ngIf="schedule.isUploaded || schedule.isUnuploaded"
+                    class="text-xs text-gray-500 dark:text-gray-400">
+                    Alat Pemadam Api telah discan pada {{ schedule.scannedEnd }}
+                  </p>
+
+                  <p *ngIf="!schedule.isUploaded && !schedule.isUnuploaded"
+                    class="text-xs text-gray-500 dark:text-gray-400">
+                    Alat Pemadam Api belum discan
+                  </p>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

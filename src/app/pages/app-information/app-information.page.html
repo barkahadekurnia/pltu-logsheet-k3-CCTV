@@ -1,0 +1,64 @@
+<ion-header mode="ios">
+  <ion-toolbar class="ion-bg-white dark:ion-bg-gray-900">
+    <ion-buttons slot="start" mode="md">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold">App Information</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
+
+  <app-screen-view *ngIf="!loading && !versionHistory.data?.length && source === 'local'" type="no-data"
+    message="Empty Data" description="Connect to the internet and refresh to get the change logs">
+  </app-screen-view>
+
+  <app-screen-view *ngIf="!loading && !versionHistory.data?.length && source === 'server'" type="no-data"
+    message="Empty Data" description="There is no previous version history"></app-screen-view>
+
+  <div *ngIf="!loading && versionHistory.data?.length" class="w-full min-h-full p-4 bg-white dark:bg-gray-900">
+    <ion-grid>
+      <ion-row class="justify-center">
+        <ion-col size="12" sizeSm="10" sizeMd="8" sizeLg="6" sizeXl="4">
+          <img class="h-20 mt-4 mx-auto mb-8" src="assets/img/s2p-logo.png" alt="Icon">
+
+          <h2 class="text-center text-gray-500 dark:text-gray-400">{{ application?.id }}</h2>
+          <p *ngIf="application?.version" class="mt-2 text-center text-sm">Version {{ application.version + '.' + application.build }}</p>
+
+          <p *ngIf="source === 'local'" class="mt-8 mb-2 text-gray-500 dark:text-gray-400 text-xs">
+            Last updated: {{ versionHistory.timestamp }}
+          </p>
+
+          <div class="flex flex-col justify-center items-center space-y-4" [ngClass]="{'mt-8': source !== 'local'}">
+            <div *ngFor="let history of versionHistory.data"
+              class="
+                relative w-full p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800
+                rounded-xl ion-activatable ripple-parent overflow-hidden cursor-pointer
+              ">
+              <div class="w-full flex justify-between items-center space-x-2">
+                <h3 class="text-lg font-semibold">{{ history.version }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ history.timestamp }}</p>
+              </div>
+
+              <ul class="list-disc list-inside">
+                <li *ngIf="!history.changeLogs?.length" class="text-sm">
+                  Developer didn't provide information about this update
+                </li>
+
+                <li *ngFor="let changeLog of history.changeLogs" class="text-sm">{{ changeLog }}</li>
+              </ul>
+
+              <ion-ripple-effect style="margin: 0 !important;"></ion-ripple-effect>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

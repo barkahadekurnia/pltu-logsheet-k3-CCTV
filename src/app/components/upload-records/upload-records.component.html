@@ -1,0 +1,84 @@
+<ion-header class="ion-no-border dark:ion-toolbar-gray-800" mode="ios">
+  <ion-toolbar class="ion-bg-white">
+    <ion-title class="text-base">{{ !loading && !shared.records.length ? 'Information' : 'Uploading' }}</ion-title>
+
+    <ion-buttons *ngIf="!loading && !shared.records.length" slot="end" mode="md">
+      <ion-button color="danger" (click)="dismissPopover()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="w-full p-4 bg-white dark:bg-gray-800 flex flex-col justify-start items-start space-y-4">
+    <div *ngIf="loading" class="w-full flex justify-start items-center space-x-4">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="text-sm">Loading data ...</p>
+    </div>
+
+    <div *ngIf="!loading && !shared.records.length" class="w-full flex justify-start items-center space-x-4">
+      <ion-icon class="text-2xl px-0.5" name="checkmark-outline" color="primary"></ion-icon>
+      <p class="text-sm">No data to upload</p>
+    </div>
+
+    <div *ngIf="!loading && shared.records.length" class="w-full my-4 flex flex-col justify-start items-start space-y-2">
+      <div *ngFor="let record of shared.records" class="w-full flex justify-between items-center space-x-2">
+        <ion-spinner *ngIf="record.status === 'uploading'" name="crescent" color="primary"></ion-spinner>
+
+        <ion-icon *ngIf="record.status === 'success'" class="text-2xl px-0.5" name="checkmark-outline" color="primary">
+        </ion-icon>
+
+        <ion-icon *ngIf="record.status === 'failed'" class="text-2xl px-0.5" name="close-outline" color="danger">
+        </ion-icon>
+
+        <div class="flex-grow flex flex-col justify-start items-start space-y-1">
+          <div class="w-full flex justify-between items-center space-x-2">
+            <p class="text-sm">{{ record.assetName }}</p>
+            <p class="font-semibold">{{ record.percentage }}%</p>
+          </div>
+
+          <ion-progress-bar mode="md" [value]="record.decimal" [color]="record.status === 'failed' ? 'danger' : 'primary'">
+          </ion-progress-bar>
+        </div>
+      </div>
+    </div>
+
+    <ion-grid *ngIf="!loading && shared.records.length" class="ion-no-padding w-full">
+      <ion-row>
+        <ion-col *ngIf="uploadStatus === 'uploading'" size="12">
+          <button class="btn btn-sm btn-error btn-block text-white focus:outline-none" (click)="dismissPopover()">
+            Upload in background
+          </button>
+        </ion-col>
+
+        <ion-col *ngIf="uploadStatus === 'success'" size="12">
+          <button class="btn btn-sm btn-error btn-block text-white focus:outline-none" (click)="dismissPopover()">
+            Close
+          </button>
+        </ion-col>
+
+        <ion-col *ngIf="uploadStatus === 'failed'" size="6">
+          <ion-button expand="block" color="medium" size="small" (click)="dismissPopover()">
+            Keep locally
+          </ion-button>
+        </ion-col>
+
+        <ion-col *ngIf="uploadStatus === 'failed'" size="6">
+          <ion-button expand="block" color="danger" size="small" (click)="retry()">
+            Try Again
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div *ngIf="!loading && shared.records.length && uploadStatus === 'failed'"
+      class="my-2 flex justify-center items-center space-x-2">
+      <ion-checkbox class="ion-size-sm" color="medium" [(ngModel)]="remember"></ion-checkbox>
+
+      <p class="text-sm text-gray-500 dark:text-gray-400" (click)="remember = !remember">
+        Remember this options
+      </p>
+    </div>
+  </div>
+</ion-content>

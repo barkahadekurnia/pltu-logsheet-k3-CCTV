@@ -1,0 +1,7 @@
+{
+  "name": "Digital Damkar",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

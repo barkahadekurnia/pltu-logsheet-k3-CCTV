@@ -1,0 +1,69 @@
+<ion-header mode="ios">
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" mode="md">
+      <ion-back-button defaultHref="/tabs"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold">Attachment Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list mode="ios">
+    <ion-list-header>
+      <ion-label>Images</ion-label>
+    </ion-list-header>
+
+    <ion-item class="dark:ion-border-gray-600">
+      <ion-label class="overflow-visible">Max Width (px)</ion-label>
+      <ion-input class="text-right" type="number" placeholder="Unset" slot="end" [disabled]="true"
+      (ionChange)="saveSettings('imageMaxWidth')" [(ngModel)]="attachmentSettings.imageMaxWidth">
+      </ion-input>
+    </ion-item>
+
+    <ion-item class="dark:ion-border-gray-600">
+      <ion-label class="overflow-visible">Max Height (px)</ion-label>
+      <ion-input class="text-right" type="number" placeholder="Unset" slot="end" [disabled]="true"
+      (ionChange)="saveSettings('imageMaxHeight')" [(ngModel)]="attachmentSettings.imageMaxHeight">
+      </ion-input>
+    </ion-item>
+
+    <ion-item class="dark:ion-border-gray-600">
+      <ion-label class="overflow-visible" position="stacked">Image Quality</ion-label>
+      <ion-range pin="true" min="0" max="100" mode="ios" [disabled]="true" (ionChange)="saveSettings('imageQuality')"
+      [(ngModel)]="attachmentSettings.imageQuality"></ion-range>
+    </ion-item>
+  </ion-list>
+
+  <ion-list *ngIf="!isAndroid" mode="ios">
+    <ion-list-header>
+      <ion-label>Audio</ion-label>
+    </ion-list-header>
+
+    <ion-item class="dark:ion-border-gray-600">
+      <ion-label class="overflow-visible">Duration (s)</ion-label>
+      <ion-input class="text-right" type="number" placeholder="Unset" slot="end" [disabled]="true"
+      (ionChange)="saveSettings('audioMaxDuration')" [(ngModel)]="attachmentSettings.audioMaxDuration">
+      </ion-input>
+    </ion-item>
+  </ion-list>
+
+  <ion-list mode="ios">
+    <ion-list-header>
+      <ion-label>Video</ion-label>
+    </ion-list-header>
+
+    <ion-item class="dark:ion-border-gray-600">
+      <ion-label class="overflow-visible">High Resolution</ion-label>
+      <ion-toggle slot="end" (ionChange)="saveSettings('videoHighResolution')" [disabled]="true"
+      [(ngModel)]="attachmentSettings.videoHighResolution"></ion-toggle>
+    </ion-item>
+
+    <ion-item class="dark:ion-border-gray-600">
+      <ion-label class="overflow-visible">Duration (s)</ion-label>
+      <ion-input class="text-right" type="number" placeholder="Unset" slot="end" [disabled]="true"
+      (ionChange)="saveSettings('videoMaxDuration')" [(ngModel)]="attachmentSettings.videoMaxDuration">
+      </ion-input>
+    </ion-item>
+  </ion-list>
+</ion-content>

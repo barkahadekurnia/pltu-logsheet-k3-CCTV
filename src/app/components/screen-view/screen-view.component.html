@@ -1,0 +1,33 @@
+<div class="w-full min-h-full p-8 flex flex-col justify-center items-center" [ngClass]="[className || 'space-y-8']">
+  <app-illustration-progress *ngIf="type === 'loading'" className="w-64 px-4 fill-current text-primary">
+  </app-illustration-progress>
+
+  <app-illustration-no-data *ngIf="type === 'no-data'" className="w-64 px-4 fill-current text-primary">
+  </app-illustration-no-data>
+
+  <app-illustration-nfc-scan *ngIf="type === 'nfc-scan'" className="w-64 px-4 fill-current text-primary">
+  </app-illustration-nfc-scan>
+
+  <app-illustration-preferences *ngIf="type === 'preferences'" className="w-64 px-4 fill-current text-primary">
+  </app-illustration-preferences>
+
+  <app-illustration-qr-scan *ngIf="type === 'qr-scan'" className="w-64 px-4 fill-current text-primary">
+  </app-illustration-qr-scan>
+
+  <ion-spinner *ngIf="type === 'loading'" class="transform scale-150" name="dots" color="primary"></ion-spinner>
+
+  <div *ngIf="message || description" class="w-full">
+    <h3 *ngIf="message" class="px-4 text-center text-lg font-semibold">{{ message }}</h3>
+
+    <p *ngIf="description" class="px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+      {{ description }}
+    </p>
+  </div>
+
+  <button *ngIf="button" class="btn btn-primary btn-block rounded-full space-x-2 shadow-md focus:outline-none"
+    (click)="button.handler()">
+    <ion-icon *ngIf="button.icon && !button.iconEnd" [name]="button.icon"></ion-icon>
+    <span>{{ button.text }}</span>
+    <ion-icon *ngIf="button.icon && button.iconEnd" [name]="button.icon"></ion-icon>
+  </button>
+</div>

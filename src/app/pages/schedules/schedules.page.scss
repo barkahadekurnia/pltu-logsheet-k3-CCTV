@@ -1,0 +1,146 @@
+ion-col.col-1\/7 {
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 8.33333%;
+    -ms-flex: 0 0 8.33333%;
+    flex: 0 0 14.285714285714286%;
+    width: 14.285714285714286%;
+    max-width: 14.285714285714286%;
+    padding: 0;
+}
+
+.bg-opacity {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.group:hover .group-hover\:bg-opacity {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+html.dark .bg-opacity {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .group:hover .group-hover\:bg-opacity {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+$color_1: #fff;
+$background-color_1: #1e202b;
+$background-color_2: #f1f1f1;
+
+/* Small Screens */
+/* Medium Screens */
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    width: 90%;
+    // margin-top: 5rem;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: $color_1;
+      width: 90%;
+      padding: 1rem 2rem;
+      margin: 1rem 0px;
+      border-radius: 20px;
+      box-shadow: 0px 0px 20px #00000020;
+      position: relative;
+      transition: all .3s ease;
+      background-color: $background-color_1;
+
+      &:hover {
+        &:before {
+          content: "";
+          display: flex;
+          width: 8px;
+          height: 100%;
+          background-color: $background-color_2;
+          position: absolute;
+          top: 0;
+          left: 0;
+          margin-left: -1.5rem;
+          border-radius: 25px;
+          box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.162);
+        }
+
+        transform: translateX(15px);
+      }
+    }
+  }
+}
+
+.image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
+  img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.text-group {
+  width: 40%;
+}
+
+@media only screen and (max-width: 576px) {
+  .center {
+    ul {
+      li {
+        &:hover {
+          transform: none;
+        }
+      }
+    }
+  }
+
+  .date-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .center {
+    li {
+      flex-direction: column;
+
+      >div {
+        margin: 2px 2px;
+      }
+    }
+  }
+
+  .text-group {
+    width: 80%;
+    text-align: center;
+  }
+
+  .date-group {
+    display: flex;
+
+    h5 {
+      margin: 0px .5rem;
+    }
+  }
+
+  p {
+    margin: 0px .5rem;
+  }
+}
