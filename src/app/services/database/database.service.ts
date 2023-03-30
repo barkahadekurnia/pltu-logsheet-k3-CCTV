@@ -258,6 +258,13 @@ export class DatabaseService {
           schType TEXT,
           assetCategoryType TEXT
         )
+      `,
+      jumlah: `
+        CREATE TABLE IF NOT EXISTS category(
+          jumlahId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          jumlahNama TEXT NOT NULL,
+          jumlahCount INTEGER
+        )
       `
     };
   }

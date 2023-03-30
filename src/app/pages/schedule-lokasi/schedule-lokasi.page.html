@@ -6,7 +6,7 @@
     </ion-buttons>
 
     <ion-title class="text-lg font-bold text-center">
-      Asset Lokasi
+      Asset Scan
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -20,7 +20,7 @@
     </ion-toolbar>
   </ion-header>
   <div class="pl-6">
-    <h4 class="text-2xl font-bold">Asset Lokasi</h4>
+    <h4 class="text-2xl font-bold">Asset Scan</h4>
   </div>
 
   <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
@@ -32,8 +32,32 @@
   <!-- <app-screen-view *ngIf="!loading && !sourceAssets?.length" type="no-data"
     message="Data Kosong" description="Synchronize untuk mendapatkan schedule">
   </app-screen-view> -->
-  <div *ngIf="!loading" class="w-full min-h-full pb-24">
+  <div *ngIf="!loading" class="w-full min-h-full">
     <ion-grid class="w-full space-y-4">
+      <ion-row class="w-full">
+        <ion-col size="12">
+          <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 text-white">
+            <ion-list class="text-white rounded-3xl">
+              <ion-item class="text-xs dark:ion-border-gray-600">
+                <ion-label>Kode Lokasi</ion-label>
+                <ion-input class="text-right" readonly [value]="lokasiaset.tagNumber"></ion-input>
+              </ion-item>
+              <ion-item class="text-xs dark:ion-border-gray-600">
+                <ion-label>Tanggal</ion-label>
+                <ion-input class="text-right" readonly [value]="lokasiaset.adviceDate"></ion-input>
+              </ion-item>
+              <ion-item class="text-xs dark:ion-border-gray-600">
+                <ion-label>Unit</ion-label>
+                <ion-input class="text-right" readonly [value]="lokasiaset.unit"></ion-input>
+              </ion-item>
+              <ion-item class="text-xs dark:ion-border-gray-600">
+                <ion-label>Lokasi</ion-label>
+                <ion-input class="text-right" readonly [value]="lokasiaset.area"></ion-input>
+              </ion-item>
+            </ion-list>
+          </div>
+        </ion-col>
+      </ion-row>
       <ion-row class="justify-center">
         <ion-col size="12" sizeLg="12">
           <ion-row  class="w-full pt-3 justify-center items-center">

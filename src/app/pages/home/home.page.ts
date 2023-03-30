@@ -12,7 +12,7 @@ import { NotificationService } from 'src/app/services/notification/notification.
 import { SharedService, UserData } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { Subscriber, Observable } from 'rxjs';
-import { chain, cond, groupBy, intersection, uniq, uniqBy, zip } from 'lodash';
+import { chain, cond, groupBy, intersection, toLower, uniq, uniqBy, zip } from 'lodash';
 import * as moment from 'moment';
 
 import { CustomAlertButton } from 'src/app/components/custom-alert/custom-alert.component';
@@ -55,7 +55,10 @@ export class HomePage implements OnInit {
     holded: number;
     unscanned: number;
     assets: number;
+    laporan: number;
   };
+  datalaporan = [];
+
 
   isHeaderVisible: boolean;
   loading: boolean;
@@ -102,7 +105,8 @@ export class HomePage implements OnInit {
       uploaded: 0,
       unuploaded: 0,
       holded: 0,
-      unscanned: 0
+      unscanned: 0,
+      laporan: 0,
     };
 
     this.syncJob = {
@@ -149,7 +153,6 @@ export class HomePage implements OnInit {
   }
 
   ionViewWillEnter() {
-
     this.platform.ready().then(() => {
       if (this.shared.lastSynchronize) {
         const now = this.utils.getTime();
@@ -164,12 +167,13 @@ export class HomePage implements OnInit {
         this.application.lastSync = null;
         this.application.bgSyncButton = 'btn-primary';
       }
-
+      // menghitung chart
       this.getLocalAssets();
     });
   }
-
+  // refresh
   doRefresh(e: any) {
+    // menghitung chart
     this.getLocalAssets().finally(() => e.target.complete());
   }
 
@@ -179,7 +183,7 @@ export class HomePage implements OnInit {
       this.isHeaderVisible = val;
     }
   }
-
+  // fungsi buka page dinamis
   openPage(commands: any[]) {
     return this.router.navigate(commands);
   }
@@ -268,7 +272,7 @@ export class HomePage implements OnInit {
     this.application.bgSyncButton = 'btn-success';
     this.shared.setLastSynchronize(moment(now).format('YYYY-MM-DDTHH:mm:ss'));
   }
-  // pengecekan jumlah apar
+  // pengecekan jumlah alat pemadam
   private async getCountAssets() {
     return this.http.requests({
       requests: [() => this.http.getCountAsset()],
@@ -293,7 +297,13 @@ export class HomePage implements OnInit {
       },
     });
   }
-
+ async openHarian(){
+  const data = JSON.stringify({
+    data: this.datalaporan
+  })
+  console.log('data json :', JSON.parse(data));
+  return this.router.navigate(['laporan-harian', { data }]);
+}
   private async getLocalAssets() {
     try {
       const result = await this.database.select('schedule', {
@@ -308,10 +318,14 @@ export class HomePage implements OnInit {
 
       const assetsParameterStatuses = await this.getAssetsParameterStatuses();
       // const holdedRecords = await this.getHoldedRecords();
-
+      // console.log('0. chart ', result)
+      // console.log('1. data schedule chart ', assetsParameterStatuses)
       const assets = this.database.parseResult(result)
         .filter(asset => {
           const assetParameterStatuses = assetsParameterStatuses[asset.assetId] || [];
+          // console.log('2. data asetid filter', asset.assetId)
+          // console.log('2. data chart filter', assetParameterStatuses)
+
           return assetParameterStatuses;
         })
         .map(asset => {
@@ -328,6 +342,8 @@ export class HomePage implements OnInit {
 
           return { ...asset, schedule };
         });
+        // console.log('3. data chart jumlah', assets)
+
 
       await this.getLocalSchedules(assets);
     } catch (error) {
@@ -338,14 +354,15 @@ export class HomePage implements OnInit {
   }
 
   private async getLocalSchedules(assets: any[]) {
-    // console.log('schedule', assets);
+    // console.log('4. data local asset ke get localSchedule', assets);
     try {
       const count = {
         assets: 0,
         uploaded: 0,
         unuploaded: 0,
         holded: 0,
-        unscanned: 0
+        unscanned: 0,
+        laporan: 0
       };
 
       const assetIds = assets.map(asset => asset.assetId);
@@ -355,6 +372,7 @@ export class HomePage implements OnInit {
         column: [
           'scheduleTrxId',
           'assetId',
+          'scannedAt',
         ],
         groupBy: ['scheduleTrxId'],
         where: {
@@ -367,34 +385,72 @@ export class HomePage implements OnInit {
       const dateInThisMonth = this.getDateInThisMonth(now);
       const lastWeek = Math.max(...dateInThisMonth.map(item => item.week));
       const schedules = this.database.parseResult(result)
+      // console.log('5. data localSchedule', schedules);
+      // console.log('6. bulan ini', dateInThisMonth);
+      // console.log('7. lastWeek', lastWeek);
+
       // .filter(schedule => this.filterSchedule(schedule, now, dateInThisMonth, lastWeek));
 
       const unuploadedRecords = await this.getUnuploadedRecords();
+      // console.log('8. belum upload', unuploadedRecords);
 
       for (const item of schedules) {
         const assetIndex = assets.findIndex(asset => asset.assetId === item.assetId);
+        console.log('9. indek dari aset', assetIndex);
+        console.log('10. item dari aset', assetIndex);
 
-        if (assetIndex >= 0 && item.syncAt != null) { // Uploaded
+        if (assetIndex >= 0 && item.scannedAt != null) { // Uploaded
           assets[assetIndex].schedule.uploaded++;
           count.uploaded++;
         } else if (assetIndex >= 0 && unuploadedRecords.includes(item.scheduleTrxId)) { // Unuploaded
           assets[assetIndex].schedule.unuploaded++;
           count.unuploaded++;
-        } else if (assetIndex >= 0 && assets[assetIndex].hasRecordHold) { // Holded | Unscanned
-          const start = new Date(item.scheduleFrom).getTime();
-          const end = new Date(item.scheduleTo).getTime();
-          const key = moment(now).isBetween(start, end) ? 'holded' : 'unscanned';
-          assets[assetIndex].schedule[key]++;
-          count[key]++;
         } else if (assetIndex >= 0) { // Unscanned
           assets[assetIndex].schedule.unscanned++;
           count.unscanned++;
+        }else{
+          assets[assetIndex].schedule.unscanned++;
+          count.laporan++;
         }
+        // } else if (assetIndex >= 0 && assets[assetIndex].hasRecordHold) { // Holded | Unscanned
+        //   const start = new Date(item.scheduleFrom).getTime();
+        //   const end = new Date(item.scheduleTo).getTime();
+        //   const key = moment(now).isBetween(start, end) ? 'holded' : 'unscanned';
+        //   assets[assetIndex].schedule[key]++;
+        //   count[key]++;
+        // } else if (assetIndex >= 0) { // Unscanned
+        //   assets[assetIndex].schedule.unscanned++;
+        //   count.unscanned++;
+        // }
       }
+      // console.log('10. upload', count.uploaded);
+      // console.log('11. belum upload', count.unuploaded);
+      // console.log('12. belum scan', count.unscanned);
 
       // count.assets = assets.length;
       this.count = count;
       this.getCountAssets();
+      const userId = { userId: this.shared.user.id }
+
+      this.http.requests({
+        requests: [
+          () => this.http.getLaporan(userId),
+        ],
+        onSuccess: async ([responseLaporan]) => {
+          if (responseLaporan.status >= 400) {
+            throw responseLaporan;
+          }
+          console.log('responseLaporan', responseLaporan);
+          if (responseLaporan?.data?.data?.length) {
+            const filterdata = responseLaporan?.data?.data?.filter((scan)=> scan.reportDate == null);
+            console.log('filterdata', filterdata)
+            count.laporan = filterdata?.length;
+            this.datalaporan = filterdata
+          }
+        },
+        onError: error => console.error(error)
+      });
+console.log('data kirim', this.datalaporan)
     } catch (error) {
       console.error(error);
     }
@@ -504,7 +560,7 @@ export class HomePage implements OnInit {
                 option: param.option,
                 parameterId: param.parameterId,
                 parameterName: param.parameterName,
-                schType: param.schType,
+                schType: toLower(param.schType),
                 showOn: param.showOn,
                 sortId: param.index,
                 uom: param.uom,
@@ -1047,7 +1103,7 @@ console.log('cek isi parameter', parameters);
           if (response.status >= 400) {
             throw response;
           }
-          console.log('getSchedules', response);
+          console.log('1. getSchedules', response?.data?.data);
 
           if (response?.data?.data?.length) {
             const uploadedSchedules = [];
@@ -1060,7 +1116,7 @@ console.log('cek isi parameter', parameters);
                 } else {
                   notifications.push(dataschedule);
                 }
-                console.log('notifications', notifications);
+                console.log('2. notifications', notifications);
 
                 const data = {
                   abbreviation: dataschedule.abbreviation,
@@ -1086,7 +1142,7 @@ console.log('cek isi parameter', parameters);
                   latitude: dataschedule.latitude,
                   longitude: dataschedule.longitude,
                   merk: dataschedule.merk,
-                  photo: dataschedule.photo,
+                  photo: dataschedule.photo.path,
                   reportPhoto: dataschedule.reportPhoto,
                   scannedAccuration: dataschedule.scannedAccuration,
                   scannedAt: dataschedule.scannedAt,
@@ -1097,7 +1153,7 @@ console.log('cek isi parameter', parameters);
                   schDays: dataschedule.schDays,
                   schFrequency: dataschedule.schFrequency,
                   schManual: dataschedule.schManual,
-                  schType: dataschedule.schType,
+                  schType: toLower(dataschedule.schType),
                   schWeekDays: dataschedule.schWeekDays,
                   schWeeks: dataschedule.schWeeks,
                   scheduleFrom: dataschedule.scheduleFrom,
@@ -1114,6 +1170,8 @@ console.log('cek isi parameter', parameters);
 
                 return data;
               });
+            console.log('3. Schedules masuk', response?.data?.data);
+
             const assetIdSchedule = [];
             const assetIdType = [];
             response?.data?.data
@@ -1278,6 +1336,8 @@ console.log('cek isi parameter', parameters);
                   notifications.push(dataschedule);
                 }
 
+                // console.log('photo', dataschedule.photo.path)
+                // var foto = dataschedule.photo.path;
                 const dataScheduledShift = {
                   scheduleTrxId: dataschedule.scheduleTrxId,
                   assetCategoryId: dataschedule.assetCategoryId,
@@ -1297,6 +1357,7 @@ console.log('cek isi parameter', parameters);
                   unitCapacity: dataschedule.unitCapacity,
                   supplyDate: dataschedule.supplyDate,
                   reportPhoto: dataschedule.reportPhoto,
+                  photo: dataschedule.photo?.path,
                   scannedAccuration: dataschedule.scannedAccuration,
                   scannedAt: dataschedule.scannedAt,
                   scannedBy: dataschedule.scannedBy,
@@ -1306,7 +1367,7 @@ console.log('cek isi parameter', parameters);
                   schDays: dataschedule.schDays,
                   schFrequency: dataschedule.schFrequency,
                   schManual: dataschedule.schManual,
-                  schType: dataschedule.schType,
+                  schType: toLower(dataschedule.schType),
                   schWeekDays: dataschedule.schWeekDays,
                   schWeeks: dataschedule.schWeeks,
                   scheduleFrom: dataschedule.scheduleFrom,
@@ -1322,7 +1383,9 @@ console.log('cek isi parameter', parameters);
                   longitude: dataschedule.longitude,
                   created_at: dataschedule.created_at,
                   deleted_at: dataschedule.deleted_at,
-                  date: dataschedule.date
+                  date: dataschedule.date,
+                  assetForm: JSON.stringify(dataschedule.assetForm),
+                  idschedule: dataschedule.idschedule
                 };
 
            return dataScheduledShift;
@@ -1405,7 +1468,7 @@ console.log('cek isi parameter', parameters);
             }
 
             this.syncJob.order.schedules.status = 'success';
-            this.syncJob.order.schedules.message = 'Success fetch data schedules';
+            this.syncJob.order.schedules.message = 'Success mengambil data schedules';
           } else {
             this.shared.addLogActivity({
               activity: 'User synchronizes schedules dari server',
@@ -1488,7 +1551,7 @@ console.log('cek isi parameter', parameters);
                   schDays: dataschedule.schDays,
                   schFrequency: dataschedule.schFrequency,
                   schManual: dataschedule.schManual,
-                  schType: dataschedule.schType,
+                  schType: toLower(dataschedule.schType),
                   schWeekDays: dataschedule.schWeekDays,
                   schWeeks: dataschedule.schWeeks,
                   scheduleFrom: dataschedule.scheduleFrom,
@@ -1598,7 +1661,7 @@ console.log('cek isi parameter', parameters);
             await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
 
             this.syncJob.order.schedules.status = 'success';
-            this.syncJob.order.schedules.message = 'Success fetch data schedules';
+            this.syncJob.order.schedules.message = 'Success mengambil data schedules';
           } else {
             this.shared.addLogActivity({
               activity: 'User synchronizes schedules dari server',
@@ -1683,7 +1746,7 @@ console.log('cek isi parameter', parameters);
                   schDays: dataschedule.schDays,
                   schFrequency: dataschedule.schFrequency,
                   schManual: dataschedule.schManual,
-                  schType: dataschedule.schType,
+                  schType: toLower(dataschedule.schType),
                   schWeekDays: dataschedule.schWeekDays,
                   schWeeks: dataschedule.schWeeks,
                   scheduleFrom: dataschedule.scheduleFrom,
@@ -1786,7 +1849,7 @@ console.log('cek isi parameter', parameters);
             await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
 
             this.syncJob.order.schedules.status = 'success';
-            this.syncJob.order.schedules.message = 'Success fetch data schedules';
+            this.syncJob.order.schedules.message = 'Success mengambil data schedules';
           } else {
             this.shared.addLogActivity({
               activity: 'User synchronizes schedules dari server',
@@ -1932,7 +1995,7 @@ console.log('cek isi parameter', parameters);
               description: category.description,
               urlImage: category.assetCategoryIconUrl,
               urlOffline: offlinePhoto,
-              schType: category.schType
+              schType: toLower(category.schType)
             };
             kategori.push(data);
           }

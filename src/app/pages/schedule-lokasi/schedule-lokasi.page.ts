@@ -41,7 +41,13 @@ export class ScheduleLokasiPage implements OnInit {
   selectedDate: any;
   segment: 'scanned' | 'unscanned';
   datakategori: any[];
-
+  // lokasiaset: any[];
+  lokasiaset: {
+    tagNumber: string;
+    adviceDate: string;
+    unit: string;
+    area: string;
+  };
   searchTerm: string;
 
   params: any;
@@ -93,7 +99,6 @@ export class ScheduleLokasiPage implements OnInit {
     this.segment = 'scanned';
     this.searchTerm = '';
 
-    this.isHeaderVisible = false;
     this.listDataScan = {
       countScanned: 0,
       scanned: [],
@@ -110,6 +115,7 @@ export class ScheduleLokasiPage implements OnInit {
       console.log('navValues 2 ',navValues.listDataScan.schedules)
       this.sourceAssets = navValues.listDataScan.schedules;
       this.datakategori = navValues.kategori;
+      this.lokasiaset = navValues.listDataScan.lokasi[0];
       this.countsc = navValues.countsc;
       // console.log('navValues 1 ',this.sourceAssets )
       // console.log('navValues 2 ',this.datakategori )

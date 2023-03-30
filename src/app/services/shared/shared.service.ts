@@ -95,6 +95,8 @@ export class SharedService {
     created_at: string;
     deleted_at: string;
     date: string;
+    assetForm: string;
+
   };
   apar: {
     assetId: string;
@@ -230,7 +232,9 @@ export class SharedService {
       longitude: '',
       created_at: '',
       deleted_at: '',
-      date: ''
+      date: '',
+      assetForm: ''
+
     };
 
     this.filterOptions = {
@@ -631,7 +635,9 @@ set isradiovalue(value){
       longitude: '',
       created_at: '',
       deleted_at: '',
-      date: ''
+      date: '',
+      assetForm: ''
+
     };
 
     this.filterOptions = {

@@ -28,6 +28,7 @@ export class AppComponent implements AfterViewInit {
   private marker: mapboxgl.Marker;
   private permissions: { [key: string]: any }[];
   user: UserData;
+  formaset: any[];
 
   constructor(
     private router: Router,
@@ -41,7 +42,9 @@ export class AppComponent implements AfterViewInit {
   ) {
     // this.user = this.shared.user;
     // console.log('yuhu', shared.user)
-    // console.log()
+    console.log('form asset shared', this.shared.asset.assetForm)
+    // console.log('form asset json', JSON.parse(this.shared.asset.assetForm))
+    // this.formaset = JSON.parse(this.shared.asset.assetForm);
     this.progress = 0;
     (mapboxgl as any).accessToken = environment.values.mapbox;
 

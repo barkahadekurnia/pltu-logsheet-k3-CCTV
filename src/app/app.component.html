@@ -109,12 +109,12 @@
           ></ion-input>
         </ion-item>
 
-        <ion-item class="text-xs dark:ion-border-gray-600">
-          <ion-label>Merk</ion-label>
+        <ion-item class="text-xs dark:ion-border-gray-600" *ngFor="let rf of formaset; let idxx = index">
+          <ion-label>{{rf.formLabel}}</ion-label>
           <ion-input
             class="text-right"
             readonly
-            [value]="asset?.merk"
+            [value]="rf?.optionName"
           ></ion-input>
         </ion-item>
 

@@ -21,34 +21,18 @@
 </ion-header>
 
 <ion-content>
-  <app-screen-view
-    *ngIf="loading"
-    type="loading"
-    message="Loading data ..."
-  ></app-screen-view>
-  <app-screen-view
-    *ngIf="!loading && !asset.assetId && resultParam?.length <= 0"
-    type="no-data"
-    message="APA tidak dalam schedule"
-  ></app-screen-view>
+  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
+  <app-screen-view *ngIf="!loading && !asset.assetId && resultParam?.length <= 0" type="no-data"
+    message="APA tidak dalam schedule"></app-screen-view>
 
-  <app-screen-view
-    *ngIf="!loading && asset.assetId && !schedule.scheduleTrxId && resultParam?.length <= 0"
-    type="no-data"
-    message="Empty Data"
-    description="There is no schedule at this time"
-  ></app-screen-view>
+  <app-screen-view *ngIf="!loading && asset.assetId && !schedule.scheduleTrxId && resultParam?.length <= 0"
+    type="no-data" message="Empty Data" description="There is no schedule at this time"></app-screen-view>
 
-  <app-screen-view
-    *ngIf="!loading && asset.assetId && schedule.scheduleTrxId  && resultParam?.length <= 0"
-    type="no-data"
-    message="Empty Data"
-    description="No parameters need to be scanned"
-  ></app-screen-view>
-  <div
-    *ngIf="!loading && asset.assetId"
-    class="w-full min-h-full p-4 bg-white dark:bg-gray-900"
-  >
+  <app-screen-view *ngIf="!loading && asset.assetId && schedule.scheduleTrxId  && resultParam?.length <= 0"
+    type="no-data" message="Empty Data" description="No parameters need to be scanned"></app-screen-view>
+
+  <div *ngIf="!loading && asset.assetId" class="w-full min-h-full p-4 bg-white dark:bg-gray-900">
+
     <ion-grid>
       <ion-row class="mb-2 justify-center">
         <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
@@ -57,355 +41,255 @@
               {{ asset.assetNumber }}
             </h2>
 
-            <button
-              class="btn btn-circle btn-ghost btn-sm"
-              (click)="showAssetInfo()"
-            >
-              <ion-icon
-                class="text-lg"
-                name="information-circle-outline"
-              ></ion-icon>
+            <button class="btn btn-circle btn-ghost btn-sm" (click)="showAssetInfo()">
+              <ion-icon class="text-lg" name="information-circle-outline"></ion-icon>
             </button>
           </div>
         </ion-col>
-        <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
+        <ion-col size="12">
+          <span class="text-base font-semibold">{{ currentSlide }}</span>
+        </ion-col>
+        <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6" *ngIf="!isEnd">
           <div class="w-full flex justify-between items-center">
             <h6 class="text-center" style="color: red;">
-                *Tekan panah untuk mengisi catatan dan file
+              *Tekan panah untuk mengisi catatan dan file
             </h6>
           </div>
         </ion-col>
-
       </ion-row>
 
       <ion-row class="justify-center">
-        <ion-col
-          size="12"
-          sizeMd="10"
-          sizeLg="8"
-          sizeXl="6"
-          *ngIf="resultParam.length > 0"
-        >
-          <ion-row>
-            <ion-col
-              *ngFor="let parameter of resultParam; let idxx = index"
-              size="12"
-              sizeSm="6"
-            >
-              <div
-                class="w-full bg-white dark:bg-gray-800 border overflow-hidden"
-                [ngClass]="[
-                  parameter.isDeviation ? 'border-error'
-                    : validated && !hasValue(parameter.value) ? 'border-warning'
-                    : 'border-gray-300 dark:border-gray-800',
-                  parameter.isExpanded ? 'rounded-2xl mb-3' : 'rounded-xl'
-                ]"
-              >
-                <div
-                  class="w-full p-3 pr-4 flex justify-between items-center space-x-2"
-                >
-                  <div class="flex justify-start items-center space-x-2">
-                    <button
-                      class="btn btn-square btn-ghost btn-xs"
-                      (click)="parameter.isExpanded = !parameter.isExpanded"
-                    >
-                      <ion-icon
-                        class="text-lg"
-                        [name]="parameter.isExpanded ? 'chevron-down-outline' : 'chevron-forward-outline'"
-                      >
-                      </ion-icon>
-                    </button>
+        <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6" *ngIf="resultParam.length > 0">
 
-                    <div
-                      class="flex-grow flex flex-col justify-start items-start"
-                    >
-                      <p
-                        class="text-sm font-medium"
-                        (click)="setFocus(parameter)"
-                      >
-                        {{ parameter.parameterName }}
-                      </p>
-                    </div>
-                  </div>
+          <ion-slides class="h-full" [options]="slidesOpts" (ionSlideDidChange)="onSlidesDidChange()"
+            (ionSlideWillChange)="onSlidesChanged()">
+            <ng-container *ngFor="let slide of slides; index as i">
+              <ion-slide>
+                <div class="w-full text-left">
+                  <ion-row *ngIf="!isEnd">
+                    <ion-col *ngFor="let parameter of resultParam[i]; let idxx = index" size="12" sizeSm="6">
+                      <div class="w-full bg-white dark:bg-gray-800 border overflow-hidden" [ngClass]="[
+                            parameter.isDeviation ? 'border-error'
+                              : validated && !hasValue(parameter.value) ? 'border-warning'
+                              : 'border-gray-300 dark:border-gray-800',
+                            parameter.isExpanded ? 'rounded-2xl mb-3' : 'rounded-xl'
+                          ]">
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <button class="btn btn-square btn-ghost btn-xs"
+                              (click)="parameter.isExpanded = !parameter.isExpanded">
+                              <ion-icon class="text-lg"
+                                [name]="parameter.isExpanded ? 'chevron-down-outline' : 'chevron-forward-outline'">
+                              </ion-icon>
+                            </button>
 
-                  <ion-input
-                    *ngIf="!parameter.isExpanded && (parameter.inputType === 'input' || parameter.inputType === 'textarea')"
-                    class="ion-no-padding min-w-12 flex-grow text-sm text-right"
-                    [ngClass]="[parameter.parameterId]"
-                    [type]="parameter.inputType === 'input' ? 'number' : 'text'"
-                    placeholder="-"
-                    (ionChange)="checkDeviation(parameter)"
-                    [(ngModel)]="parameter.value"
-                  >
-                  </ion-input>
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-medium" (click)="setFocus(parameter)">
+                                {{ parameter.parameterName }}
+                              </p>
+                            </div>
+                          </div>
 
-                  <ion-select
-                    *ngIf="!parameter.isExpanded && (parameter.inputType === 'select' || parameter.inputType === 'checkbox' || parameter.inputType === 'radio')"
-                    class="ion-no-padding min-w-12 flex-grow text-sm text-right"
-                    [ngClass]="[parameter.parameterId]"
-                    interface="alert"
-                    [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
-                    placeholder="Pilih"
-                    [multiple]="parameter.inputType === 'checkbox'"
-                    (ionChange)="checkDeviation(parameter)"
-                    [(ngModel)]="parameter.value"
-                  >
-                    <ion-select-option
-                      *ngFor="let value of parameter.option.split(',')"
-                      [value]="value"
-                    >
-                      {{ value }}
-                    </ion-select-option>
-                  </ion-select>
-                </div>
+                          <ion-input
+                            *ngIf="!parameter.isExpanded && (parameter.inputType === 'input' || parameter.inputType === 'textarea')"
+                            class="ion-no-padding min-w-12 flex-grow text-sm text-right"
+                            [ngClass]="[parameter.parameterId]"
+                            [type]="parameter.inputType === 'input' ? 'number' : 'text'" placeholder="-"
+                            (ionChange)="checkDeviation(parameter)" [(ngModel)]="parameter.value">
+                          </ion-input>
 
-                <div
-                  *ngIf="parameter.isExpanded"
-                  class="w-full p-2 flex flex-col justify-start items-start space-y-2"
-                >
-                  <div *ngIf="parameter.photo" class="w-full">
-                    <img
-                      class="w-24 m-auto rounded-btn"
-                      [src]="parameter.offlinePhoto || parameter.photo"
-                      alt="Image"
-                      onerror="this.src='assets/img/empty.jpg'"
-                      (click)="showImageViewer($event)"
-                    />
-                  </div>
-
-                  <div
-                    class="w-full flex flex-col justify-start items-start space-y-1"
-                  >
-                    <div
-                      *ngIf="parameter.inputType === 'input'"
-                      class="w-full pt-px flex justify-end items-center space-x-2"
-                    >
-                      <p
-                        class="text-right text-xs text-gray-500 dark:text-gray-400"
-                      >
-                        <span
-                          *ngIf="hasValue(parameter.min) || hasValue(parameter.max)"
-                        >
-                          ( {{ hasValue(parameter.min) ? parameter.min : '-' }}
-                          / {{ hasValue(parameter.max) ? parameter.max : '-' }}
-                          )
-                        </span>
-
-                        <span *ngIf="parameter.uom && parameter.uom !== '-'"
-                          >{{ parameter.uom }}</span
-                        >
-                      </p>
-                    </div>
-
-                    <div
-                      class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl"
-                    >
-                      <ion-input
-                        *ngIf="parameter.inputType === 'input' || parameter.inputType === 'textarea'"
-                        class="ion-no-padding min-w-12 flex-grow"
-                        [ngClass]="[parameter.parameterId]"
-                        [type]="parameter.inputType === 'input' ? 'number' : 'text'"
-                        placeholder="-"
-                        (ionChange)="checkDeviation(parameter)"
-                        [(ngModel)]="parameter.value"
-                      >
-                      </ion-input>
-
-                      <ion-select
-                        *ngIf="parameter.inputType === 'select' || parameter.inputType === 'checkbox' || parameter.inputType === 'radio'"
-                        class="ion-no-padding min-w-12 flex-grow"
-                        [ngClass]="[parameter.parameterId]"
-                        interface="alert"
-                        [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
-                        placeholder="Pilih"
-                        [multiple]="parameter.inputType === 'checkbox'"
-                        (ionChange)="checkDeviation(parameter)"
-                        [(ngModel)]="parameter.value"
-                      >
-                        <ion-select-option
-                          *ngFor="let value of parameter.option.split(',')"
-                          [value]="value"
-                        >
-                          {{ value }}
-                        </ion-select-option>
-                      </ion-select>
-                    </div>
-                  </div>
-
-                  <div
-                    class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl"
-                  >
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      Catatan
-                    </p>
-
-                    <ion-textarea
-                      class="ion-no-padding text-xs"
-                      rows="3"
-                      autoGrow="true"
-                      placeholder="Masukan Catatan disini..."
-                      (ionChange)="notes(parameter)"
-                      [(ngModel)]="parameter.notes"
-                    >
-                    </ion-textarea>
-                  </div>
-
-                  <!-- <div *ngIf="parameter.hasAttachments" class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl"> -->
-                  <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl">
-                    <p class="p-2 text-xs text-gray-500 dark:text-gray-400">
-                      Media Files
-                    </p>
-
-                    <div class="overflow-auto whitespace-nowrap">
-                      <div
-                        *ngFor="let attachment of parameter.attachments"
-                        class="relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent overflow-hidden cursor-pointer"
-                        (click)="onMediaSelected(attachment, parameter.attachments, idxx)"
-                      >
-                        <img
-                          class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
-                          src="assets/img/wave.png"
-                          alt="Wave"
-                        />
-
-                        <div
-                          class="relative w-16 h-16 z-10 flex justify-center items-center"
-                        >
-                          <ion-icon
-                            *ngIf="attachment.type.startsWith('image')"
-                            class="text-3xl text-primary-content"
-                            name="image-outline"
-                          ></ion-icon>
-
-                          <ion-icon
-                            *ngIf="attachment.type.startsWith('audio')"
-                            class="text-3xl text-primary-content"
-                            name="volume-high-outline"
-                          ></ion-icon>
-
-                          <ion-icon
-                            *ngIf="attachment.type.startsWith('video')"
-                            class="text-3xl text-primary-content"
-                            name="play-circle-outline"
-                          ></ion-icon>
+                          <ion-select
+                            *ngIf="!parameter.isExpanded && (parameter.inputType === 'select' || parameter.inputType === 'checkbox' || parameter.inputType === 'radio')"
+                            class="ion-no-padding min-w-12 flex-grow text-sm text-right"
+                            [ngClass]="[parameter.parameterId]" interface="alert"
+                            [interfaceOptions]="{header: 'Pilih', mode: 'ios'}" placeholder="Pilih"
+                            [multiple]="parameter.inputType === 'checkbox'" (ionChange)="checkDeviation(parameter)"
+                            [(ngModel)]="parameter.value">
+                            <ion-select-option *ngFor="let value of parameter.option.split(',')" [value]="value">
+                              {{ value }}
+                            </ion-select-option>
+                          </ion-select>
                         </div>
 
-                        <ion-ripple-effect
-                          style="margin: 0 !important"
-                        ></ion-ripple-effect>
-                      </div>
+                        <div *ngIf="parameter.isExpanded"
+                          class="w-full p-2 flex flex-col justify-start items-start space-y-2">
+                          <div *ngIf="parameter.photo" class="w-full">
+                            <img class="w-24 m-auto rounded-btn" [src]="parameter.offlinePhoto || parameter.photo"
+                              alt="Image" onerror="this.src='assets/img/empty.jpg'" (click)="showImageViewer($event)" />
+                          </div>
 
-                      <div
-                        class="relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent overflow-hidden cursor-pointer"
-                        (click)="selectUpload(parameter, idxx)"
-                      >
-                        <img
-                          class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
-                          src="assets/img/wave.png"
-                          alt="Wave"
-                        />
+                          <div class="w-full flex flex-col justify-start items-start space-y-1">
+                            <div *ngIf="parameter.inputType === 'input'"
+                              class="w-full pt-px flex justify-end items-center space-x-2">
+                              <p class="text-right text-xs text-gray-500 dark:text-gray-400">
+                                <span *ngIf="hasValue(parameter.min) || hasValue(parameter.max)">
+                                  ( {{ hasValue(parameter.min) ? parameter.min : '-' }}
+                                  / {{ hasValue(parameter.max) ? parameter.max : '-' }}
+                                  )
+                                </span>
 
-                        <div
-                          class="relative w-16 h-16 z-10 flex justify-center items-center"
-                        >
-                          <ion-icon
-                            class="text-3xl text-primary-content"
-                            name="add"
-                          ></ion-icon>
+                                <span *ngIf="parameter.uom && parameter.uom !== '-'">{{ parameter.uom }}</span>
+                              </p>
+                            </div>
+
+                            <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                              <ion-input *ngIf="parameter.inputType === 'input' || parameter.inputType === 'textarea'"
+                                class="ion-no-padding min-w-12 flex-grow" [ngClass]="[parameter.parameterId]"
+                                [type]="parameter.inputType === 'input' ? 'number' : 'text'" placeholder="-"
+                                (ionChange)="checkDeviation(parameter)" [(ngModel)]="parameter.value">
+                              </ion-input>
+
+                              <ion-select
+                                *ngIf="parameter.inputType === 'select' || parameter.inputType === 'checkbox' || parameter.inputType === 'radio'"
+                                class="ion-no-padding min-w-12 flex-grow" [ngClass]="[parameter.parameterId]"
+                                interface="alert" [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
+                                placeholder="Pilih" [multiple]="parameter.inputType === 'checkbox'"
+                                (ionChange)="checkDeviation(parameter)" [(ngModel)]="parameter.value">
+                                <ion-select-option *ngFor="let value of parameter.option.split(',')" [value]="value">
+                                  {{ value }}
+                                </ion-select-option>
+                              </ion-select>
+                            </div>
+                          </div>
+
+                          <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                              Catatan
+                            </p>
+
+                            <ion-textarea class="ion-no-padding text-xs" rows="3" autoGrow="true"
+                              placeholder="Masukan Catatan disini..." (ionChange)="notes(parameter)"
+                              [(ngModel)]="parameter.notes">
+                            </ion-textarea>
+                          </div>
+
+                          <!-- <div *ngIf="parameter.hasAttachments" class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl"> -->
+                          <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl">
+                            <p class="p-2 text-xs text-gray-500 dark:text-gray-400">
+                              Media Files
+                            </p>
+
+                            <div class="overflow-auto whitespace-nowrap">
+                              <div *ngFor="let attachment of parameter.attachments"
+                                class="relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent overflow-hidden cursor-pointer"
+                                (click)="onMediaSelected(attachment, parameter.attachments, idxx)">
+                                <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
+                                  src="assets/img/wave.png" alt="Wave" />
+
+                                <div class="relative w-16 h-16 z-10 flex justify-center items-center">
+                                  <ion-icon *ngIf="attachment.type.startsWith('image')"
+                                    class="text-3xl text-primary-content" name="image-outline"></ion-icon>
+
+                                  <ion-icon *ngIf="attachment.type.startsWith('audio')"
+                                    class="text-3xl text-primary-content" name="volume-high-outline"></ion-icon>
+
+                                  <ion-icon *ngIf="attachment.type.startsWith('video')"
+                                    class="text-3xl text-primary-content" name="play-circle-outline"></ion-icon>
+                                </div>
+
+                                <ion-ripple-effect style="margin: 0 !important"></ion-ripple-effect>
+                              </div>
+
+                              <div
+                                class="relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent overflow-hidden cursor-pointer"
+                                (click)="selectUpload(parameter, idxx)">
+                                <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
+                                  src="assets/img/wave.png" alt="Wave" />
+
+                                <div class="relative w-16 h-16 z-10 flex justify-center items-center">
+                                  <ion-icon class="text-3xl text-primary-content" name="add"></ion-icon>
+                                </div>
+
+                                <ion-ripple-effect style="margin: 0 !important"></ion-ripple-effect>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-
-                        <ion-ripple-effect
-                          style="margin: 0 !important"
-                        ></ion-ripple-effect>
                       </div>
-                    </div>
-                  </div>
+
+                      <div *ngIf="!parameter.isExpanded" class="w-full p-px pt-0">
+                        <div class="p-2 pb-0 flex justify-end items-center space-x-2">
+                          <p *ngIf="parameter.inputType === 'input'"
+                            class="text-right text-xs text-gray-500 dark:text-gray-400">
+                            <span *ngIf="hasValue(parameter.min) || hasValue(parameter.max)">
+                              ( {{ hasValue(parameter.min) ? parameter.min : '-' }} / {{
+                              hasValue(parameter.max) ? parameter.max : '-' }} )
+                            </span>
+
+                            <span *ngIf="parameter.uom && parameter.uom !== '-'">
+                              {{ parameter.uom }}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+
+                  <ion-row *ngIf="isEnd">
+                    <ion-col>
+                      <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Catatan</p>
+
+                        <ion-textarea class="ion-no-padding text-xs" rows="3" autoGrow="true"
+                          placeholder="Tulis Catatan disini..." [(ngModel)]="record.scannedNotes">
+                        </ion-textarea>
+                      </div>
+
+                      <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl mt-4">
+                        <p class="p-2 text-xs text-gray-500 dark:text-gray-400">Foto Alat Pemadam</p>
+                        <div class="overflow-auto whitespace-nowrap">
+                          <div *ngFor="let foto of attach" class="
+                        relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent
+                        overflow-hidden cursor-pointer
+                      " (click)="onMediaSelected1(foto)">
+                            <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
+                              src="assets/img/wave.png" alt="Wave">
+
+                            <div class="relative w-16 h-16 z-10 flex justify-center items-center">
+                              <ion-icon *ngIf="foto.type.startsWith('image')" class="text-3xl text-primary-content"
+                                name="image-outline"></ion-icon>
+                            </div>
+
+                            <ion-ripple-effect style="margin: 0 !important;"></ion-ripple-effect>
+                          </div>
+
+                          <div class="
+                        relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent
+                        overflow-hidden cursor-pointer
+                      " (click)="selectMedia2(attach)">
+                            <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
+                              src="assets/img/wave.png" alt="Wave">
+
+                            <div class="relative w-16 h-16 z-10 flex justify-center items-center">
+                              <ion-icon class="text-3xl text-primary-content" name="add"></ion-icon>
+                            </div>
+
+                            <ion-ripple-effect style="margin: 0 !important;"></ion-ripple-effect>
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
                 </div>
-              </div>
-
-              <div *ngIf="!parameter.isExpanded" class="w-full p-px pt-0">
-                <div class="p-2 pb-0 flex justify-end items-center space-x-2">
-                  <p
-                    *ngIf="parameter.inputType === 'input'"
-                    class="text-right text-xs text-gray-500 dark:text-gray-400"
-                  >
-                    <span
-                      *ngIf="hasValue(parameter.min) || hasValue(parameter.max)"
-                    >
-                      ( {{ hasValue(parameter.min) ? parameter.min : '-' }} / {{
-                      hasValue(parameter.max) ? parameter.max : '-' }} )
-                    </span>
-
-                    <span *ngIf="parameter.uom && parameter.uom !== '-'">
-                      {{ parameter.uom }}</span
-                    >
-                  </p>
-                </div>
-              </div>
-            </ion-col>
-            <ion-col  size="12" sizeSm="12">
-              <!-- *ngIf="parameter.hasParameterNotes"  [(ngModel)]="parameter.notes" -->
-              <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
-                <p class="text-xs text-gray-500 dark:text-gray-400">Catatan</p>
-
-                <ion-textarea class="ion-no-padding text-xs" rows="3" autoGrow="true"
-                  placeholder="Tulis Catatan disini..." >
-                </ion-textarea>
-              </div>
-              <!-- *ngIf="parameter.hasAttachments" -->
-
-              <div  class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl mt-4">
-                <p class="p-2 text-xs text-gray-500 dark:text-gray-400">Foto Alat Pemadam</p>
-                <div class="overflow-auto whitespace-nowrap">
-                  <div *ngFor="let foto of attach"
-                    class="
-                      relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent
-                      overflow-hidden cursor-pointer
-                    "
-                    (click)="onMediaSelected1(foto)">
-                    <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
-                      src="assets/img/wave.png" alt="Wave">
-
-                    <div class="relative w-16 h-16 z-10 flex justify-center items-center">
-                      <ion-icon *ngIf="foto.type.startsWith('image')" class="text-3xl text-primary-content"
-                        name="image-outline"></ion-icon>
-                    </div>
-
-                    <ion-ripple-effect style="margin: 0 !important;"></ion-ripple-effect>
-                  </div>
-
-                  <div class="
-                      relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent
-                      overflow-hidden cursor-pointer
-                    "
-                    (click)="selectMedia2(attach)">
-                    <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
-                      src="assets/img/wave.png" alt="Wave">
-
-                    <div class="relative w-16 h-16 z-10 flex justify-center items-center">
-                      <ion-icon class="text-3xl text-primary-content" name="add"></ion-icon>
-                    </div>
-
-                    <ion-ripple-effect style="margin: 0 !important;"></ion-ripple-effect>
-                  </div>
-                </div>
-              </div>
-            </ion-col>
-          </ion-row>
+              </ion-slide>
+            </ng-container>
+          </ion-slides>
         </ion-col>
       </ion-row>
 
-      <ion-row class="mt-4 justify-center">
-        <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
-          <button
-            class="btn btn-primary btn-block rounded-full space-x-2"
-            (click)="preview()"
-          >
-            <span>Next</span>
-            <ion-icon class="text-xl" name="arrow-forward-outline"></ion-icon>
-          </button>
-        </ion-col>
-      </ion-row>
     </ion-grid>
   </div>
 </ion-content>
+<ion-footer *ngIf="resultParam.length">
+  <ion-toolbar>
+    <div class="w-full p-2 flex items-center justify-between">
+      <ion-button class="w-32 font-bold rounded-btn" color="dark" [style.visibility]="(isBeginning) ? 'hidden' : ''"
+        (click)="onBackButtonTouched()">
+        <span class="text-white">Back</span>
+        <ion-icon slot="start" name="chevron-back"></ion-icon>
+      </ion-button>
+      <ion-button class="w-32 font-bold rounded-btn" color="primary" (click)="onNextButtonTouched()">
+        <span class="text-white">Next</span>
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

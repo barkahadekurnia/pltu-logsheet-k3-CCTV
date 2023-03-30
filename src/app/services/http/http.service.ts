@@ -20,6 +20,10 @@ export type LoginData = {
   username: string;
   password: string;
 };
+export type LaporanData = {
+  reportDate: string;
+  parentNotes: string;
+};
 
 export type RecordData = {
   trxId: string;
@@ -85,6 +89,19 @@ export class HttpService {
 
     const options: HttpOptions = {
       url: environment.url.login,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      data,
+      responseType: 'json'
+    };
+
+    return Http.post(options);
+  }
+  kirimlaporan(id: string, data: LaporanData) {
+
+    const options: HttpOptions = {
+      url: environment.url.kirimlaporan+ "/" + id,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -302,9 +319,20 @@ export class HttpService {
     return Http.get(options);
   }
   //http://114.6.64.2:11241/api/logsheet_dev/api/transaction/schedule/nonShift?userId=6596
+  //http://114.6.64.2:11241/api/logsheet_new/api/transaction/schedule/viewTrxParent/
   getGroupOperator(params) {
     const options: HttpOptions = {
       url: environment.url.grupoperator + '/' + params,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+    return Http.get(options);
+  }
+  getDetailLaporan(params) {
+    const options: HttpOptions = {
+      url: environment.url.detaillaporan + '/' + params,
       headers: {
         Authorization: `Bearer ${this.token}`
       },
@@ -318,6 +346,17 @@ export class HttpService {
       headers: {
         Authorization: `Bearer ${this.token}`
       },
+      responseType: 'json'
+    };
+    return Http.get(options);
+  }
+  getLaporan(params: { userId?: string } = {}) {
+    const options: HttpOptions = {
+      url: environment.url.laporanpetugas,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      params,
       responseType: 'json'
     };
     return Http.get(options);
@@ -350,6 +389,30 @@ export class HttpService {
         trxId: attachment.trxId,
         timestamp: attachment.timestamp,
         parameterId: attachment.parameterId
+      },
+      filePath: attachment.filePath,
+      responseType: 'json',
+    };
+
+    if (attachment.trxId) {
+      options.data.trxId = attachment.trxId;
+    }
+
+    return Http.uploadFile(options);
+  }
+
+  uploadRecordAttachmentApar(attachment: RecordAttachment) {
+    const options: HttpUploadFileOptions = {
+      url: environment.url.recordAttachment,
+      name: 'filePath',
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      data: {
+        scheduleTrxId: attachment.scheduleTrxId,
+        notes: attachment.notes,
+        trxId: attachment.trxId,
+        timestamp: attachment.timestamp,
       },
       filePath: attachment.filePath,
       responseType: 'json',

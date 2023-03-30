@@ -1,4 +1,4 @@
-<ion-content color="ion-bg-white" [scrollEvents]="true" (ionScroll)="onScroll($event)">
+<ion-content color="ion-bg-white">
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" mode="md">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
@@ -199,12 +199,12 @@
             <!-- <app-percentage
               [uploaded]="count.uploaded"
               [unuploaded]="count.unuploaded"
+              [holded]="count.holded"
               [unscanned]="count.unscanned"
             > -->
             <app-percentage
               [uploaded]="count.uploaded"
               [unuploaded]="count.unuploaded"
-              [holded]="count.holded"
               [unscanned]="count.unscanned"
             >
             </app-percentage>
@@ -244,7 +244,7 @@
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat [count]="count.uploaded + count.unuploaded" label="Transactions" theme="warning"
+          <app-badge-stat [count]="count.unuploaded" label="Transactions" theme="warning"
             icon="assets/icon/file-invoice-light.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true"
             (click)="openPage(['transactions'])">
             <!-- <app-badge-stat
@@ -261,7 +261,7 @@
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat label="Laporan" theme="error" icon="assets/icon/report.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openPage(['laporan-harian'])"></app-badge-stat>
+          <app-badge-stat [count]="count.laporan" label="Laporan" theme="error" icon="assets/icon/report.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openHarian()"></app-badge-stat>
         </ion-col>
       </ion-row>
 
