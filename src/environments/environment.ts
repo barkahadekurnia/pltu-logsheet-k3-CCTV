@@ -24,6 +24,9 @@ export const environment = {
     get assetsid() {
       return this.base + '/api/asset/assetPerId';
     },
+    get assetsdetail() {
+      return this.base + '/api/asset/show';
+    },
     get changerfid() {
       return this.base + '/api/rfid/change';
     },
@@ -48,7 +51,9 @@ export const environment = {
     get tagsscan() {
       return this.base + '/api/transaction/assetTagging/byManyAsset';
     },
-
+    get attach() {
+      return this.base + '/api/transaction/attachment';
+    },
     get parameters() {
       return this.base + '/api/transaction/asset/param';
     },

@@ -156,6 +156,10 @@ const routes: Routes = [
   {
     path: 'transaction-detail',
     loadChildren: () => import('./pages/transaction-detail/transaction-detail.module').then( m => m.TransactionDetailPageModule)
+  },
+  {
+    path: 'asset-detail',
+    loadChildren: () => import('./pages/asset-detail/asset-detail.module').then( m => m.AssetDetailPageModule)
   }
 ];
 

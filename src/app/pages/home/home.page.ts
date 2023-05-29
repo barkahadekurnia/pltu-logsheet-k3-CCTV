@@ -19,6 +19,9 @@ import { CustomAlertButton } from 'src/app/components/custom-alert/custom-alert.
 import { SynchronizeCardComponent } from 'src/app/components/synchronize-card/synchronize-card.component';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AssetsPage } from '../assets/assets.page';
+import { BarcodeScanner, ScanOptions, SupportedFormat } from '@capacitor-community/barcode-scanner';
+import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
+type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK';
 
 type RequestOrder = {
   [key: string]: {
@@ -35,6 +38,8 @@ type RequestOrder = {
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
+  private nfcStatus: NfcStatus;
+
   application: {
     name: string;
     logo: {
@@ -87,7 +92,9 @@ export class HomePage implements OnInit {
     public shared: SharedService,
     private utils: UtilsService,
     private menuCtrl: MenuController,
-    private injector: Injector
+    private injector: Injector,
+    private nfc1: NFC
+
   ) {
     this.application = {
       name: 'Digital Logsheet',
@@ -205,16 +212,16 @@ export class HomePage implements OnInit {
     this.syncJob.counter = 0;
     this.syncJob.isUploading = false;
     this.syncJob.order = {
-      records: {
-        label: 'Records',
-        status: 'loading',
-        message: 'Periksa data records...',
-      },
-      recordAttachments: {
-        label: 'Record Attachments',
-        status: 'loading',
-        message: 'Periksa record attachments...',
-      },
+      // records: {
+      //   label: 'Records',
+      //   status: 'loading',
+      //   message: 'Periksa data records...',
+      // },
+      // recordAttachments: {
+      //   label: 'Record Attachments',
+      //   status: 'loading',
+      //   message: 'Periksa record attachments...',
+      // },
       schedules: {
         label: 'Schedules',
         status: 'loading',
@@ -241,11 +248,11 @@ export class HomePage implements OnInit {
         options: {
           complexMessage: Object.values(this.syncJob.order),
           observable: new Observable((subscriber) => {
-            this.syncJob.order.records.request = () =>
-              this.uploadRecords(subscriber, loader);
+            // this.syncJob.order.records.request = () =>
+            //   this.uploadRecords(subscriber, loader);
 
-            this.syncJob.order.recordAttachments.request = () =>
-              this.uploadRecordAttachments(subscriber, loader);
+            // this.syncJob.order.recordAttachments.request = () =>
+            //   this.uploadRecordAttachments(subscriber, loader);
 
             this.syncJob.order.schedules.request = () =>
               this.getSchedules(subscriber, loader);
@@ -396,9 +403,6 @@ export class HomePage implements OnInit {
 
       for (const item of schedules) {
         const assetIndex = assets.findIndex(asset => asset.assetId === item.assetId);
-        console.log('9. indek dari aset', assetIndex);
-        console.log('10. item dari aset', assetIndex);
-
         if (assetIndex >= 0 && item.scannedAt != null) { // Uploaded
           assets[assetIndex].schedule.uploaded++;
           count.uploaded++;
@@ -545,6 +549,35 @@ console.log('data kirim', this.datalaporan)
         console.log('parameter res', responseParameters);
         if (responseParameters?.data?.data?.length) {
           const parameters = [];
+          // const parameters = responseParameters?.data?.data?.map?.((param: any) => {
+          //       const data = {
+          //       assetId: param.assetId,
+          //       assetNumber: param.assetNumber,
+          //       description: param.description,
+          //       inputType: param.inputType,
+          //       max: param.max,
+          //       min: param.min,
+          //       normal: param.normal,
+          //       abnormal: param.abnormal,
+          //       option: param.option,
+          //       parameterId: param.parameterId,
+          //       parameterName: param.parameterName,
+          //       schType: toLower(param.schType),
+          //       showOn: param.showOn,
+          //       sortId: param.index,
+          //       uom: param.uom,
+          //       workInstruction: param.workInstruction,
+          //       tagId: param.tagId,
+          //       unit: param.unit,
+          //       unitId: param.unitId,
+          //       area: param.area,
+          //       areaId: param.areaId,
+          //       created_at: param.created_at,
+          //       updated_at: param.updated_at,
+          //       parameterGroup: param.parameterGroup,
+          //     };
+          //     return data;
+          // });
           for (const parameter of responseParameters?.data?.data) {
             for (const param of parameter) {
 
@@ -578,6 +611,7 @@ console.log('data kirim', this.datalaporan)
             }
           }
           console.log('parameter', parameters)
+
           // const isiparameter = isiparameter.length;
           // isiparameter.
           let isiaray = [];
@@ -587,30 +621,30 @@ console.log('data kirim', this.datalaporan)
               (_, i) => a.slice(i * size, i * size + size)
             );
 
-          await this.database.emptyTable('parameter');
-          isiaray = chunks(parameters, 4);
+          // await this.database.emptyTable('parameter').then(() => this.database.insertbatch('parameter', val);
+          isiaray = chunks(parameters, 250);
           isiaray.map(async val => {
             await this.database.insert('parameter', val);
           });
 
 
-          // setTimeout(async () => {
-          //   const start = parameters.length;
+          setTimeout(async () => {
+            const start = parameters.length;
 
-          //   if (start < parameters.length) {
-          //     let end = start + 900;
+            if (start < parameters.length) {
+              let end = start + 900;
 
-          //     end = end > parameters.length
-          //       ? parameters.length
-          //       : end;
+              end = end > parameters.length
+                ? parameters.length
+                : end;
 
-          //     parameters.push(
-          //       ...parameters.slice(start, end)
-          //     );
-          //   }
-          //   await this.database.emptyTable('parameter')
-          //   .then(() => this.database.insert('parameter', parameters));
-          // }, 500);
+              parameters.push(
+                ...parameters.slice(start, end)
+              );
+            }
+            await this.database.emptyTable('parameter')
+            .then(() => this.database.insertbatch('parameter', parameters));
+          }, 500);
 console.log('cek isi parameter', parameters);
 
         }
@@ -799,12 +833,11 @@ console.log('cek isi parameter', parameters);
     try {
       const result = await this.database.select(table, {
         column: [
-          'photo',
-          'offlinePhoto'
+          'photo'
         ],
         groupBy: ['photo'],
         where: {
-          query: 'offlinePhoto IS NOT NULL',
+          query: 'photo IS NOT NULL',
           params: []
         }
       });
@@ -1103,8 +1136,6 @@ console.log('cek isi parameter', parameters);
           if (response.status >= 400) {
             throw response;
           }
-          console.log('1. getSchedules', response?.data?.data);
-
           if (response?.data?.data?.length) {
             const uploadedSchedules = [];
             const notifications = [];
@@ -1116,34 +1147,26 @@ console.log('cek isi parameter', parameters);
                 } else {
                   notifications.push(dataschedule);
                 }
-                console.log('2. notifications', notifications);
-
                 const data = {
+                  scheduleTrxId: dataschedule.scheduleTrxId,
+                  assetCategoryId: dataschedule.assetCategoryId,
+                  assetCategoryName: dataschedule.assetCategoryName,
                   abbreviation: dataschedule.abbreviation,
                   adviceDate: dataschedule.adviceDate,
                   approvedAt: dataschedule.approvedAt,
                   approvedBy: dataschedule.approvedBy,
                   approvedNotes: dataschedule.approvedNotes,
-                  area: dataschedule.area,
-                  areaId: dataschedule.areaId,
-                  assetCategoryId: dataschedule.assetCategoryId,
-                  assetCategoryName: dataschedule.assetCategoryName,
-                  assetForm: JSON.stringify(dataschedule.assetForm),
                   assetId: dataschedule.assetId,
                   assetNumber: dataschedule.assetNumber,
                   assetStatusId: dataschedule.assetStatusId,
                   assetStatusName: dataschedule.assetStatusName,
-                  capacityValue: dataschedule.capacityValue,
                   condition: dataschedule.condition,
-                  created_at: dataschedule.created_at,
-                  date: dataschedule.date,
-                  deleted_at: dataschedule.deleted_at,
-                  idschedule: dataschedule.idschedule,
-                  latitude: dataschedule.latitude,
-                  longitude: dataschedule.longitude,
                   merk: dataschedule.merk,
-                  photo: dataschedule.photo.path,
+                  capacityValue: dataschedule.capacityValue,
+                  unitCapacity: dataschedule.unitCapacity,
+                  supplyDate: dataschedule.supplyDate,
                   reportPhoto: dataschedule.reportPhoto,
+                  photo: dataschedule.photo?.path,
                   scannedAccuration: dataschedule.scannedAccuration,
                   scannedAt: dataschedule.scannedAt,
                   scannedBy: dataschedule.scannedBy,
@@ -1158,53 +1181,401 @@ console.log('cek isi parameter', parameters);
                   schWeeks: dataschedule.schWeeks,
                   scheduleFrom: dataschedule.scheduleFrom,
                   scheduleTo: dataschedule.scheduleTo,
-                  scheduleTrxId: dataschedule.scheduleTrxId,
-                  supplyDate: dataschedule.supplyDate,
                   syncAt: dataschedule.syncAt,
                   tagId: dataschedule.tagId,
                   tagNumber: dataschedule.tagNumber,
                   unit: dataschedule.unit,
-                  unitCapacity: dataschedule.unitCapacity,
-                  unitId: dataschedule.unitId
+                  unitId: dataschedule.unitId,
+                  area: dataschedule.area,
+                  areaId: dataschedule.areaId,
+                  latitude: dataschedule.latitude,
+                  longitude: dataschedule.longitude,
+                  created_at: dataschedule.created_at,
+                  deleted_at: dataschedule.deleted_at,
+                  date: dataschedule.date,
+                  assetForm: JSON.stringify(dataschedule.assetForm),
+                  idschedule: dataschedule.idschedule
                 };
 
                 return data;
               });
-            console.log('3. Schedules masuk', response?.data?.data);
 
             const assetIdSchedule = [];
             const assetIdType = [];
-            response?.data?.data
-              ?.map?.((dataschedule: any) => {
-                assetIdType.push(dataschedule.assetId)
-                assetIdSchedule.push({
-                  "assetId": dataschedule.assetId,
-                  "categoryId": dataschedule.assetCategoryId
-                });
-              });
-            // console.log('assetIdSchedule', assetIdSchedule);
-            const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
-            const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
-            this.getTypeScan(assetIdScheduleType1);
-            this.getParameterByAssetId(assetIdScheduleType)
 
+
+            const assetiduniq = uniqBy(response?.data?.data, "assetId");
+
+         assetiduniq
+           ?.map?.((dataschedule: any) => {
+             assetIdType.push(dataschedule.assetId)
+             assetIdSchedule.push({
+               "assetId": dataschedule.assetId,
+               "categoryId": dataschedule.assetCategoryId
+             }
+             )
+           });
+       const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
+       const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+       this.getTypeScan(assetIdScheduleType1);
+       this.getParameterByAssetId(assetIdScheduleType)
             //Jika ada record yang belum di upload
-            if (uploadedSchedules?.length) {
-              const marks = this.database.marks(uploadedSchedules.length).join(',');
-              const where = {
-                query: `scheduleTrxId IN (${marks})`,
-                params: uploadedSchedules
-              };
+            // if (uploadedSchedules?.length) {
+            //   const marks = this.database.marks(uploadedSchedules.length).join(',');
+            //   const where = {
+            //     query: `scheduleTrxId IN (${marks})`,
+            //     params: uploadedSchedules
+            //   };
 
-              this.database.update('record', { isUploaded: 1 }, where);
-            }
-
+            //   this.database.update('record', { isUploaded: 1 }, where);
+            // }
             await this.database.emptyTable('schedule')
-              .then(() => this.database.insert('schedule', schedules));
-            schedules.map?.(async v => {
-              // console.log('keluar assetid :', v.assetId)
-              // await this.getParameterByAssetId(v?.assetId);
-            })
+              .then(() => this.database.insertbatch('schedule', schedules)).then(() =>{
+                this.http.requests({
+                  requests: [() => this.http.getSchedulesnonsiftadmin()],
+                  onSuccess: async ([response]) => {
+                    if (response.status >= 400) {
+                      throw response;
+                    }
+
+                    console.log('getSchedulesNonSift', response);
+
+                    if (response?.data?.data?.length) {
+                      const notifications = [];
+
+                      const schedulesnonsift = response?.data?.data
+                        ?.map?.((dataschedule: any) => {
+                          if (dataschedule.syncAt != null) {
+                            this.uploadedSchedules.push(dataschedule.scheduleTrxId);
+                          } else {
+                            notifications.push(dataschedule);
+                          }
+
+                          const data = {
+                            scheduleTrxId: dataschedule.scheduleTrxId,
+                            assetCategoryId: dataschedule.assetCategoryId,
+                            assetCategoryName: dataschedule.assetCategoryName,
+                            abbreviation: dataschedule.abbreviation,
+                            adviceDate: dataschedule.adviceDate,
+                            approvedAt: dataschedule.approvedAt,
+                            approvedBy: dataschedule.approvedBy,
+                            approvedNotes: dataschedule.approvedNotes,
+                            assetId: dataschedule.assetId,
+                            assetNumber: dataschedule.assetNumber,
+                            assetStatusId: dataschedule.assetStatusId,
+                            assetStatusName: dataschedule.assetStatusName,
+                            condition: dataschedule.condition,
+                            merk: dataschedule.merk,
+                            capacityValue: dataschedule.capacityValue,
+                            unitCapacity: dataschedule.unitCapacity,
+                            supplyDate: dataschedule.supplyDate,
+                            reportPhoto: dataschedule.reportPhoto,
+                            photo: dataschedule.photo?.path,
+                            scannedAccuration: dataschedule.scannedAccuration,
+                            scannedAt: dataschedule.scannedAt,
+                            scannedBy: dataschedule.scannedBy,
+                            scannedEnd: dataschedule.scannedEnd,
+                            scannedNotes: dataschedule.scannedNotes,
+                            scannedWith: dataschedule.scannedWith,
+                            schDays: dataschedule.schDays,
+                            schFrequency: dataschedule.schFrequency,
+                            schManual: dataschedule.schManual,
+                            schType: toLower(dataschedule.schType),
+                            schWeekDays: dataschedule.schWeekDays,
+                            schWeeks: dataschedule.schWeeks,
+                            scheduleFrom: dataschedule.scheduleFrom,
+                            scheduleTo: dataschedule.scheduleTo,
+                            syncAt: dataschedule.syncAt,
+                            tagId: dataschedule.tagId,
+                            tagNumber: dataschedule.tagNumber,
+                            unit: dataschedule.unit,
+                            unitId: dataschedule.unitId,
+                            area: dataschedule.area,
+                            areaId: dataschedule.areaId,
+                            latitude: dataschedule.latitude,
+                            longitude: dataschedule.longitude,
+                            created_at: dataschedule.created_at,
+                            deleted_at: dataschedule.deleted_at,
+                            date: dataschedule.date,
+                            assetForm: JSON.stringify(dataschedule.assetForm),
+                            idschedule: dataschedule.idschedule
+                          };
+
+                        return data;
+                      });
+                    const assetIdSchedule = [];
+                    const assetIdType = [];
+
+                    const assetiduniq = uniqBy(response?.data?.data, "assetId");
+
+                      assetiduniq
+                        ?.map?.((dataschedule: any) => {
+                          assetIdType.push(dataschedule.assetId)
+                          assetIdSchedule.push({
+                            "assetId": dataschedule.assetId,
+                            "categoryId": dataschedule.assetCategoryId
+                          }
+                          )
+                        });
+                      // console.log('assetIdSchedule', assetIdSchedule);
+                      const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
+                      const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+                      this.getTypeScan(assetIdScheduleType1);
+                      this.getParameterByAssetId(assetIdScheduleType)
+                      this.database.insertbatch('schedule', schedulesnonsift);
+                      this.shared.addLogActivity({
+                        activity: 'User synchronizes data non-shift dari server',
+                        data: {
+                          message: 'Berhasil synchronize schedules Non Sift',
+                          status: 'success',
+                        },
+                      });
+
+                      await this.notification.cancel('Scan Asset Notification');
+
+                      const groupedNotifications = groupBy(notifications, 'scheduleTo');
+
+                      for (const [key, data] of Object.entries<any>(groupedNotifications)) {
+                        const assetNames = data
+                          .map((item: any) => item.asset_number)
+                          .join(',');
+                        const notificationSchema: LocalNotificationSchema = {
+                          id: 0, // ID akan otomatis ditimpa oleh service
+                          title: 'Scan Asset Notification',
+                          body: `Waktu untuk scan ${assetNames}`,
+                          schedule: {
+                            at: new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')),
+                            allowWhileIdle: true
+                          },
+                          smallIcon: 'ic_notification_schedule',
+                          largeIcon: 'ic_notification_schedule'
+                        };
+
+                        notificationSchema.schedule.at.setHours(
+                          notificationSchema.schedule.at.getHours() - 1
+                        );
+
+                        await this.notification.schedule(key, notificationSchema);
+                      }
+
+                      const notificationSchema: LocalNotificationSchema = {
+                        id: 0, // ID akan otomatis ditimpa oleh service
+                        title: 'Scan Asset Notification',
+                        body: 'Waktu untuk scan',
+                        schedule: {
+                          at: new Date(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')),
+                          allowWhileIdle: true
+                        },
+                        smallIcon: 'ic_notification_schedule',
+                        largeIcon: 'ic_notification_schedule'
+                      };
+
+                      await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
+
+                      this.syncJob.order.schedules.status = 'success';
+                      this.syncJob.order.schedules.message = 'Success mengambil data schedules';
+                    } else {
+                      this.shared.addLogActivity({
+                        activity: 'User synchronizes schedules non-shift dari server',
+                        data: {
+                          message: 'Data schedules kosong',
+                          status: 'failed'
+                        },
+                      });
+
+                      this.syncJob.order.schedules.status = 'failed';
+                      this.syncJob.order.schedules.message = 'Data schedules kosong';
+                    }
+                  },
+                  onError: (error) => {
+                    this.shared.addLogActivity({
+                      activity: 'User synchronizes schedules dari server',
+                      data: {
+                        message: this.http.getErrorMessage(error),
+                        status: 'failed'
+                      },
+                    });
+
+                    this.syncJob.order.schedules.status = 'failed';
+                    this.syncJob.order.schedules.message = 'Gagal mendapatkan data schedules';
+                  },
+                });
+              }).then(() => {
+                this.http.requests({
+                  requests: [() => this.http.getSchedulesManualadmin()],
+                  onSuccess: async ([response]) => {
+                    console.log(response.data.data)
+                    if (response.status >= 400) {
+                      throw response;
+                    }
+
+                    console.log('getSchedulesManual', response);
+
+
+                    if (response?.data?.data?.length) {
+                      const notifications = [];
+
+                      const schedulesmanual = response?.data?.data
+                        ?.map?.((dataschedule: any) => {
+                          if (dataschedule.syncAt != null) {
+                            this.uploadedSchedules.push(dataschedule.scheduleTrxId);
+                          } else {
+                            notifications.push(dataschedule);
+                          }
+
+                          const data = {
+                            scheduleTrxId: dataschedule.scheduleTrxId,
+                            assetCategoryId: dataschedule.assetCategoryId,
+                            assetCategoryName: dataschedule.assetCategoryName,
+                            abbreviation: dataschedule.abbreviation,
+                            adviceDate: dataschedule.adviceDate,
+                            approvedAt: dataschedule.approvedAt,
+                            approvedBy: dataschedule.approvedBy,
+                            approvedNotes: dataschedule.approvedNotes,
+                            assetId: dataschedule.assetId,
+                            assetNumber: dataschedule.assetNumber,
+                            assetStatusId: dataschedule.assetStatusId,
+                            assetStatusName: dataschedule.assetStatusName,
+                            condition: dataschedule.condition,
+                            merk: dataschedule.merk,
+                            capacityValue: dataschedule.capacityValue,
+                            unitCapacity: dataschedule.unitCapacity,
+                            supplyDate: dataschedule.supplyDate,
+                            reportPhoto: dataschedule.reportPhoto,
+                            photo: dataschedule.photo?.path,
+                            scannedAccuration: dataschedule.scannedAccuration,
+                            scannedAt: dataschedule.scannedAt,
+                            scannedBy: dataschedule.scannedBy,
+                            scannedEnd: dataschedule.scannedEnd,
+                            scannedNotes: dataschedule.scannedNotes,
+                            scannedWith: dataschedule.scannedWith,
+                            schDays: dataschedule.schDays,
+                            schFrequency: dataschedule.schFrequency,
+                            schManual: dataschedule.schManual,
+                            schType: toLower(dataschedule.schType),
+                            schWeekDays: dataschedule.schWeekDays,
+                            schWeeks: dataschedule.schWeeks,
+                            scheduleFrom: dataschedule.scheduleFrom,
+                            scheduleTo: dataschedule.scheduleTo,
+                            syncAt: dataschedule.syncAt,
+                            tagId: dataschedule.tagId,
+                            tagNumber: dataschedule.tagNumber,
+                            unit: dataschedule.unit,
+                            unitId: dataschedule.unitId,
+                            area: dataschedule.area,
+                            areaId: dataschedule.areaId,
+                            latitude: dataschedule.latitude,
+                            longitude: dataschedule.longitude,
+                            created_at: dataschedule.created_at,
+                            deleted_at: dataschedule.deleted_at,
+                            date: dataschedule.date,
+                            assetForm: JSON.stringify(dataschedule.assetForm),
+                            idschedule: dataschedule.idschedule
+                          };
+
+                          return data;
+                        });
+                      const assetIdSchedule = [];
+                      const assetIdType = [];
+                      response?.data?.data
+                        ?.map?.((dataschedule: any) => {
+
+                          assetIdType.push(dataschedule.assetId)
+                          assetIdSchedule.push({
+                            "assetId": dataschedule.assetId,
+                            "categoryId": dataschedule.assetCategoryId
+                          }
+
+                          )
+
+
+                        });
+                      const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
+                      const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+                      this.getTypeScan(assetIdScheduleType1);
+                      this.getParameterByAssetId(assetIdScheduleType)
+                      this.database.insertbatch('schedule', schedulesmanual);
+
+                      this.shared.addLogActivity({
+                        activity: 'User synchronizes data manual dari server',
+                        data: {
+                          message: 'Berhasil synchronize schedules',
+                          status: 'success',
+                        },
+                      });
+
+                      await this.notification.cancel('Scan Asset Notification');
+
+                      const groupedNotifications = groupBy(notifications, 'scheduleTo');
+
+                      for (const [key, data] of Object.entries<any>(groupedNotifications)) {
+                        const assetNames = data
+                          .map((item: any) => item.asset_number)
+                          .join(',');
+                        const notificationSchema: LocalNotificationSchema = {
+                          id: 0, // ID akan otomatis ditimpa oleh service
+                          title: 'Scan Asset Notification',
+                          body: `Waktu untuk scan ${assetNames}`,
+                          schedule: {
+                            at: new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')),
+                            allowWhileIdle: true
+                          },
+                          smallIcon: 'ic_notification_schedule',
+                          largeIcon: 'ic_notification_schedule'
+                        };
+
+                        notificationSchema.schedule.at.setHours(
+                          notificationSchema.schedule.at.getHours() - 1
+                        );
+
+                        await this.notification.schedule(key, notificationSchema);
+                      }
+
+                      const notificationSchema: LocalNotificationSchema = {
+                        id: 0, // ID akan otomatis ditimpa oleh service
+                        title: 'Scan Asset Notification',
+                        body: 'Waktu untuk scan',
+                        schedule: {
+                          at: new Date(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')),
+                          allowWhileIdle: true
+                        },
+                        smallIcon: 'ic_notification_schedule',
+                        largeIcon: 'ic_notification_schedule'
+                      };
+
+                      await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
+
+                      this.syncJob.order.schedules.status = 'success';
+                      this.syncJob.order.schedules.message = 'Success mengambil data schedules';
+                    } else {
+                      this.shared.addLogActivity({
+                        activity: 'User synchronizes schedules dari server',
+                        data: {
+                          message: 'Data schedules kosong',
+                          status: 'failed'
+                        },
+                      });
+
+                      this.syncJob.order.schedules.status = 'failed';
+                      this.syncJob.order.schedules.message = 'Data schedules kosong';
+                    }
+                  },
+                  onError: (error) => {
+                    this.shared.addLogActivity({
+                      activity: 'User synchronizes schedules dari server',
+                      data: {
+                        message: this.http.getErrorMessage(error),
+                        status: 'failed'
+                      },
+                    });
+
+                    this.syncJob.order.schedules.status = 'failed';
+                    this.syncJob.order.schedules.message = 'Gagal mendapatkan data schedules';
+                  },
+                });
+
+              });
+
             this.shared.addLogActivity({
               activity: 'User synchronizes schedules dari server',
               data: {
@@ -1414,7 +1785,7 @@ console.log('cek isi parameter', parameters);
 
        // console.log('assetIdSchedule', assetIdSchedule);
        // console.log('schedules cek', schedules);
-       this.database.insert('schedule', schedules);
+       this.database.insertbatch('schedule', schedules);
 
             this.shared.addLogActivity({
               activity: 'User Sinkronisasi Data dari Server',
@@ -1542,6 +1913,7 @@ console.log('cek isi parameter', parameters);
                   unitCapacity: dataschedule.unitCapacity,
                   supplyDate: dataschedule.supplyDate,
                   reportPhoto: dataschedule.reportPhoto,
+                  photo: dataschedule.photo?.path,
                   scannedAccuration: dataschedule.scannedAccuration,
                   scannedAt: dataschedule.scannedAt,
                   scannedBy: dataschedule.scannedBy,
@@ -1567,7 +1939,9 @@ console.log('cek isi parameter', parameters);
                   longitude: dataschedule.longitude,
                   created_at: dataschedule.created_at,
                   deleted_at: dataschedule.deleted_at,
-                  date: dataschedule.date
+                  date: dataschedule.date,
+                  assetForm: JSON.stringify(dataschedule.assetForm),
+                  idschedule: dataschedule.idschedule
                 };
 
               return data;
@@ -1604,7 +1978,7 @@ console.log('cek isi parameter', parameters);
 
             // console.log('assetIdSchedule', assetIdSchedule);
             // console.log('schedules cek', schedules);
-            this.database.insert('schedule', schedules);
+            this.database.insertbatch('schedule', schedules);
 
             this.shared.addLogActivity({
               activity: 'User synchronizes data dari server',
@@ -1737,6 +2111,7 @@ console.log('cek isi parameter', parameters);
                   unitCapacity: dataschedule.unitCapacity,
                   supplyDate: dataschedule.supplyDate,
                   reportPhoto: dataschedule.reportPhoto,
+                  photo: dataschedule.photo?.path,
                   scannedAccuration: dataschedule.scannedAccuration,
                   scannedAt: dataschedule.scannedAt,
                   scannedBy: dataschedule.scannedBy,
@@ -1762,7 +2137,9 @@ console.log('cek isi parameter', parameters);
                   longitude: dataschedule.longitude,
                   created_at: dataschedule.created_at,
                   deleted_at: dataschedule.deleted_at,
-                  date: dataschedule.date
+                  date: dataschedule.date,
+                  assetForm: JSON.stringify(dataschedule.assetForm),
+                  idschedule: dataschedule.idschedule
                 };
 
                 return data;
@@ -1792,7 +2169,7 @@ console.log('cek isi parameter', parameters);
 
             // console.log('assetIdSchedule', assetIdSchedule);
             // console.log('schedules cek', schedules);
-            this.database.insert('schedule', schedules);
+            this.database.insertbatch('schedule', schedules);
 
             this.shared.addLogActivity({
               activity: 'User synchronizes data dari server',
@@ -2000,7 +2377,7 @@ console.log('cek isi parameter', parameters);
             kategori.push(data);
           }
           await this.database.emptyTable('category')
-            .then(() => this.database.insert('category', kategori));
+            .then(() => this.database.insertbatch('category', kategori));
 
         },
         onError: error => console.error(error)
@@ -2240,5 +2617,134 @@ console.log('cek isi parameter', parameters);
 
     return weeks;
   }
+
+  async cekScan() {
+    const permission = await BarcodeScanner.checkPermission({ force: true });
+    if (permission.granted) {
+      BarcodeScanner.hideBackground();
+      document.body.classList.add('qrscanner');
+
+      const options: ScanOptions = {
+        targetedFormats: [SupportedFormat.QR_CODE]
+      };
+
+      BarcodeScanner.startScan(options).then(async (result) => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
+
+        if (result.hasContent) {
+          const key = 'assetId=';
+          const startIndex = result.content.indexOf(key) + key.length;
+
+          const assetId = result.content;
+          const data = JSON.stringify({
+            type: 'qr',
+            data: assetId
+          });
+          this.router.navigate(['asset-detail', { data }]);
+
+        }
+      });
+
+      this.utils.overrideBackButton(() => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
+        BarcodeScanner.showBackground();
+        BarcodeScanner.stopScan();
+      });
+    }
+}
+async openScan() {
+
+  const stat = await this.checkStatus();
+  console.log('cek status nfc', stat)
+  if (stat == 'NO_NFC') {
+
+    const confirm = await this.utils.createCustomAlert({
+      type: 'error',
+      header: stat,
+      message: 'NFC tidak tersedia',
+      buttons: [
+        {
+          text: 'Tutup',
+          handler: () => confirm.dismiss()
+        }
+      ]
+    });
+
+    confirm.present();
+
+  } else {
+    const permission = await BarcodeScanner.checkPermission({ force: true });
+    if (permission.granted) {
+      BarcodeScanner.hideBackground();
+      document.body.classList.add('qrscanner');
+
+      const options: ScanOptions = {
+        targetedFormats: [SupportedFormat.QR_CODE]
+      };
+
+      BarcodeScanner.startScan(options).then(async (result) => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
+
+        if (result.hasContent) {
+          // const alert = await this.alertCtrl.create({
+          //   header: 'Result',
+          //   message: result.content,
+          //   mode: 'ios',
+          //   cssClass: 'dark:ion-bg-gray-800',
+          //   buttons: [
+          //     {
+          //       text: 'Cancel',
+          //       role: 'cancel'
+          //     },
+          //     {
+          //       text: 'Copy',
+          //       handler: () => {
+          //         Clipboard.write({
+          //           // eslint-disable-next-line id-blacklist
+          //           string: result.content
+          //         });
+          //       }
+          //     }
+          //   ]
+          // });
+
+          // alert.present();
+          const key = 'assetId=';
+          const startIndex = result.content.indexOf(key) + key.length;
+
+          const assetId = result.content;
+          const data = JSON.stringify({
+            type: 'qr',
+            data: assetId
+          });
+          this.router.navigate(['change-rfid', { data }]);
+
+        }
+      });
+
+      this.utils.overrideBackButton(() => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
+        BarcodeScanner.showBackground();
+        BarcodeScanner.stopScan();
+      });
+    }
+
+  }
+}
+async checkStatus() {
+  if (this.platform.is('capacitor')) {
+    try {
+      this.nfcStatus = await this.nfc1.enabled();
+    } catch (error) {
+      this.nfcStatus = error;
+    }
+  }
+
+  return this.nfcStatus;
+}
 
 }

@@ -53,6 +53,14 @@ export type RecordAttachment = {
   parameterId: string;
   timestamp: string;
 };
+export type RecordAttachmentApar = {
+  scheduleTrxId: string;
+  trxId?: string;
+  filePath: string;
+  type: string;
+  notes: string;
+  timestamp: string;
+};
 
 export type ActivityData = {
   activity: string;
@@ -127,6 +135,17 @@ export class HttpService {
   getAssetsId(params: string) {
     const options: HttpOptions = {
       url: environment.url.assetsid + "/" + params,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
+  getAssetsDetail(params: string) {
+    const options: HttpOptions = {
+      url: environment.url.assetsdetail + "/" + params,
       headers: {
         Authorization: `Bearer ${this.token}`
       },
@@ -306,6 +325,17 @@ export class HttpService {
 
     return Http.get(options);
   }
+  getSchedulesnonsiftadmin() {
+    const options: HttpOptions = {
+      url: environment.url.schedulesnonsift,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
   getSchedulesManual(params: { userId?: string } = {}) {
     const options: HttpOptions = {
       url: environment.url.schedulesnonmanual,
@@ -313,6 +343,17 @@ export class HttpService {
         Authorization: `Bearer ${this.token}`
       },
       params,
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
+  getSchedulesManualadmin() {
+    const options: HttpOptions = {
+      url: environment.url.schedulesnonmanual,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
       responseType: 'json'
     };
 
@@ -401,9 +442,9 @@ export class HttpService {
     return Http.uploadFile(options);
   }
 
-  uploadRecordAttachmentApar(attachment: RecordAttachment) {
+  uploadRecordAttachmentApar(attachment: RecordAttachmentApar) {
     const options: HttpUploadFileOptions = {
-      url: environment.url.recordAttachment,
+      url: environment.url.attach,
       name: 'filePath',
       headers: {
         Authorization: `Bearer ${this.token}`
@@ -412,7 +453,7 @@ export class HttpService {
         scheduleTrxId: attachment.scheduleTrxId,
         notes: attachment.notes,
         trxId: attachment.trxId,
-        timestamp: attachment.timestamp,
+        timestamp: attachment.timestamp
       },
       filePath: attachment.filePath,
       responseType: 'json',

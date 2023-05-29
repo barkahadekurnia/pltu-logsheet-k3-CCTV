@@ -108,15 +108,15 @@ export class LaporanHarianDetailPage implements OnInit {
           message: response.data.messages.error,
           buttons: [{
             text: 'Close',
-            handler: () => this.utils.back(3)
+            handler: () => this.utils.back()
           }]
         })
       alert.present();
-
+      this.utils.back()
         // throw response.data;
 
       }
-
+      this.utils.back()
 
     } catch (error) {
       const alert = await this.utils.createCustomAlert({

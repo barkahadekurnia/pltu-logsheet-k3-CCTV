@@ -48,7 +48,9 @@ export const environment = {
     get tagsscan() {
       return this.base + '/api/transaction/assetTagging/byManyAsset';
     },
-
+    get attach() {
+      return this.base + '/api/transaction/attachment';
+    },
     get parameters() {
       return this.base + '/api/transaction/asset/param';
     },

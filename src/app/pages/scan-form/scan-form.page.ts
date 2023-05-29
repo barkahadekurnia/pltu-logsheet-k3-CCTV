@@ -997,7 +997,21 @@ async preview() {
 
       this.record.scannedBy = this.shared.user.name;
       this.record.scannedWith = this.transitionData?.type;
-      const value = this.transitionData.data;
+      let value='';
+      if(this.record.scannedWith == 'qr'){
+         value = this.transitionData.data;
+      }else{
+        const tagg = await this.database.select('assetTag', {
+          where: {
+            query: `assetTaggingType=? AND assetTaggingValue=?`,
+            params: [this.transitionData?.type, this.transitionData.data]
+          }
+        });
+        const [astag] = this.database.parseResult(tagg);
+        console.log('astag', astag);
+        value = astag.assetId;
+
+      }
 
 
       const resultAsset = await this.database.select('schedule', {

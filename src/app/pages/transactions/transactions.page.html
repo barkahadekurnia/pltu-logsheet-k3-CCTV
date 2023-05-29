@@ -44,9 +44,6 @@
 
   <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
 
-  <app-screen-view *ngIf="!loading && !schedules?.length" type="no-data" message="Data Kosong"
-    description="Synchronize with server to get data"></app-screen-view>
-
   <div *ngIf="!loading " class="w-full h-full bg-white dark:bg-gray-900">
     <ion-grid class="w-full p-2">
       <ion-row class="justify-center">
@@ -58,11 +55,9 @@
             </ion-col>
           </ion-row>
 
-          <ion-row *ngIf="!schedules.length">
-            <ion-col size="12">
-              <app-screen-view type="no-data" message="Data Kosong"></app-screen-view>
-            </ion-col>
-          </ion-row>
+
+          <app-screen-view *ngIf="!loading && !schedules?.length" type="no-data" message="Data Kosong"
+          description="Synchronize with server to get data"></app-screen-view>
 
           <ion-accordion-group expand="inset" *ngIf="schedules.length">
             <ion-accordion [value]="item?.assetId" toggleIcon="chevron-down-circle" *ngFor="let item of schedules">
@@ -112,7 +107,7 @@
     </ion-grid>
   </div>
   <!-- *ngIf="laporan?.reportDate === null" -->
-  <ion-fab  slot="fixed" vertical="bottom" horizontal="end" (click)="uploadData()">
+  <ion-fab  *ngIf="schedules?.length && segment === 'unuploaded'" slot="fixed" vertical="bottom" horizontal="end" (click)="uploadData()">
     <ion-fab-button>
       <ion-icon name="cloud-upload"></ion-icon>
     </ion-fab-button>

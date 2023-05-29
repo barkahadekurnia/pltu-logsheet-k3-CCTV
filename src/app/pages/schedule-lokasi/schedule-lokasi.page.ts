@@ -50,7 +50,47 @@ export class ScheduleLokasiPage implements OnInit {
   };
   searchTerm: string;
 
-  params: any;
+  params: {
+    abbreviation: string;
+    adviceDate: string;
+    approvedAt: string;
+    approvedBy: string;
+    approvedNotes: string;
+    area: string;
+    areaId: string;
+    assetCategoryId: string;
+    assetCategoryName: string;
+    assetId: string;
+    assetName: string;
+    assetNumber: string;
+    assetStatusId: string;
+    assetStatusName: string;
+    assetTags: string;
+    condition: string;
+    hasCoordinatTagging: string;
+    hasPreview: string;
+    hasRecordHold: string;
+    isUnscanned: string;
+    isUnuploaded: string;
+    isUploaded: string;
+    latitude: string;
+    longitude: string;
+    scannedAt: string;
+    scannedBy: string;
+    scannedEnd: string;
+    scannedNotes: string;
+    scannedWith: string;
+    scheduleFrom: string;
+    scheduleTo: string;
+    scheduleTrxId: string;
+    supplyDate: string;
+    syncAt: string;
+    tagId: string;
+    tagNumber: string;
+    unit: string;
+  };
+
+
   listDataScan: {
     countScanned: number,
     scanned: any[],
@@ -116,6 +156,7 @@ export class ScheduleLokasiPage implements OnInit {
       this.sourceAssets = navValues.listDataScan.schedules;
       this.datakategori = navValues.kategori;
       this.lokasiaset = navValues.listDataScan.lokasi[0];
+      this.params = navValues.params;
       this.countsc = navValues.countsc;
       // console.log('navValues 1 ',this.sourceAssets )
       // console.log('navValues 2 ',this.datakategori )
@@ -158,10 +199,7 @@ export class ScheduleLokasiPage implements OnInit {
     }
     this.onSearch();
   }
-  doRefresh(e: any) {
 
-
-  }
   onSearch(event?: any) {
     if (event) {
       this.filteredData = this.sourceData
@@ -203,7 +241,7 @@ export class ScheduleLokasiPage implements OnInit {
   }
 
 
-  navPage(path, params, listDataScan) {
-    this.navCtrl.navigateForward(path, { state: { params, listDataScan } });
+  navPage(path, paramsm, listDataScan) {
+    this.navCtrl.navigateForward(path, { state: { paramsm, listDataScan } });
   }
 }

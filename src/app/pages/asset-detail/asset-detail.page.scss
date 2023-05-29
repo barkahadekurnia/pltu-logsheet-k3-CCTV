@@ -1,0 +1,18 @@
+$color_1: #FFF;
+$color_2: #EEE;
+$font-family_1: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+$background-color_1: #444343;
+$border-top-color_1: #777;
+$border-left-color_1: #777;
+
+.card {
+  background-color: $background-color_1;
+  border: 4px solid #666666;
+  border-left-color: $border-left-color_1;
+  border-top-color: $border-top-color_1;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+  font-family: $font-family_1;
+  margin: auto;
+  padding: 10px;
+  width: 380px;
+}
