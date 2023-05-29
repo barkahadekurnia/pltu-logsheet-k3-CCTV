@@ -24,6 +24,9 @@ export const environment = {
     get assetsid() {
       return this.base + '/api/asset/assetPerId';
     },
+    get assetsdetail() {
+      return this.base + '/api/asset/show';
+    },
     get changerfid() {
       return this.base + '/api/rfid/change';
     },
