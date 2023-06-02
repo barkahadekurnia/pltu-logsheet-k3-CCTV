@@ -41,7 +41,7 @@
     </ion-row>
 
     <ion-accordion-group expand="inset" *ngIf="filteredData?.length">
-      <ion-accordion [value]="item?.assetId" toggleIcon="chevron-down-circle" *ngFor="let item of filteredData">
+      <ion-accordion [value]="item?.assetName" toggleIcon="chevron-down-circle" *ngFor="let item of filteredData">
         <ion-item slot="header" class="accordion">
           <p class="text-base font-semibold">{{ item?.assetName }}</p>
         </ion-item>
@@ -71,6 +71,11 @@
                   <ion-item class="text-xs dark:ion-border-gray-600">
                     <ion-label>Area</ion-label>
                     <ion-input class="text-right" readonly [value]="item?.area"></ion-input>
+                  </ion-item>
+                  <ion-item class="text-xs dark:ion-border-gray-600">
+                    <ion-label>Detail Lokasi</ion-label>
+                    <ion-textarea class="text-right font-semibold" readonly rows="3" [value]="item?.detailLocation"></ion-textarea>
+                    <!-- <ion-input class="text-right" readonly [value]="item?.detailLocation"></ion-input> -->
                   </ion-item>
                 </ion-list>
               </div>

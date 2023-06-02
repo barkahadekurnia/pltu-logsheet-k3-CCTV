@@ -87,6 +87,9 @@ export class AssetsPage implements OnInit {
 
   async showDetails(asset?: any) {
     this.shared.asset = asset;
+    console.log('showDetails', asset);
+    
+
     await this.menuCtrl.enable(true, 'asset-information');
     return this.menuCtrl.open('asset-information');
   }
@@ -106,7 +109,7 @@ export class AssetsPage implements OnInit {
         });
       this.filteredAssets = this.filteredAssets.slice(0, 5);
     }
-console.log('filteraser', this.filteredAssets)
+    console.log('filteraser', this.filteredAssets)
 
   }
 
@@ -149,8 +152,10 @@ console.log('filteraser', this.filteredAssets)
           'assetStatusId',
           'assetStatusName',
           'condition',
+          'detailLocation',
           'merk',
           'capacityValue',
+          'detailLocation',
           'unitCapacity',
           'supplyDate',
           'reportPhoto',
@@ -183,110 +188,114 @@ console.log('filteraser', this.filteredAssets)
         ]
       });
 
+      const resAsset = this.database.parseResult(result);
+      console.log('resAsset', resAsset);
 
-      const assets = this.database.parseResult(result)    .map(asset => {
-          const tagIds: string[] = asset?.tagId?.length
-            ? asset?.tagId?.split?.(',')
-            : [];
 
-          const tagNumbers = asset?.tagNumber?.length
-            ? asset?.tagNumber?.split?.(',')
-            : [];
+      const assets = this.database.parseResult(result).map(asset => {
+        const tagIds: string[] = asset?.tagId?.length
+          ? asset?.tagId?.split?.(',')
+          : [];
 
-          const areaIds = asset?.areaId?.length
-            ? asset?.areaId?.split?.(',')
-            : [];
+        const tagNumbers = asset?.tagNumber?.length
+          ? asset?.tagNumber?.split?.(',')
+          : [];
 
-          const areaNames = asset?.area?.length
-            ? asset?.area?.split?.(',')
-            : [];
+        const areaIds = asset?.areaId?.length
+          ? asset?.areaId?.split?.(',')
+          : [];
 
-          const unitIds = asset?.unitId?.length
-            ? asset?.unitId?.split?.(',')
-            : [];
+        const areaNames = asset?.area?.length
+          ? asset?.area?.split?.(',')
+          : [];
 
-          const unitNames = asset?.unit?.length
-            ? asset?.unit?.split?.(',')
-            : [];
+        const unitIds = asset?.unitId?.length
+          ? asset?.unitId?.split?.(',')
+          : [];
 
-          // const tagLocationIds = asset?.tagLocationId?.length
-          //   ? asset?.tagLocationId?.split?.(',')
-          //   : [];
+        const unitNames = asset?.unit?.length
+          ? asset?.unit?.split?.(',')
+          : [];
 
-          // const tagLocationNames = asset?.tagLocationName?.length
-          //   ? asset?.tagLocationName?.split?.(',')
-          //   : [];
+        // const tagLocationIds = asset?.tagLocationId?.length
+        //   ? asset?.tagLocationId?.split?.(',')
+        //   : [];
 
-          const data = {
-            scheduleTrxId: asset?.scheduleTrxId,
-            abbreviation: asset?.abbreviation,
-            adviceDate: asset?.adviceDate,
-            approvedAt: asset?.approvedAt,
-            approvedBy: asset?.approvedBy,
-            approvedNotes: asset?.approvedNotes,
-            assetId: asset?.assetId,
-            assetNumber: asset?.assetNumber,
-            assetStatusId: asset?.assetStatusId,
-            assetStatusName: asset?.assetStatusName,
-            condition: asset?.condition,
-            merk: asset?.merk,
-            capacityValue: asset?.capacityValue,
-            unitCapacity: asset?.unitCapacity,
-            supplyDate: asset?.supplyDate,
-            reportPhoto: asset?.reportPhoto,
-            scannedAccuration: asset?.scannedAccuration,
-            scannedAt: asset?.scannedAt,
-            scannedBy: asset?.scannedBy,
-            scannedEnd: asset?.scannedEnd,
-            scannedNotes: asset?.scannedNotes,
-            scannedWith: asset?.scannedWith,
-            schDays: asset?.schDays,
-            schFrequency: asset?.schFrequency,
-            schManual: asset?.schManual,
-            schType: asset?.schType,
-            schWeekDays: asset?.schWeekDays,
-            schWeeks: asset?.schWeeks,
-            scheduleFrom: asset?.scheduleFrom,
-            scheduleTo: asset?.scheduleTo,
-            syncAt: asset?.syncAt,
-            tagId: asset?.tagId,
-            tagNumber: asset?.tagNumber,
-            unit: asset?.unit,
-            unitId: asset?.unitId,
-            area: asset?.area,
-            areaId: asset?.areaId,
-            latitude: asset?.latitude,
-            longitude: asset?.longitude,
-            created_at: asset?.created_at,
-            deleted_at: asset?.deleted_at,
-            date: asset?.date,
-            //   id: asset?.id,
-            //   asset_number: asset?.asset_number,
-            //   assetName: asset?.assetName,
-            //   assetStatusId: asset?.assetStatusId,
-            //   // description: this.utils.parseJson(asset?.description),
-            //   description: asset?.description,
-            //   // latitude: this.utils.parseFloat(asset?.latitude),
-            //   // longitude: this.utils.parseFloat(asset?.longitude),
-            //   schManual: this.utils.parseFloat(asset?.sch_manual),
-            //   schType: asset?.sch_type,
-            //   schFrequency: asset?.sch_frequency,
-            //   schWeekDays: asset?.schWeekDays,
-            //   schDays: asset?.schDays,
-            //   photo: asset?.photo,
-            //   more: this.utils.parseJson(asset?.more),
-            //   offlinePhoto: null,
-            tags: zip(tagIds, tagNumbers).map(([id, name]) => ({ id, name })),
-            tagLocations: zip(unitIds, unitNames)
-              .map(([id, name]) => ({ id, name }))
-            // };
-            // console.log(asset)
-            // if(asset?.offlinePhoto) {
-            //     data.offlinePhoto = Capacitor.convertFileSrc(asset?.offlinePhoto);
-            //   }
-          };
-          return data;
-        });
+        // const tagLocationNames = asset?.tagLocationName?.length
+        //   ? asset?.tagLocationName?.split?.(',')
+        //   : [];
+
+        const data = {
+          scheduleTrxId: asset?.scheduleTrxId,
+          abbreviation: asset?.abbreviation,
+          adviceDate: asset?.adviceDate,
+          approvedAt: asset?.approvedAt,
+          approvedBy: asset?.approvedBy,
+          approvedNotes: asset?.approvedNotes,
+          assetId: asset?.assetId,
+          assetNumber: asset?.assetNumber,
+          assetStatusId: asset?.assetStatusId,
+          assetStatusName: asset?.assetStatusName,
+          condition: asset?.condition,
+          merk: asset?.merk,
+          capacityValue: asset?.capacityValue,
+          detailLocation: asset?.detailLocation,
+          unitCapacity: asset?.unitCapacity,
+          supplyDate: asset?.supplyDate,
+          reportPhoto: asset?.reportPhoto,
+          scannedAccuration: asset?.scannedAccuration,
+          scannedAt: asset?.scannedAt,
+          scannedBy: asset?.scannedBy,
+          scannedEnd: asset?.scannedEnd,
+          scannedNotes: asset?.scannedNotes,
+          scannedWith: asset?.scannedWith,
+          schDays: asset?.schDays,
+          schFrequency: asset?.schFrequency,
+          schManual: asset?.schManual,
+          schType: asset?.schType,
+          schWeekDays: asset?.schWeekDays,
+          schWeeks: asset?.schWeeks,
+          scheduleFrom: asset?.scheduleFrom,
+          scheduleTo: asset?.scheduleTo,
+          syncAt: asset?.syncAt,
+          tagId: asset?.tagId,
+          tagNumber: asset?.tagNumber,
+          unit: asset?.unit,
+          unitId: asset?.unitId,
+          area: asset?.area,
+          areaId: asset?.areaId,
+          latitude: asset?.latitude,
+          longitude: asset?.longitude,
+          created_at: asset?.created_at,
+          deleted_at: asset?.deleted_at,
+          date: asset?.date,
+          //   id: asset?.id,
+          //   asset_number: asset?.asset_number,
+          //   assetName: asset?.assetName,
+          //   assetStatusId: asset?.assetStatusId,
+          //   // description: this.utils.parseJson(asset?.description),
+          //   description: asset?.description,
+          //   // latitude: this.utils.parseFloat(asset?.latitude),
+          //   // longitude: this.utils.parseFloat(asset?.longitude),
+          //   schManual: this.utils.parseFloat(asset?.sch_manual),
+          //   schType: asset?.sch_type,
+          //   schFrequency: asset?.sch_frequency,
+          //   schWeekDays: asset?.schWeekDays,
+          //   schDays: asset?.schDays,
+          //   photo: asset?.photo,
+          //   more: this.utils.parseJson(asset?.more),
+          //   offlinePhoto: null,
+          tags: zip(tagIds, tagNumbers).map(([id, name]) => ({ id, name })),
+          tagLocations: zip(unitIds, unitNames)
+            .map(([id, name]) => ({ id, name }))
+          // };
+          // console.log(asset)
+          // if(asset?.offlinePhoto) {
+          //     data.offlinePhoto = Capacitor.convertFileSrc(asset?.offlinePhoto);
+          //   }
+        };
+        return data;
+      });
       console.log('assets', assets);
       this.sourceAssets = assets;
       this.filteredAssets = this.sourceAssets.slice(0, this.loaded)

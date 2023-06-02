@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+/* eslint-disable @typescript-eslint/member-delimiter-style */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/member-ordering */
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http/http.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Platform, AlertController, MenuController } from '@ionic/angular';
@@ -18,7 +21,7 @@ type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK'
   templateUrl: './asset-detail.page.html',
   styleUrls: ['./asset-detail.page.scss'],
 })
-export class AssetDetailPage implements OnInit {
+export class AssetDetailPage implements OnInit, AfterViewInit {
   checkOnly: boolean;
   subscription: Subscription;
 
@@ -50,17 +53,17 @@ export class AssetDetailPage implements OnInit {
     id: string,
     more: {
       category: {
-        code:string,
-        id:string,
-        name:string
+        code: string,
+        id: string,
+        name: string,
       },
-      status:{
+      status: {
         abbreviation: string,
         id: string,
         name: string,
       },
-      tag:[{
-        area:string,
+      tag: [{
+        area: string,
         areaId: string,
         detail_location: string,
         id: string,
@@ -70,12 +73,12 @@ export class AssetDetailPage implements OnInit {
         unitId: string,
       }],
       tagging: any[],
-      type:{
-        id:string,
-        name:string
+      type: {
+        id: string,
+        name: string
       }
     },
-    parameter:{
+    parameter: {
       day: any[],
       lustrum: any[],
       monthly: any[],
@@ -253,20 +256,22 @@ export class AssetDetailPage implements OnInit {
       }
     });
   }
-  async showdata(){
+  async showdata() {
     await this.http.requests({
       requests: [() => this.http.getAssetsDetail(this.transitionData.data)],
       onSuccess: async ([responseAsset]) => {
+        console.log('responseAsset', responseAsset);
+
         if (responseAsset.status >= 400) {
           throw responseAsset;
         }
         console.log('responseAsset', responseAsset?.data?.data);
-this.resultParam = responseAsset?.data?.data;
+        this.resultParam = responseAsset?.data?.data;
 
       },
       onError: error => console.error(error)
     });
-console.log('this.resultParam', this.resultParam);
+    console.log('this.resultParam', this.resultParam);
 
   }
   showImageViewer({ target }: Event) {
@@ -278,6 +283,82 @@ console.log('this.resultParam', this.resultParam);
 
     const viewer = new Viewer(target as HTMLElement, options);
     viewer.show();
+  }
+
+  async editDetailLocation() {
+    const alert = await this.alertCtrl.create({
+      header: 'Form Edit',
+      message: 'Edit detail lokasi',
+      backdropDismiss: false,
+      mode: 'ios',
+      inputs: [
+        {
+          type: 'textarea',
+          label: 'Detail lokasi',
+          value: this.resultParam?.more?.tag[0]?.detail_location,
+          placeholder: 'Isikan detail lokasi baru...'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel',
+          handler: () => alert.dismiss()
+        }, {
+          text: 'Submit',
+          handler: (res) => {
+            this.putDetailLocation(this.resultParam?.more?.tag[0].id, {
+              detailLocation: res['0']
+            });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private async putDetailLocation(tagId, body) {
+    try {
+      const response = await this.http.uploadDetailLocation(tagId, body);
+
+      if (![200, 201].includes(response.status)) {
+        throw response;
+      }
+
+      const alert = await this.utils.createCustomAlert({
+        type: 'success',
+        color: 'success',
+        header: 'Update Berhasil',
+        message: `${(response.data as any)?.message}. Perubahan efektif terjadi setelah dilakukan sinkronisasi.`,
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Tutup',
+            handler: () => alert.dismiss()
+          }
+        ]
+      });
+
+      await alert.present();
+    } catch (err) {
+      console.error(err);
+      const alert = await this.utils.createCustomAlert({
+        type: 'error',
+        color: 'danger',
+        header: 'Kesalahan',
+        message: this.http.getErrorMessage(err),
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Tutup',
+            handler: () => alert.dismiss()
+          }
+        ]
+      });
+
+      await alert.present();
+    }
   }
 
 }

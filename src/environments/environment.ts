@@ -83,6 +83,9 @@ export const environment = {
     },
     get apar() {
       return this.base + '/api/asset/index';
+    },
+    get updateLocation() {
+      return this.base + '/api/tag/updateDetailLocation';
     }
   },
   values: {

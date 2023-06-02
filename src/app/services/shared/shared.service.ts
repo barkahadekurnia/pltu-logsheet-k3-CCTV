@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/adjacent-overload-signatures */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable no-underscore-dangle */
 import { Injectable, Injector } from '@angular/core';
@@ -66,6 +67,7 @@ export class SharedService {
     condition: string;
     merk: string;
     capacityValue: string;
+    detailLocation: string;
     unitCapacity: string;
     supplyDate: string;
     reportPhoto: string;
@@ -126,6 +128,7 @@ export class SharedService {
     abbreviation: string;
     capacityId: string;
     capacityValue: string;
+    detailLocation: string;
     unitCapacity: string;
     unit: string;
     typeTag: string;
@@ -184,6 +187,9 @@ export class SharedService {
   private applicationDataKeys: DataKey[];
   private attachmentSettingKeys: DataKey[];
   public radiovalue: any;
+
+  private _currentRoute: string;
+
   constructor(
     private injector: Injector,
     private platform: Platform
@@ -204,6 +210,7 @@ export class SharedService {
       condition: '',
       merk: '',
       capacityValue: '',
+      detailLocation: '',
       unitCapacity: '',
       supplyDate: '',
       reportPhoto: '',
@@ -299,9 +306,12 @@ export class SharedService {
   get isInitialCheck() {
     return this._initialCheck;
   }
-get isvalueradio(){
-  return this.radiovalue;
-}
+  get isvalueradio() {
+    return this.radiovalue;
+  }
+  get currentRoute(): string {
+    return this._currentRoute;
+  }
   get isAuthenticated() {
     return (
       this._user.id &&
@@ -354,9 +364,12 @@ get isvalueradio(){
   get notificationIds() {
     return this._notificationIds;
   }
-set isradiovalue(value){
-  this.radiovalue = value;
-}
+  set isradiovalue(value) {
+    this.radiovalue = value;
+  }
+  set currentRoute(value: string) {
+    this._currentRoute = value;
+  }
   setUserData(data: UserData) {
     for (const key of this.userDataKeys) {
       if (data[key.key]) {
@@ -607,6 +620,7 @@ set isradiovalue(value){
       condition: '',
       merk: '',
       capacityValue: '',
+      detailLocation: '',
       unitCapacity: '',
       supplyDate: '',
       reportPhoto: '',

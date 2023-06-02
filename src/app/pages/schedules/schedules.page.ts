@@ -126,9 +126,11 @@ export class SchedulesPage implements OnInit {
   selectDate(item: any) {
     this.selectedDate.selected = false;
 
+    console.log('selectDate', item);
+
     this.selectedDate = item;
     this.selectedDate.selected = true;
-    console.log('this.selectedDate ',this.selectedDate);
+    console.log('this.selectedDate ', this.selectedDate);
 
     this.calendar.date = new Date(
       this.calendar.date.getFullYear(),
@@ -141,20 +143,20 @@ export class SchedulesPage implements OnInit {
     // Group the elements of Array based on `color` property
     // .groupBy("color")
     const grup = uniqBy(schdata1, "areaId");
-    console.log('grup ',grup);
+    console.log('grup ', grup);
     this.selectedDate.lokasi = grup;
     let filteredSchedule = [];
     let isigrup = [];
     let isifilter = [];
     console.log('cek per tgl :', schdata1)
 
-    grup.forEach((values) =>{
+    grup.forEach((values) => {
       isigrup.push(values);
     })
     isigrup.forEach((b, ind) => {
       let schdatalokasi = schdata1.filter((v) => v.area == b.area);
-      this.datakategori.forEach((value,i) => {
-        let scanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded ==  true);
+      this.datakategori.forEach((value, i) => {
+        let scanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded == true);
         let unscanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded == false);
         const data = {
           countScanned: scanned.length,
@@ -278,6 +280,7 @@ export class SchedulesPage implements OnInit {
             'condition',
             'merk',
             'capacityValue',
+            'detailLocation',
             'unitCapacity',
             'supplyDate',
             'reportPhoto',
@@ -343,6 +346,7 @@ export class SchedulesPage implements OnInit {
           area: schedule.area,
           latitude: schedule.latitude,
           longitude: schedule.longitude,
+          detailLocation: schedule.detailLocation,
           tagNumber: schedule.tagNumber,
           scannedAt: schedule.scannedAt,
           scannedBy: schedule.scannedBy,
@@ -502,6 +506,9 @@ export class SchedulesPage implements OnInit {
         // this.selectDate(this.calendar?.daysInThisMonth)
 
       }
+
+      console.log('daysInThisMonth', this.calendar.daysInThisMonth);
+
 
       for (let i = 1; i <= 6 - lastDayOnThisMonth; i++) {
         this.calendar.daysInNextMonth.push({

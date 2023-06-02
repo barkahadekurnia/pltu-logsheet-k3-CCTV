@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Platform, IonRouterOutlet, MenuController } from '@ionic/angular';
+import { Platform, IonRouterOutlet, MenuController, AlertController } from '@ionic/angular';
 import { TextZoom } from '@capacitor/text-zoom';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
@@ -12,6 +12,8 @@ import Viewer from 'viewerjs';
 import * as mapboxgl from 'mapbox-gl';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Router } from '@angular/router';
+import { Keyboard } from '@capacitor/keyboard';
+import { HttpService } from './services/http/http.service';
 
 @Component({
   selector: 'app-root',
@@ -21,8 +23,11 @@ import { Router } from '@angular/router';
 export class AppComponent implements AfterViewInit {
   @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
   @ViewChild('appLoader') appLoader: ElementRef;
+  @ViewChild('input') keyInput: { setFocus: () => void };
 
   progress: number;
+
+  isReadOnly: boolean;
 
   private map: mapboxgl.Map;
   private marker: mapboxgl.Marker;
@@ -39,6 +44,8 @@ export class AppComponent implements AfterViewInit {
     private nfc: NfcService,
     public shared: SharedService,
     private utils: UtilsService,
+    private alertCtrl: AlertController,
+    private http: HttpService
   ) {
     // this.user = this.shared.user;
     // console.log('yuhu', shared.user)
@@ -46,6 +53,7 @@ export class AppComponent implements AfterViewInit {
     // console.log('form asset json', JSON.parse(this.shared.asset.assetForm))
     // this.formaset = JSON.parse(this.shared.asset.assetForm);
     this.progress = 0;
+    this.isReadOnly = true;
     (mapboxgl as any).accessToken = environment.values.mapbox;
 
     this.permissions = [
@@ -127,6 +135,40 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
+  async inputFocus() {
+    const alert = await this.alertCtrl.create({
+      header: 'Form Edit',
+      message: 'Edit detail lokasi',
+      backdropDismiss: false,
+      mode: 'ios',
+      inputs: [
+        {
+          type: 'textarea',
+          label: 'Detail lokasi',
+          value: this.asset?.detailLocation,
+          placeholder: 'Isikan detail lokasi baru...'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel',
+          handler: () => alert.dismiss()
+        }, {
+          text: 'Submit',
+          handler: (res) => {
+            const body = {
+              detailLocation: res['0']
+            };
+            this.putDetailLocation(this.asset.tagId, body);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
   animateCSS(element: HTMLElement, animation: string, prefix = 'animate__') {
     return new Promise<void>(resolve => {
       if (!element) {
@@ -190,6 +232,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   assetInfoDidClose({ target }: Event) {
+    this.shared.currentRoute = null;
+    this.isReadOnly = true;
     this.menuCtrl.swipeGesture(true, (target as any).menuId);
     this.marker?.remove();
   }
@@ -245,6 +289,49 @@ export class AppComponent implements AfterViewInit {
     document.body.classList.remove('qrscanner');
     BarcodeScanner.showBackground();
     BarcodeScanner.stopScan();
+  }
+
+  private async putDetailLocation(tagId, body) {
+    try {
+      const response = await this.http.uploadDetailLocation(tagId, body);
+
+      if (![200, 201].includes(response.status)) {
+        throw response;
+      }
+
+      const alert = await this.utils.createCustomAlert({
+        type: 'success',
+        color: 'success',
+        header: 'Update Berhasil',
+        message: `${(response.data as any)?.message}. Perubahan efektif terjadi setelah dilakukan sinkronisasi.`,
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Tutup',
+            handler: () => alert.dismiss()
+          }
+        ]
+      });
+
+      await alert.present();
+    } catch (err) {
+      console.error(err);
+      const alert = await this.utils.createCustomAlert({
+        type: 'error',
+        color: 'danger',
+        header: 'Kesalahan',
+        message: this.http.getErrorMessage(err),
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Tutup',
+            handler: () => alert.dismiss()
+          }
+        ]
+      });
+
+      await alert.present();
+    }
   }
 
 }

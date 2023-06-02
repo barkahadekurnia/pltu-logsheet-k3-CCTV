@@ -480,6 +480,20 @@ export class HttpService {
     return Http.post(options);
   }
 
+  uploadDetailLocation(tagId, data: any) {
+    const options: HttpOptions = {
+      url: `${environment.url.updateLocation}/${tagId}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json'
+      },
+      data,
+      responseType: 'json'
+    };
+
+    return Http.put(options);
+  }
+
   async refreshToken() {
     const utils = this.injector.get(UtilsService);
     // console.log('utils', utils);

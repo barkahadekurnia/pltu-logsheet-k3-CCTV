@@ -237,6 +237,7 @@ export class JadwalPage implements OnInit {
           condition: asset?.condition,
           merk: asset?.merk,
           capacityValue: asset?.capacityValue,
+          detailLocation: asset?.detailLocation,
           unitCapacity: asset?.unitCapacity,
           supplyDate: asset?.supplyDate,
           reportPhoto: asset?.reportPhoto,

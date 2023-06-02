@@ -42,15 +42,15 @@ export class ScheduleDetailPage implements OnInit {
 
     if (router.getCurrentNavigation().extras.state) {
       const navValues = this.router.getCurrentNavigation().extras.state;
-      console.log('navValues ',navValues)
+      console.log('navValues ', navValues)
       this.params = navValues?.params;
-      console.log('this.params ',this.params)
+      console.log('this.params ', this.params)
 
       this.listDataScan = navValues?.listDataScan;
-      console.log('this.listDataScan ',this.listDataScan)
+      console.log('this.listDataScan ', this.listDataScan)
 
       this.filteredData = this.listDataScan.scanned.slice(0, this.loaded);
-      console.log('this.filteredData ',this.filteredData)
+      console.log('this.filteredData ', this.filteredData)
 
     }
   }
@@ -74,6 +74,8 @@ export class ScheduleDetailPage implements OnInit {
     } else if (this.segment === 'unscanned') {
       this.filteredData = this.listDataScan.unscanned.slice(0, this.loaded);
       this.sourceData = this.listDataScan.unscanned;
+      console.log('sourceData', this.sourceData);
+
     }
     this.onSearch();
   }
