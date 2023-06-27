@@ -5,7 +5,7 @@
 export const environment = {
   production: true,
   url: {
-    base: 'http://114.6.64.2:11241/api/logsheet_dev',
+    base: 'http://114.6.64.2:11241/api/logsheet_new',
     // base: 'http://192.168.4.99',
     // base: 'http://app.logsheet.digital',
     // base: 'http://45.77.45.6/logsheet',
@@ -86,6 +86,15 @@ export const environment = {
     },
     get updateLocation() {
       return this.base + '/api/tag/updateDetailLocation';
+    },
+    get formAssetCategory() {
+      return this.base + '/api/assetform/assetCategory';
+    },
+    get formType() {
+      return this.base + '/api/type/getDataByForm';
+    },
+    get uploadFormType() {
+      return this.base + '/api/asset/updateAssetType';
     }
   },
   values: {

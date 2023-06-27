@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Platform, IonRouterOutlet, MenuController, AlertController } from '@ionic/angular';
+import { Platform, IonRouterOutlet, MenuController, AlertController, IonModal } from '@ionic/angular';
 import { TextZoom } from '@capacitor/text-zoom';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
@@ -14,6 +15,42 @@ import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Router } from '@angular/router';
 import { Keyboard } from '@capacitor/keyboard';
 import { HttpService } from './services/http/http.service';
+import { chain, filter, find, intersectionBy, intersectionWith, map, merge, some } from 'lodash';
+import { of } from 'rxjs';
+import { tap, map as rxjsMap } from 'rxjs/operators';
+
+export interface AssetDetails {
+  assetCategoryCode: string;
+  assetCategoryId: string;
+  assetCategoryName: string;
+  created_at: string;
+  deleted_at: string;
+  formId: string;
+  formLabel: string;
+  formName: string;
+  formOption: any[];
+  formType: string;
+  index: string;
+  selected: boolean;
+  updated_at: string;
+  value: string;
+  disabled: boolean;
+};
+
+export interface typeForm {
+  assetcategoryid: string;
+  code: string;
+  description: string;
+  formId: string;
+  formValue: string;
+  id: string;
+  itemTypeId: string;
+  kapasitas: string;
+  media: string;
+  merk: string;
+  more: any[];
+  type_name: string;
+};
 
 @Component({
   selector: 'app-root',
@@ -29,6 +66,8 @@ export class AppComponent implements AfterViewInit {
 
   isReadOnly: boolean;
 
+  dataFormDetailAsset: AssetDetails[] = [];
+
   private map: mapboxgl.Map;
   private marker: mapboxgl.Marker;
   private permissions: { [key: string]: any }[];
@@ -43,13 +82,13 @@ export class AppComponent implements AfterViewInit {
     private screenOrientation: ScreenOrientation,
     private nfc: NfcService,
     public shared: SharedService,
-    private utils: UtilsService,
+    public utils: UtilsService,
     private alertCtrl: AlertController,
     private http: HttpService
   ) {
     // this.user = this.shared.user;
     // console.log('yuhu', shared.user)
-    console.log('form asset shared', this.shared.asset.assetForm)
+    console.log('form asset shared', this.shared.asset.assetForm);
     // console.log('form asset json', JSON.parse(this.shared.asset.assetForm))
     // this.formaset = JSON.parse(this.shared.asset.assetForm);
     this.progress = 0;
@@ -79,14 +118,14 @@ export class AppComponent implements AfterViewInit {
   }
 
   async ngAfterViewInit() {
-    // console.log('yuhu', this.shared.user)
+    console.log('current route', this.shared.currentRoute);
 
     await this.platform.ready();
     this.utils.setRouterOutlet(this.routerOutlet);
 
     if (this.shared.isInitialCheck) {
       await this.shared.getAppData();
-      console.log('yuhu', this.shared.user)
+      console.log('yuhu', this.shared.user);
 
     }
 
@@ -135,40 +174,6 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  async inputFocus() {
-    const alert = await this.alertCtrl.create({
-      header: 'Form Edit',
-      message: 'Edit detail lokasi',
-      backdropDismiss: false,
-      mode: 'ios',
-      inputs: [
-        {
-          type: 'textarea',
-          label: 'Detail lokasi',
-          value: this.asset?.detailLocation,
-          placeholder: 'Isikan detail lokasi baru...'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Batal',
-          role: 'cancel',
-          handler: () => alert.dismiss()
-        }, {
-          text: 'Submit',
-          handler: (res) => {
-            const body = {
-              detailLocation: res['0']
-            };
-            this.putDetailLocation(this.asset.tagId, body);
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
   animateCSS(element: HTMLElement, animation: string, prefix = 'animate__') {
     return new Promise<void>(resolve => {
       if (!element) {
@@ -188,7 +193,7 @@ export class AppComponent implements AfterViewInit {
     });
   }
   openPage(commands: any[]) {
-    this.menuCtrl.close('sidebar')
+    this.menuCtrl.close('sidebar');
     return this.router.navigate(commands);
   }
   async checkAppPermissions() {

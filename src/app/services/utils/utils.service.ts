@@ -75,6 +75,17 @@ export class UtilsService {
 
     return alert;
   }
+  async presentLoader() {
+    const loader = await this.loadingCtrl.create({
+      spinner: null,
+      message: `<img src="assets/img/loader.gif" class="w-20 h-20" />`,
+      cssClass: 'custom-loader',
+      backdropDismiss: true,
+      mode: 'ios',
+    });
+    await loader.present();
+    return loader;
+  }
   async encrypt(data: string) {
     if (!this.platform.is('capacitor')) {
       return data;
@@ -270,6 +281,16 @@ export class UtilsService {
 
   generateArray(end: number, start?: number, step?: number) {
     return Array.from(this.range(end, start, step));
+  }
+
+  chunkArray(arr, num) {
+    const chunks = (a, size) =>
+      Array.from(
+        new Array(Math.ceil(a.length / size)),
+        (_, i) => a.slice(i * size, i * size + size)
+      );
+
+    return chunks(arr, num);
   }
 
   private async isCheated() {

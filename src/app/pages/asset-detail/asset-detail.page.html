@@ -38,6 +38,81 @@
             <ion-col>{{ jenis?.optionName }}</ion-col>
           </ion-row>
         </ion-grid>
+        <div class="mt-4 justify-center items-center text-center">
+          <button class="btn btn-block btn-sm btn-info rounded-btn text-white no-animation" id="modal-edit-asset"
+            (click)="getDataInputForms()">
+            <ion-icon slot="start" name="create-outline" class="mr-2"></ion-icon>
+            Edit Detail Asset
+          </button>
+        </div>
+        <!-- Begin modal edit asset -->
+        <ion-modal #modal trigger="modal-edit-asset">
+          <ng-template>
+            <ion-header class="ion-no-border ion-no-shading">
+              <ion-toolbar color="content">
+                <ion-buttons slot="start">
+                  <ion-button (click)="modal.dismiss()">Batal</ion-button>
+                </ion-buttons>
+                <ion-buttons slot="end">
+                  <ion-button color="primary" (click)="submitFormUpdate(modal)">
+                    <ion-label class="!font-bold">Simpan</ion-label>
+                  </ion-button>
+                </ion-buttons>
+              </ion-toolbar>
+            </ion-header>
+            <ion-content color="content">
+              <ion-grid>
+                <ion-row class="my-2 px-2">
+                  <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
+                    <div class="w-full">
+                      <h2 class="text-left text-lg font-semibold">
+                        Edit detail asset
+                      </h2>
+                      <span class="text-sm font-semibold text-gray-500">
+                        {{resultParam.asset_number}}
+                      </span>
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ion-row class="px-2" *ngIf="dataFormDetailAsset.length">
+                  <ion-col size="12" *ngFor="let form of dataFormDetailAsset; index as idx">
+                    <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[
+                                !form.value ? 'border-error' : 'border-gray-300'
+                              ]">
+                      <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                        <div class="flex justify-start items-center space-x-2">
+                          <div class="flex-grow flex flex-col justify-start items-start">
+                            <p class="text-sm font-semibold">
+                              {{form.formLabel}}
+                            </p>
+                          </div>
+                        </div>
+
+                        <ion-input *ngIf="form.formType === 'input' || form.formType === 'textarea'"
+                          class="ion-no-padding min-w-12 flex-grow text-sm text-right" [ngClass]="[form.formId]"
+                          [type]="form.formType === 'input' ? 'number' : 'text'" [(ngModel)]="form.value">
+                        </ion-input>
+
+                        <ion-select
+                          *ngIf="form.formType === 'select' || form.formType === 'checkbox' || form.formType === 'radio'"
+                          class="ion-no-padding min-w-12 flex-grow text-sm text-right" interface="alert"
+                          [interfaceOptions]="{header: 'Pilih', mode: 'ios'}" placeholder="Pilih"
+                          [multiple]="form.formType === 'checkbox'" [disabled]="form.disabled"
+                          (ionChange)="idx === 0 ? fetchFormType($event) : idx === 1 ? fetchAdditionalData($event, form.formOption) : null"
+                          [(ngModel)]="form.value" cancelText="Batal" okText="Pilih">
+                          <ion-select-option *ngFor="let value of form.formOption" [value]="value.id">
+                            {{value.optionName || value.type_name}}
+                          </ion-select-option>
+                        </ion-select>
+                      </div>
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-content>
+          </ng-template>
+        </ion-modal>
+        <!-- End modal edit asset -->
       </div>
     </div>
     <br>

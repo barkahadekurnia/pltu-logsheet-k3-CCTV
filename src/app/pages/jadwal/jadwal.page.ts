@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Component, OnInit } from '@angular/core';
 import { Platform, MenuController } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
@@ -173,7 +174,7 @@ export class JadwalPage implements OnInit {
             throw response;
           }
 
-          console.log('cek :', response.data.data)
+          console.log('getAssets', response.data.data);
           this.isiaset = response.data.data;
 
         },
@@ -189,7 +190,7 @@ export class JadwalPage implements OnInit {
           // this.utils.presentToast('Failed to synchronize assets with server', 'danger');   },
           // onComplete: () => console.log('complete'),
         }
-      })
+      });
       this.sourceAssets = this.isiaset.map(asset => {
         const tagIds: string[] = asset?.tagId?.length
           ? asset?.tagId?.split?.(',')

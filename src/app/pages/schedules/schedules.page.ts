@@ -321,7 +321,7 @@ export class SchedulesPage implements OnInit {
         }
       );
 
-      const schedules = this.database.parseResult(result)
+      const schedules = this.database.parseResult(result);
       const assetIds = uniq(schedules.map(schedule => schedule.assetId));
       const assetTags = await this.getAssetTags(assetIds);
       const holdedRecords = await this.getHoldedRecords(assetIds);
@@ -423,6 +423,7 @@ export class SchedulesPage implements OnInit {
 
       this.showCalendar(this.calendar.date);
       this.loading = false;
+      console.log('schedules', this.schedules);
     }
   }
 

@@ -45,7 +45,7 @@
     (ionDidOpen)="assetInfoDidOpen($event)">
     <ion-header class="ion-no-border" mode="md">
       <ion-toolbar>
-        <ion-title class="font-bold">APA Information</ion-title>
+        <ion-title class="font-bold">Detail Asset</ion-title>
 
         <ion-buttons slot="end" class="p-2">
           <ion-button color="danger" (click)="closeMenu('asset-information')">
@@ -65,22 +65,23 @@
         </ion-item>
 
         <ion-item class="text-xs dark:ion-border-gray-600">
-          <ion-label>APA Number</ion-label>
+          <ion-label>Nomor APA</ion-label>
           <ion-input class="text-right" readonly [value]="asset?.assetNumber"></ion-input>
         </ion-item>
         <ion-item class="text-xs dark:ion-border-gray-600">
-          <ion-label>Type</ion-label>
-          <ion-input class="text-right" readonly [value]="asset?.schType"></ion-input>
+          <ion-label>Tipe</ion-label>
+          <ion-input class="text-right !capitalize" readonly [value]="asset?.schType"></ion-input>
         </ion-item>
 
-        <ion-item class="text-xs dark:ion-border-gray-600" *ngFor="let rf of formaset; let idxx = index">
+        <ion-item class="text-xs dark:ion-border-gray-600" *ngFor="let rf of formaset">
           <ion-label>{{rf.formLabel}}</ion-label>
           <ion-input class="text-right" readonly [value]="rf?.optionName"></ion-input>
         </ion-item>
 
         <ion-item class="text-xs dark:ion-border-gray-600">
-          <ion-label>APA Status</ion-label>
-          <ion-input class="text-right" readonly [value]="asset?.assetStatusName"></ion-input>
+          <ion-label>Status</ion-label>
+          <ion-badge color="secondary" mode="ios" class="text-white">{{asset?.assetStatusName}}</ion-badge>
+          <!-- <ion-input class="text-right" readonly [value]="asset?.assetStatusName"></ion-input> -->
         </ion-item>
         <ion-item class="text-xs dark:ion-border-gray-600">
           <ion-label>Unit</ion-label>
@@ -92,14 +93,8 @@
         </ion-item>
         <ion-item class="text-xs dark:ion-border-gray-600">
           <ion-label>Detail Lokasi</ion-label>
-          <ion-textarea #input rows="3" class="text-sm text-right font-semibold" readonly
+          <ion-textarea #input rows="3" class="text-sm text-right font-semibold !capitalize" readonly
             [value]="asset?.detailLocation"></ion-textarea>
-        </ion-item>
-        <ion-item *ngIf="shared.currentRoute?.includes('scan-form')">
-          <button class="btn btn-block btn-sm p-2 text-white btn-primary" (click)="inputFocus()">
-            <ion-icon slot="start" name="create-outline" class="mr-2"></ion-icon>
-            Edit detail lokasi
-          </button>
         </ion-item>
         <ion-item class="text-xs" lines="none">
           <ion-label>Map</ion-label>

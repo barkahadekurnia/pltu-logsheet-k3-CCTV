@@ -88,7 +88,7 @@ export class AssetsPage implements OnInit {
   async showDetails(asset?: any) {
     this.shared.asset = asset;
     console.log('showDetails', asset);
-    
+
 
     await this.menuCtrl.enable(true, 'asset-information');
     return this.menuCtrl.open('asset-information');

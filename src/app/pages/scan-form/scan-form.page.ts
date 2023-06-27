@@ -25,8 +25,9 @@ import { UtilsService } from 'src/app/services/utils/utils.service';
 import { chain, groupBy, toLower, zip } from 'lodash';
 import Viewer from 'viewerjs';
 import * as moment from 'moment';
-import { Directory } from "@capacitor/filesystem";
-import write_blob from "capacitor-blob-writer";
+import { Directory } from '@capacitor/filesystem';
+import write_blob from 'capacitor-blob-writer';
+
 @Component({
   selector: 'app-scan-form',
   templateUrl: './scan-form.page.html',
@@ -95,35 +96,35 @@ export class ScanFormPage implements OnInit {
     created_at: string;
     deleted_at: string;
     date: string;
-    assetCategoryId: string,
-    assetCategoryName: string,
-    assetForm: string,
-    idschedule: string,
+    assetCategoryId: string;
+    assetCategoryName: string;
+    assetForm: string;
+    idschedule: string;
   };
   param: {
-    assetId: string,
-    assetNumber: string,
-    description: string,
-    inputType: string,
-    max: string,
-    min: string,
-    normal: string,
-    abnormal: string,
-    option: string,
-    parameterId: string,
-    parameterName: string,
-    schType: string,
-    showOn: string,
-    sortId: string,
-    uom: string,
-    workInstruction: string,
-    tagId,
-    unit: string,
-    unitId: string,
-    area: string,
-    areaId: string,
-    created_at: string,
-    updated_at: string,
+    assetId: string;
+    assetNumber: string;
+    description: string;
+    inputType: string;
+    max: string;
+    min: string;
+    normal: string;
+    abnormal: string;
+    option: string;
+    parameterId: string;
+    parameterName: string;
+    schType: string;
+    showOn: string;
+    sortId: string;
+    uom: string;
+    workInstruction: string;
+    tagId;
+    unit: string;
+    unitId: string;
+    area: string;
+    areaId: string;
+    created_at: string;
+    updated_at: string;
     col: string;
     isDeviation: string;
     isExpanded: string;
@@ -158,7 +159,6 @@ export class ScanFormPage implements OnInit {
     data: string;
     offset?: number;
   };
-
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -314,6 +314,8 @@ export class ScanFormPage implements OnInit {
   }
 
   async onNextButtonTouched() {
+    console.log(this.resultParam);
+    
     const index = await this.ionSlides.getActiveIndex();
 
     if (!this.isEnd) {
@@ -543,7 +545,7 @@ export class ScanFormPage implements OnInit {
     actionSheet.present();
   }
   async onMediaSelected1(media: any) {
-    console.log(media)
+    console.log(media);
     const options: ActionSheetOptions = {
       animated: true,
       backdropDismiss: true,
@@ -774,11 +776,11 @@ export class ScanFormPage implements OnInit {
     //   return this.ionContent.scrollToTop(2000);
 
     // }
-    console.log('sch', this.sch)
-    this.sch = this.sch.filter(sch => sch.schType == this.shared.schtype.type)
-    console.log('sch', this.sch)
-    console.log('type', this.shared.schtype.type)
-    moment.locale('id')
+    console.log('sch', this.sch);
+    this.sch = this.sch.filter(sch => sch.schType === this.shared.schtype.type);
+    console.log('sch', this.sch);
+    console.log('type', this.shared.schtype.type);
+    moment.locale('id');
     const now = this.utils.getTime();
     const current = new Date();
     this.record.scannedAt = moment(current).format('YYYY-MM-DD HH:mm:ss');
@@ -1001,7 +1003,7 @@ export class ScanFormPage implements OnInit {
       this.record.scannedBy = this.shared.user.name;
       this.record.scannedWith = this.transitionData?.type;
       let value = '';
-      if (this.record.scannedWith == 'qr') {
+      if (this.record.scannedWith === 'qr') {
         value = this.transitionData.data;
       } else {
         const tagg = await this.database.select('assetTag', {
@@ -1015,7 +1017,6 @@ export class ScanFormPage implements OnInit {
         value = astag.assetId;
 
       }
-
 
       const resultAsset = await this.database.select('schedule', {
         where: {
@@ -1036,29 +1037,27 @@ export class ScanFormPage implements OnInit {
         }
       }
       );
-      const isiaray = { notes: "", attachments: [] };
-      const params = this.database.parseResult(resultParameters)
+      const isiaray = { notes: '', attachments: [] };
+      const params = this.database.parseResult(resultParameters);
 
-      const ak = params.map(attachment =>
-      ({
+      const ak = params.map(attachment => ({
         ...attachment,
         ...isiaray
-      })
-      )
+      }));
 
       this.resultParam = ak;
       console.log('awal parameter :', this.resultParam);
       console.log('asset schedule :', asset);
       this.sch = assetarr;
+      console.log('sch >>>', this.sch);
 
       if (asset) {
-        console.log('css', this.shared.schtype.type)
-        console.log('css1', asset.schType)
+        console.log('css', this.shared.schtype.type);
+        console.log('css1', asset.schType);
         this.shared.setSchType({
           type: asset.schType
         });
-        console.log('css2', this.shared.schtype.type)
-
+        console.log('css2', this.shared.schtype.type);
 
         this.setDataAsset(asset);
         if (this.schedule.scheduleTrxId) {
@@ -1088,9 +1087,6 @@ export class ScanFormPage implements OnInit {
             alert.present();
           }
         }
-
-
-
       }
       // const value = this.transitionData.data;
       // const resultAsset = await this.database.select('schedule', {
@@ -1101,14 +1097,14 @@ export class ScanFormPage implements OnInit {
       // });
       // const asset = this.database.parseResult(resultAsset);
       console.log('value :', value);
-      console.log('cek jumlah jadwal :', asset)
+      console.log('cek jumlah jadwal :', asset);
 
       if (assetarr.length > 1) {
         const datatype = assetarr.map(k => ({
           label: k.schType,
-          type: "radio",
+          type: 'radio',
           value: k.schType
-        }))
+        }));
         const alert = await this.utils.createCustomAlert({
           type: 'radio',
           header: 'Type Scan',
@@ -1118,9 +1114,9 @@ export class ScanFormPage implements OnInit {
             {
               text: 'Lanjutkan',
               handler: async () => {
-                console.log('k', this.shared.schtype.type)
-                console.log('value', value)
-                alert.dismiss()
+                console.log('k', this.shared.schtype.type);
+                console.log('value', value);
+                alert.dismiss();
                 const resultParameters = await this.database.select('parameter', {
                   where: {
 
@@ -1130,17 +1126,15 @@ export class ScanFormPage implements OnInit {
                   }
                 }
                 );
-                console.log('cek param', resultParameters)
-                const isiaray = { notes: "", attachments: [] };
-                const params = this.database.parseResult(resultParameters)
-                console.log('cek param2', params)
+                console.log('cek param', resultParameters);
+                const isiaray = { notes: '', attachments: [] };
+                const params = this.database.parseResult(resultParameters);
+                console.log('cek param2', params);
 
-                const ak = params.map(attachment =>
-                ({
+                const ak = params.map(attachment => ({
                   ...attachment,
                   ...isiaray
-                })
-                )
+                }));
 
                 this.resultParam = chain(ak).groupBy('parameterGroup').map(res => res).value();
                 console.log(this.resultParam);
@@ -1158,24 +1152,20 @@ export class ScanFormPage implements OnInit {
       } else {
         const resultParameters = await this.database.select('parameter', {
           where: {
-
             query: `assetId=? AND schType=?`,
             // params: ["96b7597d-7b56-4f87-868f-e775e7908b21", "Monthly"]
             params: [value, toLower(this.shared.schtype.type)]
           }
-        }
-        );
+        });
         console.log('cek param', resultParameters)
-        const isiaray = { notes: "", attachments: [] };
+        const isiaray = { notes: '', attachments: [] };
         const params = this.database.parseResult(resultParameters)
         console.log('cek param2', params)
 
-        const ak = params.map(attachment =>
-        ({
+        const ak = params.map(attachment => ({
           ...attachment,
           ...isiaray
-        })
-        )
+        }));
 
         this.resultParam = chain(ak).groupBy('parameterGroup').map(res => res).value();
         console.log(this.resultParam);
@@ -1185,13 +1175,10 @@ export class ScanFormPage implements OnInit {
         dataSlides.push('Catatan & Lampiran');
         this.buildSlides(dataSlides);
       }
-
-
     } catch (error) {
       console.error(error);
     } finally {
       this.loading = false;
-
     }
   }
 
@@ -1358,14 +1345,59 @@ export class ScanFormPage implements OnInit {
       ? asset?.tagLocationName?.split?.(',')
       : [];
 
-    // this.asset.id = asset?.id;
-    // this.asset.asset_number = asset?.asset_number;
+    this.asset.abbreviation = asset?.abbreviation;
+    this.asset.adviceDate = asset?.adviceDate;
+    this.asset.approvedAt = asset?.approvedAt;
+    this.asset.approvedBy = asset?.approvedBy;
+    this.asset.approvedNotes = asset?.approvedNotes;
+    this.asset.area = asset?.area;
+    this.asset.areaId = asset?.areaId;
+    this.asset.assetCategoryId = asset?.assetCategoryId;
+    this.asset.assetCategoryName = asset?.assetCategoryName;
+    this.asset.assetForm = asset?.assetForm;
+    this.asset.assetId = asset?.assetId;
+    this.asset.assetNumber = asset?.assetNumber;
+    this.asset.assetStatusId = asset?.assetStatusId;
+    this.asset.assetStatusName = asset?.assetStatusName;
+    this.asset.capacityValue = asset?.capacityValue;
+    this.asset.condition = asset?.condition;
+    this.asset.created_at = asset?.created_at;
+    this.asset.date = asset?.date;
+    this.asset.deleted_at = asset?.deleted_at;
+    this.asset.detailLocation = asset?.detailLocation;
+    this.asset.idschedule = asset?.idschedule;
+    this.asset.latitude = asset?.latitude;
+    this.asset.longitude = asset?.longitude;
+    this.asset.merk = asset?.merk;
     this.asset.photo = asset?.photo;
-    // this.asset.description = asset?.description;
-    // this.asset.sch_manual = this.utils.parseJson(asset?.sch_manual);
-    this.asset.schType = this.sch[0].schType;
-    this.asset.merk = this.sch[0].merk;
-    this.asset.assetForm = asset.form;
+    this.asset.offlinePhoto = null;
+    this.asset.reportPhoto = asset?.reportPhoto;
+    this.asset.scannedAccuration = asset?.scannedAccuration;
+    this.asset.scannedAt = asset?.scannedAt;
+    this.asset.scannedBy = asset?.scannedBy;
+    this.asset.scannedEnd = asset?.scannedEnd;
+    this.asset.scannedNotes = asset?.scannedNotes;
+    this.asset.scannedWith = asset?.scannedWith;
+    this.asset.schDays = asset?.schDays;
+    this.asset.schFrequency = asset?.schFrequency;
+    this.asset.schManual = asset?.schManual;
+    this.asset.schType = asset?.schType;
+    this.asset.schWeekDays = asset?.schWeekDays;
+    this.asset.schWeeks = asset?.schWeeks;
+    this.asset.scheduleFrom = asset?.scheduleFrom;
+    this.asset.scheduleTo = asset?.scheduleTo;
+    this.asset.scheduleTrxId = asset?.scheduleTrxId;
+    this.asset.supplyDate = asset?.supplyDate;
+    this.asset.syncAt = asset?.syncAt;
+    this.asset.tagId = asset?.tagId;
+    this.asset.tagNumber = asset?.tagNumber;
+    this.asset.unit = asset?.unit;
+    this.asset.unitCapacity = asset?.unitCapacity;
+    this.asset.unitId = asset?.unitId;
+
+    // this.asset.schType = this.sch[0].schType;
+    // this.asset.merk = this.sch[0].merk;
+    // this.asset.assetForm = asset.form;
     // this.asset.sch_frequency = asset?.sch_frequency;
     // this.asset.sch_weeks = asset?.sch_weeks;
     // this.asset.schWeekDays = asset?.schWeekDays;
@@ -1373,13 +1405,13 @@ export class ScanFormPage implements OnInit {
     // this.asset.offlinePhoto = asset?.offlinePhoto;
     // this.asset.parameter = asset?.parameter;
     // this.asset.more = asset?.more;
-    this.asset.assetId = asset?.assetId;
-    this.asset.assetNumber = asset?.assetNumber;
-    this.asset.assetStatusName = this.sch[0].assetStatusName;
-    this.asset.condition = this.sch[0].condition;
-    this.asset.latitude = this.sch[0].latitude;
-    this.asset.longitude = this.sch[0].longitude;
-    this.asset.detailLocation = this.sch[0].detailLocation;
+    // this.asset.assetId = asset?.assetId;
+    // this.asset.assetNumber = asset?.assetNumber;
+    // this.asset.assetStatusName = this.sch[0].assetStatusName;
+    // this.asset.condition = this.sch[0].condition;
+    // this.asset.latitude = this.sch[0].latitude;
+    // this.asset.longitude = this.sch[0].longitude;
+    // this.asset.detailLocation = this.sch[0].detailLocation;
     // this.asset.min = asset?.min;
     // this.asset.normal = asset?.normal;
     // this.asset.abnormal = asset?.abnormal;
@@ -1387,25 +1419,28 @@ export class ScanFormPage implements OnInit {
     // this.asset.parameterId = asset?.parameterId;
     // this.asset.parameterName = asset?.parameterName;
     // this.asset.photo1 = parameter[photoKey];
-    this.asset.offlinePhoto = null;
-    this.asset.reportPhoto = asset?.reportPhoto;
+    // this.asset.offlinePhoto = null;
+    // this.asset.reportPhoto = asset?.reportPhoto;
     // this.asset.col = asset?.col;
     // this.asset.reportType = asset?.reportType;
     // this.asset.showOn = asset?.showOn;
     // this.asset.sortId = asset?.sortId;
     // this.asset.uom = asset?.uom;
     // this.asset.workInstruction = asset?.workInstruction;
-    this.asset.tagId = asset?.tagId;
-    this.asset.unit = asset?.unit;
-    this.asset.unitId = asset?.unitId;
-    this.asset.area = asset?.area;
-    this.asset.areaId = asset?.areaId;
-    this.asset.created_at = asset?.created_at;
+    // this.asset.tagId = asset?.tagId;
+    // this.asset.unit = asset?.unit;
+    // this.asset.unitId = asset?.unitId;
+    // this.asset.area = asset?.area;
+    // this.asset.areaId = asset?.areaId;
+    // this.asset.created_at = asset?.created_at;
     // this.asset.updated_at = asset?.updated_at;
 
     if (asset.offlinePhoto) {
       this.asset.offlinePhoto = Capacitor.convertFileSrc(asset.offlinePhoto);
     }
+
+    console.log('sch', this.sch);
+    console.log('asset', this.asset);
 
     console.log({ tagIds, tagNames, tagLocationIds, tagLocationNames });
 
