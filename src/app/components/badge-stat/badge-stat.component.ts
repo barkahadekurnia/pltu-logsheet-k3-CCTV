@@ -9,6 +9,8 @@ type Theme = 'success' | 'lime' | 'warning' | 'info' | 'error' | 'dark';
 })
 export class BadgeStatComponent implements OnInit, OnChanges {
   @Input() count: number;
+  @Input() countSudah: number;
+  @Input() countBelum: number;
   @Input() label: string;
   @Input() theme: Theme;
   @Input() icon: string;

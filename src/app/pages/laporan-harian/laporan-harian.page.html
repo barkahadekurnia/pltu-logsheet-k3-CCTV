@@ -24,9 +24,19 @@
   </div>
   <div class="py-0">
     <ion-toolbar class="ion-bg-white">
-      <ion-segment class="w-11/12" [value]="segment" (ionChange)="onSegmentChanged($event)">
-        <ion-segment-button class="font-bold uppercase" value="belum">Belum Laporan</ion-segment-button>
-        <ion-segment-button class="font-bold uppercase" value="sudah">Sudah Laporan</ion-segment-button>
+      <ion-segment class="w-full" [value]="segment" (ionChange)="onSegmentChanged($event)">
+        <ion-segment-button  *ngIf="dataBelum" class="font-bold capitalize" value="belum">
+          <div class="bg-transparent">
+            <ion-label class="tracking-normal">Belum Laporan </ion-label>
+            <ion-badge color="danger" class="align-middle">{{dataBelum.length}}</ion-badge>
+          </div>
+        </ion-segment-button>
+        <ion-segment-button  *ngIf="dataSudah" class="font-bold capitalize" value="sudah">
+          <div class="bg-transparent">
+            <ion-label class="tracking-normal">Sudah Laporan </ion-label>
+            <ion-badge color="success" class="align-middle">{{dataSudah.length}}</ion-badge>
+          </div>
+        </ion-segment-button>
       </ion-segment>
     </ion-toolbar>
   </div>

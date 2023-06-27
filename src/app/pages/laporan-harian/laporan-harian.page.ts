@@ -16,29 +16,28 @@ export class LaporanHarianPage implements OnInit {
   datasc: any;
   segment: 'belum' | 'sudah';
   laporan: {
-    approvedAt: string,
-    approvedBy: string,
-    approvedNotes: string,
-    notes: string,
-    reportDate: string,
-    scannedAt: string,
-    scannedBy: string,
-    scannedDate: string,
-    scannedNotes: string,
-    scannedWith: string,
-    syncAt: string,
-    trxData: any[],
-    trxParentId: string
+    approvedAt: string;
+    approvedBy: string;
+    approvedNotes: string;
+    notes: string;
+    reportDate: string;
+    scannedAt: string;
+    scannedBy: string;
+    scannedDate: string;
+    scannedNotes: string;
+    scannedWith: string;
+    syncAt: string;
+    trxData: any[];
+    trxParentId: string;
   };
-
 
   searchTerm: string;
   params: any;
   listDataScan: {
-    countScanned: number,
-    scanned: any[],
-    countUnscanned: number,
-    unscanned: any[],
+    countScanned: number;
+    scanned: any[];
+    countUnscanned: number;
+    unscanned: any[];
   };
   filteredData: any[];
   dataBelum: any[];
@@ -51,16 +50,14 @@ export class LaporanHarianPage implements OnInit {
     private router: Router,
     private http: HttpService,
     private shared: SharedService,
-    private platform: Platform,
-
-
+    private platform: Platform
   ) {
     this.loading = true;
     this.datasc = {};
     this.segment = 'belum';
     this.searchTerm = '';
     this.isHeaderVisible = false;
-    this.laporan= {
+    this.laporan = {
       approvedAt: '',
       approvedBy: '',
       approvedNotes: '',
@@ -73,15 +70,14 @@ export class LaporanHarianPage implements OnInit {
       scannedWith: '',
       syncAt: '',
       trxData: [],
-      trxParentId: ''
+      trxParentId: '',
     };
-
 
     this.listDataScan = {
       countScanned: 0,
       scanned: [],
       countUnscanned: 0,
-      unscanned: []
+      unscanned: [],
     };
     this.filteredData = [];
     this.dataBelum = [];
@@ -107,7 +103,7 @@ export class LaporanHarianPage implements OnInit {
   ngOnInit() {
     this.getData();
   }
-  ionViewWillEnter(){
+  ionViewWillEnter() {
     this.platform.ready().then(() => {
       this.getData();
     });
@@ -119,14 +115,12 @@ export class LaporanHarianPage implements OnInit {
       this.isHeaderVisible = val;
     }
   }
-  async getData(){
-    const userId = { userId: this.shared.user.id }
+  async getData() {
+    const userId = { userId: this.shared.user.id };
 
     try {
       this.http.requests({
-        requests: [
-          () => this.http.getLaporan(userId),
-        ],
+        requests: [() => this.http.getLaporan(userId)],
         onSuccess: async ([responseLaporan]) => {
           if (responseLaporan.status >= 400) {
             throw responseLaporan;
@@ -134,19 +128,21 @@ export class LaporanHarianPage implements OnInit {
           console.log('responseLaporan', responseLaporan.data.data);
 
           if (responseLaporan?.data?.data?.length) {
-            const filterdatabelum = responseLaporan?.data?.data?.filter((scan)=> scan.reportDate == null);
-            const filterdatasudah = responseLaporan?.data?.data?.filter((scan)=> scan.reportDate != null);
+            const filterdatabelum = responseLaporan?.data?.data?.filter(
+              (scan) => scan.reportDate == null
+            );
+            const filterdatasudah = responseLaporan?.data?.data?.filter(
+              (scan) => scan.reportDate != null
+            );
             console.log('filterdatabelum', filterdatabelum);
-          console.log('filterdatasudah', filterdatasudah);
-          this.dataBelum = filterdatabelum;
-          this.dataSudah = filterdatasudah;
-
+            console.log('filterdatasudah', filterdatasudah);
+            this.dataBelum = filterdatabelum;
+            this.dataSudah = filterdatasudah;
           }
           console.log('this.dataBelum', this.dataBelum);
           console.log('this.dataSudah', this.dataSudah);
-
         },
-        onError: error => console.error(error)
+        onError: (error) => console.error(error),
       });
     } catch (error) {
       console.error(error);
@@ -156,30 +152,27 @@ export class LaporanHarianPage implements OnInit {
   }
   onSegmentChanged(event: any) {
     this.segment = event.detail.value;
-console.log('segmen', this.segment )
+    console.log('segmen', this.segment);
     if (this.segment === 'sudah') {
       this.filteredData = this.dataSudah;
-      console.log('segmen this.dataSudah', this.dataSudah)
-
+      console.log('segmen this.dataSudah', this.dataSudah);
     } else if (this.segment === 'belum') {
       this.filteredData = this.dataBelum;
-      console.log('segmen this.dataBelum', this.dataBelum)
-
+      console.log('segmen this.dataBelum', this.dataBelum);
     }
     this.onSearch();
   }
 
   onSearch(event?: any) {
     if (event) {
-      this.filteredData = this.sourceData
-        ?.filter((sch: any) => {
-          const keyword = this.searchTerm?.toLowerCase();
-          const matchAssetName = sch?.assetName?.toLowerCase()?.includes(keyword);
-          const matchUnit = sch?.unit?.toLowerCase()?.includes(keyword);
-          const matchArea = sch?.area?.toLowerCase()?.includes(keyword);
+      this.filteredData = this.sourceData?.filter((sch: any) => {
+        const keyword = this.searchTerm?.toLowerCase();
+        const matchAssetName = sch?.assetName?.toLowerCase()?.includes(keyword);
+        const matchUnit = sch?.unit?.toLowerCase()?.includes(keyword);
+        const matchArea = sch?.area?.toLowerCase()?.includes(keyword);
 
-          return matchAssetName || matchUnit || matchArea;
-        });
+        return matchAssetName || matchUnit || matchArea;
+      });
 
       this.filteredData = this.filteredData.slice(0, 5);
     }
@@ -192,13 +185,14 @@ console.log('segmen', this.segment )
       if (start < this.listDataScan.unscanned.length) {
         let end = start + 12;
 
-        end = end > this.listDataScan.unscanned.length
-          ? this.listDataScan.unscanned.length
-          : end;
+        end =
+          end > this.listDataScan.unscanned.length
+            ? this.listDataScan.unscanned.length
+            : end;
 
-        this.filteredData = this.filteredData
-          .concat(this.listDataScan.unscanned
-            .slice(start, end));
+        this.filteredData = this.filteredData.concat(
+          this.listDataScan.unscanned.slice(start, end)
+        );
 
         if (this.loaded < this.filteredData.length) {
           this.loaded = this.filteredData.length;
@@ -209,10 +203,10 @@ console.log('segmen', this.segment )
     }, 500);
   }
 
-  async openDetail(id){
+  async openDetail(id) {
     const data = JSON.stringify({
-      data: id
-    })
+      data: id,
+    });
     console.log('data json :', JSON.parse(data));
     return this.router.navigate(['laporan-harian-detail', { data }]);
   }
@@ -220,5 +214,4 @@ console.log('segmen', this.segment )
     // menghitung chart
     this.getData().finally(() => e.target.complete());
   }
-
 }

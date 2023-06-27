@@ -35,8 +35,13 @@
     inverse ? color.bg : ' dark:bg-gray-800',
     type === 'outline' ? '' : 'shadow-md'
     ]">
-    <ion-badge color="danger" mode="ios" class="absolute right-3 top-1"
+    
+    <ion-badge color="light" mode="ios" class="absolute right-0.5 top-0 text-[10px]"
       *ngIf="count !== undefined">{{ count }}</ion-badge>
+    <ion-badge color="danger" mode="ios" class="absolute right-0.5 top-0 text-[10px]"
+      *ngIf="countBelum !== undefined">{{ countBelum }}</ion-badge>
+    <ion-badge color="success" mode="ios" class="absolute right-0.5 top-2.5 text-[10px]"
+      *ngIf="countSudah !== undefined">{{ countSudah }}</ion-badge>
     <!-- <button
       class="absolute btn btn-circle btn-xs btn-error rounded-full text-xs
       font-extrabold right-3 top-1"
@@ -66,6 +71,7 @@
       {{ count }}
     </p> -->
     <p
+    
       [ngClass]="[
       inverse ? 'text-white' : color.text,
       large ? 'text-xs font-semibold' : 'text-xs font-semibold'
@@ -73,4 +79,5 @@
       {{ label }}
     </p>
   </div>
+
 </div>
