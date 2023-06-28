@@ -96,7 +96,6 @@ export class HomePage implements OnInit {
   };
   datalaporan = [];
 
-  //maintenis barkah
   jumlahlaporan: any;
 
   isHeaderVisible: boolean;
@@ -391,6 +390,35 @@ export class HomePage implements OnInit {
     }
   }
 
+  // private async getTransaction(){
+  //   this.http.requests({
+  //     requests: [() => this.http.getLaporan(userId)],
+  //     onSuccess: async ([responseLaporan]) => {
+  //       if (responseLaporan.status >= 400) {
+  //         throw responseLaporan;
+  //       }
+  //       console.log('responseLaporan', responseLaporan);
+  //       this.jumlahlaporan = responseLaporan?.data?.data?.length
+  //       console.log('jumlahLaporan',this.jumlahlaporan);
+        
+  //       if (this.jumlahlaporan) {
+  //         const filterdata = responseLaporan?.data?.data?.filter(
+  //           (scan) => scan.reportDate == null
+  //         );
+  //         console.log('filterdata', filterdata);
+  //         count.laporan = filterdata?.length;
+  //         count.belumlaporan = filterdata?.length;
+  //         count.sudahlaporan = this.jumlahlaporan-count.laporan;
+  //         console.log('belum laporan',count.sudahlaporan);
+          
+  //         this.datalaporan = filterdata;
+  //         console.log('dataLaporan',this.datalaporan)
+  //       }
+  //     },
+  //     onError: (error) => console.error(error),
+  //   });
+  // }
+
   private async getLocalSchedules(assets: any[]) {
     // console.log('4. data local asset ke get localSchedule', assets);
     try {
@@ -506,6 +534,7 @@ export class HomePage implements OnInit {
       console.error(error);
     }
   }
+
   private async prepareDirectory(
     type: 'asset' | 'parameter',
     exceptions: string[] = []
