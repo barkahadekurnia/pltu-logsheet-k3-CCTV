@@ -58,6 +58,10 @@ export class TransactionsPage {
   };
   dataBelum: any[];
   dataSudah: any[];
+
+  jumlahUploaded:any;
+  jumlahUnuploaded:any;
+
   constructor(
     private router: Router,
     private platform: Platform,
@@ -111,11 +115,11 @@ export class TransactionsPage {
     console.log('segmen', this.segment )
     if (this.segment === 'unuploaded') {
       this.schedules = this.dataSudah;
-      console.log('segmen this.dataSudah', this.dataSudah)
+      console.log('segmen unuploaded this.dataSudah', this.dataSudah)
 
     } else if (this.segment === 'uploaded') {
       this.schedules = this.dataBelum;
-      console.log('segmen this.dataBelum', this.dataBelum)
+      console.log('segmen uploaded this.dataBelum', this.dataBelum)
 
     }
     this.onSearch();
@@ -136,6 +140,8 @@ export class TransactionsPage {
   pushData(event: any) {
     setTimeout(async () => {
       const start = this.schedules.length;
+      console.log('cek isi this schedules',this.schedules);
+      
 
       if (start < this.filteredSchedules.length) {
         let end = start + 20;
@@ -825,7 +831,6 @@ console.log('mark2', uploaded);
 
     this.schedules = this.filteredSchedules.slice(0, this.loaded);
     console.log('schedules', this.schedules);
-
   }
 
   async getSchedules() {
@@ -935,8 +940,14 @@ console.log('mark2', uploaded);
       const holdedRecords = await this.getHoldedRecords(assetIds);
 
       // const scheduleTrxIds = schedules.map((schedule) => schedule.scheduleTrxId);
-      // const uploadedRecords = await this.getUploadedRecords(scheduleTrxIds);
+      //  const uploadedRecords = await this.getUploadedRecords(scheduleTrxIds);
       // const unuploadedRecords = await this.getUnuploadedRecords();
+
+      // console.log('uploadedRecords',uploadedRecords);
+      // console.log('unuploadedRecords',unuploadedRecords);
+      
+
+
       // this.sourceSchedules
       this.sourceSchedules = schedules.map((schedule) => {
           const tagIds = schedule?.tagId?.length
@@ -1046,7 +1057,7 @@ console.log('mark2', uploaded);
         .filter(schedule => schedule.isUploaded || schedule.isUnuploaded || schedule.hasRecordHold);
 
         console.log('cek semua', this.sourceSchedules);
-
+      
       this.dataSudah = [];
   this.dataBelum=this.sourceSchedules;
     } catch (error) {
@@ -1055,6 +1066,17 @@ console.log('mark2', uploaded);
       this.onSearch();
       this.loading = false;
     }
+    
+  console.log('dataSudah',this.dataSudah);
+  console.log('dataBelum',this.dataBelum);
+
+  this.jumlahUnuploaded=this.dataSudah;
+  this.jumlahUploaded=this.dataBelum;
+
+  console.log('jumlah Unuploaded' , this.jumlahUnuploaded);
+  console.log('jumlah Uploaded' , this.jumlahUploaded);
+  
+  
   }
 
   private async getUploadedRecords(scheduleTrxIds: string[]) {
@@ -1104,6 +1126,9 @@ console.log('mark2', uploaded);
     } catch (error) {
       console.error(error);
     }
+
+    console.log('unuploadedRecords',unuploadedRecords);
+    
 
     return unuploadedRecords;
   }

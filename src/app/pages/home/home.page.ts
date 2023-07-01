@@ -479,6 +479,7 @@ export class HomePage implements OnInit {
           // Unscanned
           assets[assetIndex].schedule.unscanned++;
           count.unscanned++;
+          
         } else {
           assets[assetIndex].schedule.unscanned++;
           count.laporan++;
@@ -494,9 +495,9 @@ export class HomePage implements OnInit {
         //   count.unscanned++;
         // }
       }
-      // console.log('10. upload', count.uploaded);
-      // console.log('11. belum upload', count.unuploaded);
-      // console.log('12. belum scan', count.unscanned);
+      console.log('10. upload', count.uploaded);
+      console.log('11. belum upload', count.unuploaded);
+      console.log('12. belum scan', count.unscanned);
 
       // count.assets = assets.length;
       this.count = count;
