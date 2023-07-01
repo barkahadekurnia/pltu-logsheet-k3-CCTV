@@ -1057,7 +1057,7 @@ console.log('mark2', uploaded);
         .filter(schedule => schedule.isUploaded || schedule.isUnuploaded || schedule.hasRecordHold);
 
         console.log('cek semua', this.sourceSchedules);
-      
+        
       this.dataSudah = [];
   this.dataBelum=this.sourceSchedules;
     } catch (error) {
