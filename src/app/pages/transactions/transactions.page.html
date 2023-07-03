@@ -5,19 +5,21 @@
       <ion-back-button defaultHref="/tabs" icon="chevron-back"></ion-back-button>
     </ion-buttons>
 
-    <ion-title class="text-lg font-bold text-center text-white">Transactions</ion-title>
+    <ion-title class="text-lg font-bold text-center text-white">
+      Transactions
+    </ion-title>
   </ion-toolbar>
 
   <ion-toolbar class="dark:ion-base-gray-800" color="primary">
-    <ion-segment class="W-11/12 bg-primary" [value]="segment" (ionChange)="onSegmentChanged($event)">
+    <ion-segment class="W-full bg-primary" [value]="segment" (ionChange)="onSegmentChanged($event)">
       <!-- <ion-segment-button class="font-bold uppercase expanded" value="holded">Holded</ion-segment-button> -->
-      <ion-segment-button  *ngIf="jumlahUnuploaded" class="font-bold capitalize" value="unuploaded">
+      <ion-segment-button  *ngIf="jumlahUnuploaded" class="font-bold capitalize " value="unuploaded">
         <div class="bg-transparent">
           <ion-label class="tracking-normal">Belum Laporan </ion-label>
           <ion-badge color="danger" class="align-middle">{{jumlahUnuploaded.length}}</ion-badge>
         </div>
       </ion-segment-button>
-      <ion-segment-button  *ngIf="jumlahUploaded" class="font-bold capitalize" value="uploaded">
+      <ion-segment-button  *ngIf="jumlahUploaded" class="font-bold capitalize " value="uploaded">
         <div class="bg-transparent">
           <ion-label class="tracking-normal">Sudah Laporan </ion-label>
           <ion-badge color="success" class="align-middle">{{jumlahUploaded.length}}</ion-badge>
