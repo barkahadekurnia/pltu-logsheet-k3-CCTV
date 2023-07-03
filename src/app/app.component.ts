@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Platform, IonRouterOutlet, MenuController } from '@ionic/angular';
+import { Platform, IonRouterOutlet, MenuController, AlertController, IonModal } from '@ionic/angular';
 import { TextZoom } from '@capacitor/text-zoom';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
@@ -12,6 +13,44 @@ import Viewer from 'viewerjs';
 import * as mapboxgl from 'mapbox-gl';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Router } from '@angular/router';
+import { Keyboard } from '@capacitor/keyboard';
+import { HttpService } from './services/http/http.service';
+import { chain, filter, find, intersectionBy, intersectionWith, map, merge, some } from 'lodash';
+import { of } from 'rxjs';
+import { tap, map as rxjsMap } from 'rxjs/operators';
+
+export interface AssetDetails {
+  assetCategoryCode: string;
+  assetCategoryId: string;
+  assetCategoryName: string;
+  created_at: string;
+  deleted_at: string;
+  formId: string;
+  formLabel: string;
+  formName: string;
+  formOption: any[];
+  formType: string;
+  index: string;
+  selected: boolean;
+  updated_at: string;
+  value: string;
+  disabled: boolean;
+};
+
+export interface typeForm {
+  assetcategoryid: string;
+  code: string;
+  description: string;
+  formId: string;
+  formValue: string;
+  id: string;
+  itemTypeId: string;
+  kapasitas: string;
+  media: string;
+  merk: string;
+  more: any[];
+  type_name: string;
+};
 
 @Component({
   selector: 'app-root',
@@ -21,8 +60,13 @@ import { Router } from '@angular/router';
 export class AppComponent implements AfterViewInit {
   @ViewChild(IonRouterOutlet) routerOutlet: IonRouterOutlet;
   @ViewChild('appLoader') appLoader: ElementRef;
+  @ViewChild('input') keyInput: { setFocus: () => void };
 
   progress: number;
+
+  isReadOnly: boolean;
+
+  dataFormDetailAsset: AssetDetails[] = [];
 
   private map: mapboxgl.Map;
   private marker: mapboxgl.Marker;
@@ -38,14 +82,17 @@ export class AppComponent implements AfterViewInit {
     private screenOrientation: ScreenOrientation,
     private nfc: NfcService,
     public shared: SharedService,
-    private utils: UtilsService,
+    public utils: UtilsService,
+    private alertCtrl: AlertController,
+    private http: HttpService
   ) {
     // this.user = this.shared.user;
     // console.log('yuhu', shared.user)
-    console.log('form asset shared', this.shared.asset.assetForm)
+    console.log('form asset shared', this.shared.asset.assetForm);
     // console.log('form asset json', JSON.parse(this.shared.asset.assetForm))
     // this.formaset = JSON.parse(this.shared.asset.assetForm);
     this.progress = 0;
+    this.isReadOnly = true;
     (mapboxgl as any).accessToken = environment.values.mapbox;
 
     this.permissions = [
@@ -71,14 +118,14 @@ export class AppComponent implements AfterViewInit {
   }
 
   async ngAfterViewInit() {
-    // console.log('yuhu', this.shared.user)
+    console.log('current route', this.shared.currentRoute);
 
     await this.platform.ready();
     this.utils.setRouterOutlet(this.routerOutlet);
 
     if (this.shared.isInitialCheck) {
       await this.shared.getAppData();
-      console.log('yuhu', this.shared.user)
+      console.log('yuhu', this.shared.user);
 
     }
 
@@ -146,7 +193,7 @@ export class AppComponent implements AfterViewInit {
     });
   }
   openPage(commands: any[]) {
-    this.menuCtrl.close('sidebar')
+    this.menuCtrl.close('sidebar');
     return this.router.navigate(commands);
   }
   async checkAppPermissions() {
@@ -190,6 +237,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   assetInfoDidClose({ target }: Event) {
+    this.shared.currentRoute = null;
+    this.isReadOnly = true;
     this.menuCtrl.swipeGesture(true, (target as any).menuId);
     this.marker?.remove();
   }
@@ -245,6 +294,49 @@ export class AppComponent implements AfterViewInit {
     document.body.classList.remove('qrscanner');
     BarcodeScanner.showBackground();
     BarcodeScanner.stopScan();
+  }
+
+  private async putDetailLocation(tagId, body) {
+    try {
+      const response = await this.http.uploadDetailLocation(tagId, body);
+
+      if (![200, 201].includes(response.status)) {
+        throw response;
+      }
+
+      const alert = await this.utils.createCustomAlert({
+        type: 'success',
+        color: 'success',
+        header: 'Update Berhasil',
+        message: `${(response.data as any)?.message}. Perubahan efektif terjadi setelah dilakukan sinkronisasi.`,
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Tutup',
+            handler: () => alert.dismiss()
+          }
+        ]
+      });
+
+      await alert.present();
+    } catch (err) {
+      console.error(err);
+      const alert = await this.utils.createCustomAlert({
+        type: 'error',
+        color: 'danger',
+        header: 'Kesalahan',
+        message: this.http.getErrorMessage(err),
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: 'Tutup',
+            handler: () => alert.dismiss()
+          }
+        ]
+      });
+
+      await alert.present();
+    }
   }
 
 }

@@ -51,6 +51,7 @@ export class DatabaseService {
                   assetStatusName TEXT,
                   capacityValue TEXT,
                   condition TEXT,
+                  detailLocation TEXT,
                   created_at TEXT,
                   date TEXT,
                   deleted_at TEXT,

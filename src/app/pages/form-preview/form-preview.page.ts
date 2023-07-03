@@ -58,6 +58,7 @@ export class FormPreviewPage {
     condition: string;
     merk: string;
     capacityValue: string;
+    detailLocation: string;
     unitCapacity: string;
     supplyDate: string;
     reportPhoto: string;
@@ -136,6 +137,7 @@ export class FormPreviewPage {
       condition: '',
       merk: '',
       capacityValue: '',
+      detailLocation: '',
       unitCapacity: '',
       supplyDate: '',
       reportPhoto: '',
@@ -926,6 +928,7 @@ export class FormPreviewPage {
     this.schedule.condition = asset?.condition;
     this.schedule.merk = asset?.merk;
     this.schedule.capacityValue = asset?.capacityValue;
+    this.schedule.detailLocation = asset?.detailLocation;
     this.schedule.unitCapacity = asset?.unitCapacity;
     this.schedule.supplyDate = asset?.supplyDate;
     this.schedule.reportPhoto = asset?.reportPhoto;

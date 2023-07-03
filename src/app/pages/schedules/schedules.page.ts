@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, OnInit } from '@angular/core';
+
 import { Platform, NavController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
 
+import { chain, uniq, uniqBy } from 'lodash';
+import * as moment from 'moment';
+
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-
-import { chain, cond, groupBy, intersection, uniq, uniqBy, zip } from 'lodash';
-
-import * as moment from 'moment';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-schedules',
@@ -56,7 +55,6 @@ export class SchedulesPage implements OnInit {
     public shared: SharedService,
     private utils: UtilsService,
     private navCtrl: NavController,
-    private router: Router,
   ) {
     this.calendar = {
       date: null,
@@ -126,9 +124,11 @@ export class SchedulesPage implements OnInit {
   selectDate(item: any) {
     this.selectedDate.selected = false;
 
+    console.log('selectDate', item);
+
     this.selectedDate = item;
     this.selectedDate.selected = true;
-    console.log('this.selectedDate ',this.selectedDate);
+    console.log('this.selectedDate ', this.selectedDate);
 
     this.calendar.date = new Date(
       this.calendar.date.getFullYear(),
@@ -136,36 +136,37 @@ export class SchedulesPage implements OnInit {
       this.selectedDate.date
     );
 
-    let schdata1 = this.selectedDate.schedules;
+    const schdata1 = this.selectedDate.schedules;
 
     // Group the elements of Array based on `color` property
     // .groupBy("color")
-    const grup = uniqBy(schdata1, "areaId");
-    console.log('grup ',grup);
+    const grup = uniqBy(schdata1, 'areaId');
+    console.log('grup ', grup);
     this.selectedDate.lokasi = grup;
-    let filteredSchedule = [];
-    let isigrup = [];
-    let isifilter = [];
-    console.log('cek per tgl :', schdata1)
+    const filteredSchedule = [];
+    const isigrup = [];
+    const isifilter = [];
+    console.log('cek per tgl :', schdata1);
 
-    grup.forEach((values) =>{
+
+    grup.forEach((values) => {
       isigrup.push(values);
-    })
+    });
     isigrup.forEach((b, ind) => {
-      let schdatalokasi = schdata1.filter((v) => v.area == b.area);
-      this.datakategori.forEach((value,i) => {
-        let scanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded ==  true);
-        let unscanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded == false);
+      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit);
+      this.datakategori.forEach((value, i) => {
+        const scanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === true);
+        const unscanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === false);
         const data = {
           countScanned: scanned.length,
-          scanned: scanned,
+          scanned,
           countUnscanned: unscanned.length,
-          unscanned: unscanned,
+          unscanned,
           index: ind
-        }
+        };
         filteredSchedule.push(data);
       });
-    })
+    });
 
     this.countsc = chain(filteredSchedule).groupBy('index').map(res => res).value();
     console.log(chain(this.countsc).groupBy('index').map(res => res).value());
@@ -174,6 +175,29 @@ export class SchedulesPage implements OnInit {
     console.log('countsc', this.countsc);
   }
 
+  showNextMonth(item?: any) {
+    let date = item?.date;
+
+    if (date == null) {
+      const maxDate = new Date(
+        this.calendar.date.getFullYear(),
+        this.calendar.date.getMonth() + 2,
+        0
+      ).getDate();
+
+      date = this.calendar.date.getDate() > maxDate
+        ? maxDate
+        : this.calendar.date.getDate();
+    }
+
+    this.showCalendar(
+      new Date(
+        this.calendar.date.getFullYear(),
+        this.calendar.date.getMonth() + 1,
+        date
+      )
+    );
+  }
   showLastMonth(item?: any) {
     let date = item?.date;
 
@@ -197,6 +221,7 @@ export class SchedulesPage implements OnInit {
       )
     );
   }
+
   private async getKategori() {
     try {
       const result = await this.database.select('category', {
@@ -231,30 +256,6 @@ export class SchedulesPage implements OnInit {
     } finally {
       this.loading = false;
     }
-
-  }
-  showNextMonth(item?: any) {
-    let date = item?.date;
-
-    if (date == null) {
-      const maxDate = new Date(
-        this.calendar.date.getFullYear(),
-        this.calendar.date.getMonth() + 2,
-        0
-      ).getDate();
-
-      date = this.calendar.date.getDate() > maxDate
-        ? maxDate
-        : this.calendar.date.getDate();
-    }
-
-    this.showCalendar(
-      new Date(
-        this.calendar.date.getFullYear(),
-        this.calendar.date.getMonth() + 1,
-        date
-      )
-    );
   }
 
   private async getManualSchedules() {
@@ -278,6 +279,7 @@ export class SchedulesPage implements OnInit {
             'condition',
             'merk',
             'capacityValue',
+            'detailLocation',
             'unitCapacity',
             'supplyDate',
             'reportPhoto',
@@ -318,7 +320,7 @@ export class SchedulesPage implements OnInit {
         }
       );
 
-      const schedules = this.database.parseResult(result)
+      const schedules = this.database.parseResult(result);
       const assetIds = uniq(schedules.map(schedule => schedule.assetId));
       const assetTags = await this.getAssetTags(assetIds);
       const holdedRecords = await this.getHoldedRecords(assetIds);
@@ -343,6 +345,7 @@ export class SchedulesPage implements OnInit {
           area: schedule.area,
           latitude: schedule.latitude,
           longitude: schedule.longitude,
+          detailLocation: schedule.detailLocation,
           tagNumber: schedule.tagNumber,
           scannedAt: schedule.scannedAt,
           scannedBy: schedule.scannedBy,
@@ -419,6 +422,7 @@ export class SchedulesPage implements OnInit {
 
       this.showCalendar(this.calendar.date);
       this.loading = false;
+      console.log('schedules', this.schedules);
     }
   }
 
@@ -503,6 +507,9 @@ export class SchedulesPage implements OnInit {
 
       }
 
+      console.log('daysInThisMonth', this.calendar.daysInThisMonth);
+
+
       for (let i = 1; i <= 6 - lastDayOnThisMonth; i++) {
         this.calendar.daysInNextMonth.push({
           date: i,
@@ -518,8 +525,9 @@ export class SchedulesPage implements OnInit {
           selected: false
         });
       }
-      let datein = moment().format('DD');
-      let idx = parseInt(datein) - 1;
+      const datein = moment().format('DD');
+      // eslint-disable-next-line radix
+      const idx = parseInt(datein) - 1;
       this.selectDate(this.calendar?.daysInThisMonth[idx]);
     } catch (error) {
       console.error(error);

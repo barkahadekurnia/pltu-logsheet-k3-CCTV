@@ -1,25 +1,14 @@
 <ion-app class="scanner-hide">
-  <div
-    #appLoader
-    *ngIf="progress < 100"
-    class="fixed top-0 left-0 right-0 bottom-0 z-50 w-full min-h-screen bg-white dark:bg-gray-900 flex justify-center items-center"
-  >
-    <div
-      class="text-center flex flex-col justify-center items-center space-y-8 animate__animated animate__zoomIn"
-    >
+  <div #appLoader *ngIf="progress < 100"
+    class="fixed top-0 left-0 right-0 bottom-0 z-50 w-full min-h-screen bg-white dark:bg-gray-900 flex justify-center items-center">
+    <div class="text-center flex flex-col justify-center items-center space-y-8 animate__animated animate__zoomIn">
       <img class="h-16" src="assets/img/s2p-logo.png" alt="Logo" />
       <!-- <progress class="w-48 progress progress-primary" [value]="progress" max="100"></progress> -->
       <ion-spinner></ion-spinner>
     </div>
   </div>
 
-  <ion-menu
-    menuId="filter-assets"
-    contentId="main"
-    side="end"
-    [swipeGesture]="false"
-    [disabled]="true"
-  >
+  <ion-menu menuId="filter-assets" contentId="main" side="end" [swipeGesture]="false" [disabled]="true">
     <ion-header class="ion-no-border" mode="md">
       <ion-toolbar>
         <ion-title class="font-bold">Filter</ion-title>
@@ -39,16 +28,11 @@
         </p>
 
         <div>
-          <div
-            *ngFor="let item of filter.values"
-            class="badge mx-0.5 mb-1 p-3 px-2 rounded-full"
-            [ngClass]="[
+          <div *ngFor="let item of filter.values" class="badge mx-0.5 mb-1 p-3 px-2 rounded-full" [ngClass]="[
               item.selected
                 ? 'badge-primary'
                 : 'badge-outline text-black dark:text-gray-100 border-gray-300 dark:border-gray-600'
-            ]"
-            (click)="onFilterClick(item)"
-          >
+            ]" (click)="onFilterClick(item)">
             {{ item.text }}
           </div>
         </div>
@@ -56,19 +40,12 @@
     </ion-content>
   </ion-menu>
 
-  <ion-menu
-    menuId="asset-information"
-    contentId="main"
-    side="end"
-    [swipeGesture]="false"
-    [disabled]="true"
-    (ionDidClose)="assetInfoDidClose($event)"
-    (ionWillOpen)="assetInfoWillOpen()"
-    (ionDidOpen)="assetInfoDidOpen($event)"
-  >
+  <ion-menu menuId="asset-information" contentId="main" side="end" [swipeGesture]="false" [disabled]="true"
+    (ionDidClose)="assetInfoDidClose($event)" (ionWillOpen)="assetInfoWillOpen()"
+    (ionDidOpen)="assetInfoDidOpen($event)">
     <ion-header class="ion-no-border" mode="md">
       <ion-toolbar>
-        <ion-title class="font-bold">APA Information</ion-title>
+        <ion-title class="font-bold">Detail Asset</ion-title>
 
         <ion-buttons slot="end" class="p-2">
           <ion-button color="danger" (click)="closeMenu('asset-information')">
@@ -82,114 +59,73 @@
       <ion-list mode="ios">
         <ion-item *ngIf="asset?.photo" lines="none">
           <ion-label>
-            <img
-              class="w-48 max-w-full m-auto rounded-btn"
-              [src]="asset?.offlinePhoto || asset?.photo"
-              alt="Asset Info"
-              onerror="this.src='assets/img/empty.jpg'"
-              (click)="showImageViewer($event)"
-            />
+            <img class="w-48 max-w-full m-auto rounded-btn" [src]="asset?.offlinePhoto || asset?.photo" alt="Asset Info"
+              onerror="this.src='assets/img/empty.jpg'" (click)="showImageViewer($event)" />
           </ion-label>
         </ion-item>
 
         <ion-item class="text-xs dark:ion-border-gray-600">
-          <ion-label>APA Number</ion-label>
-          <ion-input
-            class="text-right"
-            readonly
-            [value]="asset?.assetNumber"
-          ></ion-input>
+          <ion-label>Nomor APA</ion-label>
+          <ion-input class="text-right" readonly [value]="asset?.assetNumber"></ion-input>
         </ion-item>
         <ion-item class="text-xs dark:ion-border-gray-600">
-          <ion-label>Type</ion-label>
-          <ion-input
-            class="text-right"
-            readonly
-            [value]="asset?.schType"
-          ></ion-input>
+          <ion-label>Tipe</ion-label>
+          <ion-input class="text-right !capitalize" readonly [value]="asset?.schType"></ion-input>
         </ion-item>
 
-        <ion-item class="text-xs dark:ion-border-gray-600" *ngFor="let rf of formaset; let idxx = index">
+        <ion-item class="text-xs dark:ion-border-gray-600" *ngFor="let rf of formaset">
           <ion-label>{{rf.formLabel}}</ion-label>
-          <ion-input
-            class="text-right"
-            readonly
-            [value]="rf?.optionName"
-          ></ion-input>
+          <ion-input class="text-right" readonly [value]="rf?.optionName"></ion-input>
         </ion-item>
 
         <ion-item class="text-xs dark:ion-border-gray-600">
-          <ion-label>APA Status</ion-label>
-          <ion-input
-            class="text-right"
-            readonly
-            [value]="asset?.assetStatusName"
-          ></ion-input>
+          <ion-label>Status</ion-label>
+          <ion-badge color="secondary" mode="ios" class="text-white">{{asset?.assetStatusName}}</ion-badge>
+          <!-- <ion-input class="text-right" readonly [value]="asset?.assetStatusName"></ion-input> -->
         </ion-item>
         <ion-item class="text-xs dark:ion-border-gray-600">
           <ion-label>Unit</ion-label>
-          <ion-input
-            class="text-right"
-            readonly
-            [value]="asset?.unit"
-          ></ion-input>
+          <ion-input class="text-right" readonly [value]="asset?.unit"></ion-input>
         </ion-item>
         <ion-item class="text-xs dark:ion-border-gray-600">
           <ion-label>Area</ion-label>
-          <ion-input
-            class="text-right"
-            readonly
-            [value]="asset?.area"
-          ></ion-input>
+          <ion-input class="text-right" readonly [value]="asset?.area"></ion-input>
+        </ion-item>
+        <ion-item class="text-xs dark:ion-border-gray-600">
+          <ion-label>Detail Lokasi</ion-label>
+          <ion-textarea #input rows="3" class="text-sm text-right font-semibold !capitalize" readonly
+            [value]="asset?.detailLocation"></ion-textarea>
         </ion-item>
         <ion-item class="text-xs" lines="none">
           <ion-label>Map</ion-label>
         </ion-item>
 
         <ion-item lines="none">
-          <div
-            id="map"
-            class="w-full h-80 bg-gray-300 dark:bg-gray-700 rounded-lg"
-          ></div>
+          <div id="map" class="w-full h-80 bg-gray-300 dark:bg-gray-700 rounded-lg"></div>
         </ion-item>
       </ion-list>
     </ion-content>
   </ion-menu>
 
-  <ion-menu
-    menuId="sidebar"
-    contentId="main"
-    side="start"
-    [swipeGesture]="false"
-    [disabled]="true"
-    (ionDidClose)="assetInfoDidClose($event)"
-    (ionWillOpen)="assetInfoWillOpen()"
-    (ionDidOpen)="assetInfoDidOpen($event)"
-  >
-    <ion-header class="ion-no-border" mode="md" >
+  <ion-menu menuId="sidebar" contentId="main" side="start" [swipeGesture]="false" [disabled]="true"
+    (ionDidClose)="assetInfoDidClose($event)" (ionWillOpen)="assetInfoWillOpen()"
+    (ionDidOpen)="assetInfoDidOpen($event)">
+    <ion-header class="ion-no-border" mode="md">
       <ion-toolbar class="new-background-color">
-        <ion-title class="new-background-color"
-          ><p class="text-xs text-gray-500 text-center">
+        <ion-title class="new-background-color">
+          <p class="text-xs text-gray-500 text-center">
             <ion-badge color="warning" mode="ios">{{ shared.user.group }}</ion-badge>
-          </p></ion-title
-        >
+          </p>
+        </ion-title>
         <div id="profile" class="space-y-3">
-          <img
-            src="assets/img/engineer.png"
-            alt="Avatar user"
-            class="w-20 md:w-16 rounded-full mx-auto"
-          />
+          <img src="assets/img/engineer.png" alt="Avatar user" class="w-20 md:w-16 rounded-full mx-auto" />
           <div>
-            <h2
-              class="font-medium text-xs md:text-sm text-center text-teal-500"
-            >
-            {{ shared.user.name }}
+            <h2 class="font-medium text-xs md:text-sm text-center text-teal-500">
+              {{ shared.user.name }}
             </h2>
 
-          <h2
-              class="font-medium text-xs md:text-sm text-center text-teal-500"
-            >
-            {{ shared.user.namaperusahaan }}
+            <h2 class="font-medium text-xs md:text-sm text-center text-teal-500">
+              {{ shared.user.namaperusahaan }}
             </h2>
 
 
@@ -201,24 +137,14 @@
     <ion-content class="ion-padding-bottom">
       <div class="space-y-6 md:space-y-10 mt-10">
         <div id="menu" class="flex flex-col space-y-2">
-          <a
-            class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
-            (click)="openPage(['profile'])"
-          >
-            <img class="w-6 h-6 fill-current inline-block"
-            src="assets/icon/user.png"
-            alt="Avatar user"
-          />
+          <a class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
+            (click)="openPage(['profile'])">
+            <img class="w-6 h-6 fill-current inline-block" src="assets/icon/user.png" alt="Avatar user" />
             <span class=""> Akun</span>
           </a>
-          <a
-            (click)="openPage(['admin'])"
-            class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out"
-          >
-          <img class="w-6 h-6 fill-current inline-block"
-          src="assets/icon/settings.png"
-          alt="Avatar user"
-        />
+          <a (click)="openPage(['admin'])"
+            class="text-sm font-medium text-gray-900 py-2 px-2 hover:bg-teal-500 hover:text-white hover:scale-105 rounded-md transition duration-150 ease-in-out">
+            <img class="w-6 h-6 fill-current inline-block" src="assets/icon/settings.png" alt="Avatar user" />
             <span class=""> Settings</span>
           </a>
           <!-- <a
@@ -278,10 +204,7 @@
         </div>
       </div>
       <div class="text-center mt-8">
-        <button
-          class="btn btn-block btn-warning text-white focus:outline-none"
-          (click)="closeReader()"
-        >
+        <button class="btn btn-block btn-warning text-white focus:outline-none" (click)="closeReader()">
           Kembali
         </button>
       </div>

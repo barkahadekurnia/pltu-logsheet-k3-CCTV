@@ -23,16 +23,19 @@
       overflow: hidden;
       cursor: pointer;
     }
+
     .button:focus .dropdown,
     .button:active .dropdown {
       transform: translate(0, 20px);
       opacity: 1;
       visibility: visible;
     }
+
     .button .material-icons {
       border-radius: 100%;
       animation: ripple 0.6s linear infinite;
     }
+
     .button .dropdown {
       position: absolute;
       top: 100%;
@@ -46,6 +49,7 @@
       visibility: hidden;
       transition: 0.3s ease;
     }
+
     .button .dropdown:before {
       content: "";
       position: absolute;
@@ -61,6 +65,7 @@
       transform: rotate(-45deg);
       mix-blend-mode: multiple;
     }
+
     .button .dropdown li {
       z-index: 1;
       position: relative;
@@ -68,18 +73,23 @@
       padding: 0 20px;
       color: #666;
     }
+
     .button .dropdown li.active {
       color: #5380f7;
     }
+
     .button .dropdown li:first-child {
       border-radius: 4px 4px 0 0;
     }
+
     .button .dropdown li:last-child {
       border-radius: 0 0 4px 4px;
     }
+
     .button .dropdown li:last-child a {
       border-bottom: 0;
     }
+
     .button .dropdown a {
       display: block;
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -88,6 +98,7 @@
       font-size: 10px;
       text-decoration: none;
     }
+
     @keyframes ripple {
       0% {
         box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1),
@@ -95,6 +106,7 @@
           0 0 0 40px rgba(255, 255, 255, 0.1),
           0 0 0 60px rgba(255, 255, 255, 0.1);
       }
+
       100% {
         box-shadow: 0 0 0 20px rgba(255, 255, 255, 0.1),
           0 0 0 40px rgba(255, 255, 255, 0.1),
@@ -124,21 +136,19 @@
                 <ul class="dropdown">
                   <li><a>Grup Operator</a></li>
                   <li *ngIf="gruprole === 'PETUGAS' && datanonsift.status === 1">
-                    <a
-                      ><p
-                        class="text-white text-xl font-semibold leading-tight truncate"
-                      >
+
+                    <a>
+                      <p class="text-white text-xl font-semibold leading-tight truncate">
                         <ion-badge color="warning" mode="ios">
                           {{ datanonsift.data.operatorGroupName }}
                         </ion-badge>
-                      </p></a
-                    >
+                      </p>
+                    </a>
                   </li>
                   <li *ngIf="gruprole === 'PETUGAS' && datasift.status === 1">
-                    <a
-                      ><h4
-                        class="text-white text-xl font-semibold leading-tight truncate"
-                      >
+
+                    <a>
+                      <h4 class="text-white text-xl font-semibold leading-tight truncate">
                         <ion-badge color="warning" mode="ios">
                           {{ datasift.data.operatorGroupName }}
                         </ion-badge>
@@ -146,10 +156,9 @@
                     </a>
                   </li>
                   <li *ngIf="gruprole === 'PETUGAS' && datalk3.status === 1">
-                    <a
-                      ><h4
-                        class="text-white text-xl font-semibold leading-tight truncate"
-                      >
+
+                    <a>
+                      <h4 class="text-white text-xl font-semibold leading-tight truncate">
                         <ion-badge color="warning" mode="ios">
                           {{ datalk3.data.operatorGroupName }}
                         </ion-badge>
@@ -190,8 +199,8 @@
           <button *ngIf="gruprole === 'ADMIN'" class="btn btn-info rounded-full text-white" (click)="openScan()">
             <ion-icon name="card-outline"></ion-icon>
           </button>
-          <button class="btn btn-primary rounded-full bttext-white ml-1" (click)="cekScan()" >
-            <ion-icon name="qr-code-outline" ></ion-icon>
+          <button class="btn btn-primary rounded-full bttext-white ml-1" (click)="cekScan()">
+            <ion-icon name="qr-code-outline"></ion-icon>
           </button>
 
         </div>
@@ -209,18 +218,14 @@
               [holded]="count.holded"
               [unscanned]="count.unscanned"
             > -->
-            <app-percentage
-              [uploaded]="count.uploaded"
-              [unuploaded]="count.unuploaded"
-              [unscanned]="count.unscanned"
-            >
+            <app-percentage [uploaded]="count.uploaded" [unuploaded]="count.unuploaded" [unscanned]="count.unscanned">
             </app-percentage>
           </div>
         </ion-col>
       </ion-row>
       <ion-row class="w-full pt-3 justify-center items-center">
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat [count]="count.uploaded + count.unuploaded + count.unscanned" label="Schedules" theme="info"
+          <app-badge-stat [count]="count.uploaded + count.unuploaded + count.unscanned" label="Jadwal Scan" theme="info"
             icon="assets/icon/calendar-alt-light.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true"
             (click)="openPage(['schedules'])">
             <!-- <app-badge-stat
@@ -237,17 +242,8 @@
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat
-            [count]="count.assets"
-            label="Alat Pemadam"
-            theme="success"
-            icon="assets/icon/apa.svg"
-            type="outline"
-            [ripple]="true"
-            [vertical]="true"
-            [large]="true"
-            (click)="openPage(['assets'])"
-          >
+          <app-badge-stat [count]="count.assets" label="Alat Pemadam" theme="success" icon="assets/icon/apa.svg"
+            type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openPage(['assets'])">
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">

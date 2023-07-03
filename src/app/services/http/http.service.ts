@@ -1,16 +1,19 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Injectable, Injector } from '@angular/core';
 import { Platform, LoadingController, NavController } from '@ionic/angular';
+import { HttpClient } from '@angular/common/http';
+
 import { App } from '@capacitor/app';
 import { Device } from '@capacitor/device';
 import { Storage } from '@capacitor/storage';
-
 import {
   Http,
   HttpOptions,
   HttpUploadFileOptions,
   HttpDownloadFileOptions
 } from '@capacitor-community/http';
+
+import { timeout, retry } from 'rxjs/operators';
 
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService, MyAlertOptions } from 'src/app/services/utils/utils.service';
@@ -81,16 +84,63 @@ export type RequestSet = {
   providedIn: 'root'
 })
 export class HttpService {
+  timeout: number;
+  retry: number;
+
   constructor(
     private injector: Injector,
     private platform: Platform,
     private loadingCtrl: LoadingController,
-    private navCtrl: NavController
-  ) { }
+    private navCtrl: NavController,
+    private httpClient: HttpClient
+  ) {
+    this.timeout = 10000;
+    this.retry = 3;
+  }
 
   get token() {
     const shared = this.injector.get(SharedService);
     return shared.user.token;
+  }
+
+  getAnyData(url, params?: any) {
+    const options: HttpOptions = {
+      url,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      params,
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
+
+  postAnyData(url: string, data) {
+    const observable = this.httpClient
+      .post(url, data, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        },
+        observe: 'response',
+        responseType: 'json'
+      })
+      .pipe(timeout(this.timeout), retry(this.retry));
+
+    return observable.toPromise();
+
+
+    // const options: HttpOptions = {
+    //   url,
+    //   headers: {
+    //     Authorization: `Bearer ${this.token}`,
+    //     'Content-Type': 'application/json'
+    //   },
+    //   data,
+    //   responseType: 'json'
+    // };
+
+    // return Http.post(options);
   }
 
   login(data: LoginData) {
@@ -109,7 +159,7 @@ export class HttpService {
   kirimlaporan(id: string, data: LaporanData) {
 
     const options: HttpOptions = {
-      url: environment.url.kirimlaporan+ "/" + id,
+      url: environment.url.kirimlaporan + '/' + id,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -134,7 +184,7 @@ export class HttpService {
   }
   getAssetsId(params: string) {
     const options: HttpOptions = {
-      url: environment.url.assetsid + "/" + params,
+      url: environment.url.assetsid + '/' + params,
       headers: {
         Authorization: `Bearer ${this.token}`
       },
@@ -145,7 +195,7 @@ export class HttpService {
   }
   getAssetsDetail(params: string) {
     const options: HttpOptions = {
-      url: environment.url.assetsdetail + "/" + params,
+      url: environment.url.assetsdetail + '/' + params,
       headers: {
         Authorization: `Bearer ${this.token}`
       },
@@ -191,7 +241,7 @@ export class HttpService {
 
     return Http.get(options);
   }
-  getjadwal(params: { tanggal?: string; } = {}) {
+  getjadwal(params: { tanggal?: string } = {}) {
     const options: HttpOptions = {
       url: environment.url.jadwal,
       headers: {
@@ -203,7 +253,8 @@ export class HttpService {
 
     return Http.get(options);
   }
-  getjadwaldate(params: { userId?: string; date?: string; } = {}, categoryid) {
+  getjadwaldate(params: { userId?: string; date?: string } = {}, categoryid) {
+    // eslint-disable-next-line max-len
     //http://114.6.64.2:11241/api/logsheet_dev/api/schedule/getAssetByCategory/c3777b68-ba7e-11ec-adb0-a8ea9c4fb59f?userId=6596&date=2022-12-08
     const options: HttpOptions = {
       url: environment.url.jadwaldate + '/' + categoryid,
@@ -229,7 +280,7 @@ export class HttpService {
   }
   changerfid(params: string, data: Rfid) {
     const options: HttpOptions = {
-      url: environment.url.changerfid + "/" + params,
+      url: environment.url.changerfid + '/' + params,
       headers: {
         Authorization: `Bearer ${this.token}`,
         'Content-Type': 'application/json'
@@ -278,16 +329,6 @@ export class HttpService {
   // }
 
   getParameters(data: AssetIdToType) {
-    // const options: HttpOptions = {
-    //   url: environment.url.parameters,
-    //   headers: {
-    //     Authorization: `Bearer ${this.token}`
-    //   },
-    //   params,
-    //   responseType: 'json'
-    // };
-
-    // return Http.get(options);
     const options: HttpOptions = {
       url: environment.url.parameters,
       headers: {
@@ -478,6 +519,20 @@ export class HttpService {
     };
 
     return Http.post(options);
+  }
+
+  uploadDetailLocation(tagId, data: any) {
+    const options: HttpOptions = {
+      url: `${environment.url.updateLocation}/${tagId}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json'
+      },
+      data,
+      responseType: 'json'
+    };
+
+    return Http.put(options);
   }
 
   async refreshToken() {

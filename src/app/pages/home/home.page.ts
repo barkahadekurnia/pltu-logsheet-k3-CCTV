@@ -45,6 +45,7 @@ import {
   SupportedFormat,
 } from '@capacitor-community/barcode-scanner';
 import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
+
 type NfcStatus =
   | 'NO_NFC'
   | 'NFC_DISABLED'
@@ -166,6 +167,7 @@ export class HomePage implements OnInit {
     this.datasift = this.shared.userdetail.shift;
     this.datanonsift = this.shared.userdetail.nonshift;
     this.datalk3 = this.shared.userdetail.lk3;
+
     console.log(this.gruprole, this.datasift, this.datanonsift, this.datalk3);
   }
 
@@ -325,6 +327,7 @@ export class HomePage implements OnInit {
           throw response;
         }
         this.count.assets = response?.data?.data;
+
         console.log('data', response?.data?.data);
       },
       onError: (error) => {
@@ -420,7 +423,7 @@ export class HomePage implements OnInit {
   // }
 
   private async getLocalSchedules(assets: any[]) {
-    // console.log('4. data local asset ke get localSchedule', assets);
+    // //console.log('4. data local asset ke get localSchedule', assets);
     try {
       const count = {
         assets: 0,
@@ -458,7 +461,7 @@ export class HomePage implements OnInit {
       // .filter(schedule => this.filterSchedule(schedule, now, dateInThisMonth, lastWeek));
 
       const unuploadedRecords = await this.getUnuploadedRecords();
-      // console.log('8. belum upload', unuploadedRecords);
+      // //console.log('8. belum upload', unuploadedRecords);
 
       for (const item of schedules) {
         const assetIndex = assets.findIndex(
@@ -479,7 +482,6 @@ export class HomePage implements OnInit {
           // Unscanned
           assets[assetIndex].schedule.unscanned++;
           count.unscanned++;
-          
         } else {
           assets[assetIndex].schedule.unscanned++;
           count.laporan++;
@@ -555,7 +557,7 @@ export class HomePage implements OnInit {
         });
       }
     } catch (error) {
-      // console.log(error)
+      // //console.log(error)
       await Filesystem.mkdir({
         path: type,
         directory: Directory.Data,
@@ -611,51 +613,24 @@ export class HomePage implements OnInit {
 
     return filePath;
   }
+  
   async showDetails(akun?: any) {
     await this.menuCtrl.enable(true, 'sidebar');
     return this.menuCtrl.open('sidebar');
   }
-  // private getParameterByAssetId(assetId: string) {
-  private getParameterByAssetId(assetId) {
-    console.log('cek asset in', assetId);
+
+  private async getParameterByAssetId(assetId) {
+    const loader = await this.utils.presentLoader();
     return this.http.requests({
       requests: [() => this.http.getParameters(assetId)],
       onSuccess: async ([responseParameters]) => {
-        if (responseParameters.status >= 400) {
+        if (![200, 201].includes(responseParameters.status)) {
           throw responseParameters;
         }
-        console.log('parameter res', responseParameters);
+
         if (responseParameters?.data?.data?.length) {
           const parameters = [];
-          // const parameters = responseParameters?.data?.data?.map?.((param: any) => {
-          //       const data = {
-          //       assetId: param.assetId,
-          //       assetNumber: param.assetNumber,
-          //       description: param.description,
-          //       inputType: param.inputType,
-          //       max: param.max,
-          //       min: param.min,
-          //       normal: param.normal,
-          //       abnormal: param.abnormal,
-          //       option: param.option,
-          //       parameterId: param.parameterId,
-          //       parameterName: param.parameterName,
-          //       schType: toLower(param.schType),
-          //       showOn: param.showOn,
-          //       sortId: param.index,
-          //       uom: param.uom,
-          //       workInstruction: param.workInstruction,
-          //       tagId: param.tagId,
-          //       unit: param.unit,
-          //       unitId: param.unitId,
-          //       area: param.area,
-          //       areaId: param.areaId,
-          //       created_at: param.created_at,
-          //       updated_at: param.updated_at,
-          //       parameterGroup: param.parameterGroup,
-          //     };
-          //     return data;
-          // });
+
           for (const parameter of responseParameters?.data?.data) {
             for (const param of parameter) {
               const data = {
@@ -687,40 +662,41 @@ export class HomePage implements OnInit {
               parameters.push(data);
             }
           }
-          console.log('parameter', parameters);
+          console.log('parameter1', parameters);
 
-          // const isiparameter = isiparameter.length;
-          // isiparameter.
-          let isiaray = [];
-          const chunks = (a, size) =>
-            Array.from(new Array(Math.ceil(a.length / size)), (_, i) =>
-              a.slice(i * size, i * size + size)
-            );
-
-          // await this.database.emptyTable('parameter').then(() => this.database.insertbatch('parameter', val);
-          isiaray = chunks(parameters, 250);
-          isiaray.map(async (val) => {
+          let storeParameters = [];
+          // await this.database.emptyTable('parameter');
+          // .then(() => this.database.insertbatch('parameter', val);
+          storeParameters = this.utils.chunkArray(parameters, 250);
+          storeParameters?.map?.(async (val) => {
             await this.database.insert('parameter', val);
           });
+          // //console.log('storeParameters', storeParameters);
 
-          setTimeout(async () => {
-            const start = parameters.length;
+          // setTimeout(async () => {
+          //   const start = parameters.length;
 
-            if (start < parameters.length) {
-              let end = start + 900;
+          //   if (start < parameters.length) {
+          //     let end = start + 900;
 
-              end = end > parameters.length ? parameters.length : end;
+          //     end = end > parameters.length
+          //       ? parameters.length
+          //       : end;
 
-              parameters.push(...parameters.slice(start, end));
-            }
-            await this.database
-              .emptyTable('parameter')
-              .then(() => this.database.insertbatch('parameter', parameters));
-          }, 500);
-          console.log('cek isi parameter', parameters);
+          //     parameters.push(
+          //       ...parameters.slice(start, end)
+          //     );
+          //   }
+
+          //   console.log('parameter2', parameters);
+          //   await this.database.emptyTable('parameter')
+          //     .then(() => this.database.insertbatch('parameter', parameters));
+          // }, 500);
+          // //console.log('cek isi parameter', parameters);
         }
       },
-      onError: (error) => console.error(error),
+      onError: error => console.error(error),
+      onComplete: () => loader.dismiss()
     });
   }
 
@@ -791,7 +767,7 @@ export class HomePage implements OnInit {
   ) {
     this.syncJob.counter++;
     const maxCount = Object.keys(this.syncJob.order).length;
-    // console.log('jumlah syc', this.syncJob.counter);
+    // //console.log('jumlah syc', this.syncJob.counter);
 
     if (this.syncJob.counter < maxCount) {
       subscriber.next({
@@ -966,7 +942,7 @@ export class HomePage implements OnInit {
       updated_at: syncAt,
     }));
 
-    // console.log('records', records);
+    // //console.log('records', records);
 
     if (records.length) {
       this.syncJob.isUploading = true;
@@ -1072,25 +1048,21 @@ export class HomePage implements OnInit {
     }
   }
 
-  private async uploadRecordAttachments(
-    subscriber: Subscriber<any>,
-    loader: HTMLIonPopoverElement
-  ) {
-    const recordAttachments = (
-      await this.getUnuploadedData('recordAttachment')
-    ).map((attachment) => ({
-      recordAttachmentId: attachment.recordAttachmentId,
-      scheduleTrxId: attachment.scheduleTrxId,
-      trxId: attachment.trxId,
-      notes: attachment.notes,
-      type: attachment.type,
-      filePath: attachment.filePath,
-      timestamp: attachment.timestamp,
-      parameterId: attachment.parameterId,
-    }));
-    // console.log('isi att', recordAttachments);
+  private async uploadRecordAttachments(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
+    const recordAttachments = (await this.getUnuploadedData('recordAttachment'))
+      .map((attachment) => ({
+        recordAttachmentId: attachment.recordAttachmentId,
+        scheduleTrxId: attachment.scheduleTrxId,
+        trxId: attachment.trxId,
+        notes: attachment.notes,
+        type: attachment.type,
+        filePath: attachment.filePath,
+        timestamp: attachment.timestamp,
+        parameterId: attachment.parameterId,
+      }));
+    // //console.log('isi att', recordAttachments);
     if (recordAttachments.length) {
-      console.log('recordAttachments', recordAttachments);
+      //console.log('recordAttachments', recordAttachments)
       const uploaded = [];
       const activityLogs = [];
       this.syncJob.isUploading = true;
@@ -1103,9 +1075,9 @@ export class HomePage implements OnInit {
 
       const attachmentBySchedule: any = {};
 
-      Object.entries(groupBy(recordAttachments, 'scheduleTrxId')).forEach(
-        ([scheduleTrxId, attachments]) => {
-          console.log('attachments cek1', attachments);
+      Object.entries(groupBy(recordAttachments, 'scheduleTrxId'))
+        .forEach(([scheduleTrxId, attachments]) => {
+          //console.log('attachments cek1', attachments)
           attachmentBySchedule[scheduleTrxId] = {
             attachmentIds: attachments.map(
               (attachment) => attachment.recordAttachmentId
@@ -1118,7 +1090,7 @@ export class HomePage implements OnInit {
       subscriber.next({
         complexMessage: Object.values(this.syncJob.order),
       });
-      console.log('recordAttachmentId', recordAttachments.entries());
+      //console.log('recordAttachmentId', recordAttachments.entries())
 
       for (const [i, item] of recordAttachments.entries()) {
         const { recordAttachmentId, ...data } = item;
@@ -1137,7 +1109,7 @@ export class HomePage implements OnInit {
             if (response.status >= 400) {
               throw response;
             }
-            console.log('recordAttachmentId', response);
+            //console.log('recordAttachmentId', response)
             uploaded.push(recordAttachmentId);
 
             attachmentBySchedule[item.scheduleTrxId].uploadedAttachmentIds.push(
@@ -1151,7 +1123,7 @@ export class HomePage implements OnInit {
             });
           },
           onError: (error) => {
-            console.log(error);
+            //console.log(error)
             activityLogs.push({
               scheduleTrxId: item.scheduleTrxId,
               status: 'failed',
@@ -1182,22 +1154,18 @@ export class HomePage implements OnInit {
                     value.uploadedAttachmentIds?.length
                 )
                 .map(([scheduleTrxId]) => scheduleTrxId);
-              // console.log('uploadedBySchedule', uploadedBySchedule);
+              // //console.log('uploadedBySchedule', uploadedBySchedule);
 
               if (uploadedBySchedule.length) {
                 const marks = this.database.marks(uploadedBySchedule.length);
-                // console.log('marks', marks);
+                // //console.log('marks', marks);
 
                 const where = {
                   query: `trxId IN (${marks})`,
                   params: uploadedBySchedule,
                 };
-                console.log(where);
-                this.database.update(
-                  'recordAttachment',
-                  { isUploaded: 1 },
-                  where
-                );
+                //console.log(where)
+                this.database.update('recordAttachment', { isUploaded: 1 }, where);
               }
 
               if (uploaded.length === recordAttachments.length) {
@@ -1243,13 +1211,14 @@ export class HomePage implements OnInit {
     loader: HTMLIonPopoverElement
   ) {
     const shared = this.injector.get(SharedService);
-    if (shared.user.group == 'ADMIN') {
+    if (shared.user.group === 'ADMIN') {
       return this.http.requests({
         requests: [() => this.http.getSchedules()],
         onSuccess: async ([response]) => {
           if (response.status >= 400) {
             throw response;
           }
+
           if (response?.data?.data?.length) {
             const uploadedSchedules = [];
             const notifications = [];
@@ -1277,6 +1246,7 @@ export class HomePage implements OnInit {
                   condition: dataschedule.condition,
                   merk: dataschedule.merk,
                   capacityValue: dataschedule.capacityValue,
+                  detailLocation: dataschedule.detailLocation,
                   unitCapacity: dataschedule.unitCapacity,
                   supplyDate: dataschedule.supplyDate,
                   reportPhoto: dataschedule.reportPhoto,
@@ -1320,19 +1290,28 @@ export class HomePage implements OnInit {
 
             const assetiduniq = uniqBy(response?.data?.data, 'assetId');
 
-            assetiduniq?.map?.((dataschedule: any) => {
-              assetIdType.push(dataschedule.assetId);
-              assetIdSchedule.push({
-                assetId: dataschedule.assetId,
-                categoryId: dataschedule.assetCategoryId,
+            const assetiduniq = uniqBy(response?.data?.data, 'assetId');
+
+            assetiduniq
+              ?.map?.((dataschedule: any) => {
+                assetIdType.push(dataschedule.assetId);
+                assetIdSchedule.push({
+                  assetId: dataschedule.assetId,
+                  categoryId: dataschedule.assetCategoryId
+                });
               });
-            });
-            const assetIdScheduleType = {
-              asset: JSON.stringify(assetIdSchedule),
-            };
+            const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
             const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+            //console.log('assetIdSchedule', assetIdSchedule);
+
             this.getTypeScan(assetIdScheduleType1);
-            this.getParameterByAssetId(assetIdScheduleType);
+            // this.getParameterByAssetId(assetIdScheduleType);
+            let splitAssetIdSchedule = [];
+            splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
+            splitAssetIdSchedule?.map?.(async val => {
+              const payload = { asset: JSON.stringify(val) };
+              await this.getParameterByAssetId(payload);
+            });
             //Jika ada record yang belum di upload
             // if (uploadedSchedules?.length) {
             //   const marks = this.database.marks(uploadedSchedules.length).join(',');
@@ -1354,7 +1333,7 @@ export class HomePage implements OnInit {
                       throw response;
                     }
 
-                    console.log('getSchedulesNonSift', response);
+                    //console.log('getSchedulesNonSift', response);
 
                     if (response?.data?.data?.length) {
                       const notifications = [];
@@ -1385,6 +1364,7 @@ export class HomePage implements OnInit {
                             condition: dataschedule.condition,
                             merk: dataschedule.merk,
                             capacityValue: dataschedule.capacityValue,
+                            detailLocation: dataschedule.detailLocation,
                             unitCapacity: dataschedule.unitCapacity,
                             supplyDate: dataschedule.supplyDate,
                             reportPhoto: dataschedule.reportPhoto,
@@ -1420,15 +1400,11 @@ export class HomePage implements OnInit {
                           };
 
                           return data;
-                        }
-                      );
+                        });
                       const assetIdSchedule = [];
                       const assetIdType = [];
 
-                      const assetiduniq = uniqBy(
-                        response?.data?.data,
-                        'assetId'
-                      );
+                      const assetiduniq = uniqBy(response?.data?.data, "assetId");
 
                       assetiduniq?.map?.((dataschedule: any) => {
                         assetIdType.push(dataschedule.assetId);
@@ -1436,16 +1412,19 @@ export class HomePage implements OnInit {
                           assetId: dataschedule.assetId,
                           categoryId: dataschedule.assetCategoryId,
                         });
-                      });
-                      // console.log('assetIdSchedule', assetIdSchedule);
-                      const assetIdScheduleType = {
-                        asset: JSON.stringify(assetIdSchedule),
-                      };
-                      const assetIdScheduleType1 = {
-                        asset: JSON.stringify(assetIdType),
-                      };
+                      // //console.log('assetIdSchedule', assetIdSchedule);
+                      const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
+                      const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+                      //console.log('assetIdSchedule', assetIdSchedule);
+
                       this.getTypeScan(assetIdScheduleType1);
-                      this.getParameterByAssetId(assetIdScheduleType);
+                      // this.getParameterByAssetId(assetIdScheduleType);
+                      splitAssetIdSchedule = [];
+                      splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
+                      splitAssetIdSchedule?.map?.(async val => {
+                        const payload = { asset: JSON.stringify(val) };
+                        await this.getParameterByAssetId(payload);
+                      });
                       this.database.insertbatch('schedule', schedulesnonsift);
                       this.shared.addLogActivity({
                         activity:
@@ -1549,12 +1528,12 @@ export class HomePage implements OnInit {
                 this.http.requests({
                   requests: [() => this.http.getSchedulesManualadmin()],
                   onSuccess: async ([response]) => {
-                    console.log(response.data.data);
+                    //console.log(response.data.data)
                     if (response.status >= 400) {
                       throw response;
                     }
 
-                    console.log('getSchedulesManual', response);
+                    //console.log('getSchedulesManual', response);
 
                     if (response?.data?.data?.length) {
                       const notifications = [];
@@ -1585,6 +1564,7 @@ export class HomePage implements OnInit {
                             condition: dataschedule.condition,
                             merk: dataschedule.merk,
                             capacityValue: dataschedule.capacityValue,
+                            detailLocation: dataschedule.detailLocation,
                             unitCapacity: dataschedule.unitCapacity,
                             supplyDate: dataschedule.supplyDate,
                             reportPhoto: dataschedule.reportPhoto,
@@ -1630,15 +1610,18 @@ export class HomePage implements OnInit {
                           assetId: dataschedule.assetId,
                           categoryId: dataschedule.assetCategoryId,
                         });
-                      });
-                      const assetIdScheduleType = {
-                        asset: JSON.stringify(assetIdSchedule),
-                      };
-                      const assetIdScheduleType1 = {
-                        asset: JSON.stringify(assetIdType),
-                      };
+                      const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
+                      const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+                      //console.log('assetIdSchedule', assetIdSchedule);
+
                       this.getTypeScan(assetIdScheduleType1);
-                      this.getParameterByAssetId(assetIdScheduleType);
+                      // this.getParameterByAssetId(assetIdScheduleType);
+                      splitAssetIdSchedule = [];
+                      splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
+                      splitAssetIdSchedule?.map?.(async val => {
+                        const payload = { asset: JSON.stringify(val) };
+                        await this.getParameterByAssetId(payload);
+                      });
                       this.database.insertbatch('schedule', schedulesmanual);
 
                       this.shared.addLogActivity({
@@ -1747,7 +1730,7 @@ export class HomePage implements OnInit {
             });
 
             await this.notification.cancel('Scan Asset Notification');
-            console.log('notifications', notifications);
+            //console.log('notifications', notifications);
 
             const groupedNotifications = groupBy(notifications, 'scheduleTo');
 
@@ -1758,8 +1741,8 @@ export class HomePage implements OnInit {
                 .map((item: any) => item.asset_number)
                 .join(',');
 
-              // console.log(moment(key).format('YYYY-MM-DDTHH:mm:ss'));
-              // console.log(new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')));
+              // //console.log(moment(key).format('YYYY-MM-DDTHH:mm:ss'));
+              // //console.log(new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')));
 
               // eslint-disable-next-line @typescript-eslint/no-shadow
               const notificationSchema: LocalNotificationSchema = {
@@ -1849,12 +1832,13 @@ export class HomePage implements OnInit {
       this.onProcessFinished(subscriber, loader);
     }
   }
+
   private async getSchedulesShift() {
     const shared = this.injector.get(SharedService);
     const userIdShift = JSON.stringify(shared.userdetail.shift);
     const userId = { groupOperatorId: JSON.parse(userIdShift).data.operatorId };
-    console.log('status sift', JSON.parse(userIdShift).status);
-    console.log('status userId', userId);
+    //console.log('status sift', JSON.parse(userIdShift).status)
+    //console.log('status userId', userId)
     if (JSON.parse(userIdShift).status == 1) {
       this.http.requests({
         requests: [() => this.http.getSchedules(userId)],
@@ -1862,7 +1846,7 @@ export class HomePage implements OnInit {
           if (response.status >= 400) {
             throw response;
           }
-          console.log('response data sift', response?.data?.data);
+          //console.log('response data sift', response?.data?.data)
 
           if (response?.data?.data?.length) {
             let notifications = [];
@@ -1875,7 +1859,7 @@ export class HomePage implements OnInit {
                   notifications.push(dataschedule);
                 }
 
-                // console.log('photo', dataschedule.photo.path)
+                // //console.log('photo', dataschedule.photo.path)
                 // var foto = dataschedule.photo.path;
                 const dataScheduledShift = {
                   scheduleTrxId: dataschedule.scheduleTrxId,
@@ -1893,6 +1877,7 @@ export class HomePage implements OnInit {
                   condition: dataschedule.condition,
                   merk: dataschedule.merk,
                   capacityValue: dataschedule.capacityValue,
+                  detailLocation: dataschedule.detailLocation,
                   unitCapacity: dataschedule.unitCapacity,
                   supplyDate: dataschedule.supplyDate,
                   reportPhoto: dataschedule.reportPhoto,
@@ -1928,31 +1913,42 @@ export class HomePage implements OnInit {
                 };
 
                 return dataScheduledShift;
-              }
-            );
+              });
             const assetIdSchedule = [];
             const assetIdType = [];
 
-            const assetiduniq = uniqBy(response?.data?.data, 'assetId');
+            const assetiduniq = uniqBy(response?.data?.data, "assetId");
 
-            assetiduniq?.map?.((dataschedule: any) => {
-              assetIdType.push(dataschedule.assetId);
-              assetIdSchedule.push({
-                assetId: dataschedule.assetId,
-                categoryId: dataschedule.assetCategoryId,
+            assetiduniq
+              ?.map?.((dataschedule: any) => {
+                assetIdType.push(dataschedule.assetId)
+                assetIdSchedule.push({
+                  "assetId": dataschedule.assetId,
+                  "categoryId": dataschedule.assetCategoryId
+                }
+                )
               });
-            });
-            // console.log('assetIdSchedule', assetIdSchedule);
-            const assetIdScheduleType = {
-              asset: JSON.stringify(assetIdSchedule),
-            };
+            // //console.log('assetIdSchedule', assetIdSchedule);
+            const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
             const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+            //console.log('assetIdSchedule', assetIdSchedule);
+
             this.getTypeScan(assetIdScheduleType1);
-            this.getParameterByAssetId(assetIdScheduleType);
+            // this.getParameterByAssetId(assetIdScheduleType);
+            let splitAssetIdSchedule = [];
+            splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
+            splitAssetIdSchedule?.map?.(async val => {
+              const payload = { asset: JSON.stringify(val) };
+              await this.getParameterByAssetId(payload);
+            });
+            //console.log('splitAssetIdSchedule', splitAssetIdSchedule);
+
+
             //Jika ada record yang belum di upload
 
-            // console.log('assetIdSchedule', assetIdSchedule);
-            // console.log('schedules cek', schedules);
+
+            // //console.log('assetIdSchedule', assetIdSchedule);
+            // //console.log('schedules cek', schedules);
             this.database.insertbatch('schedule', schedules);
 
             this.shared.addLogActivity({
@@ -1970,11 +1966,8 @@ export class HomePage implements OnInit {
               'scheduleFrom'
             );
             const scheduleToGroupNotify = groupBy(notifications, 'scheduleTo');
-            let scheduledData = {
-              ...scheduleFromGroupNotify,
-              ...scheduleToGroupNotify,
-            };
-            // console.log('scheduledData', scheduledData);
+            let scheduledData = { ...scheduleFromGroupNotify, ...scheduleToGroupNotify };
+            // //console.log('scheduledData', scheduledData);
 
             for (const [key, data] of Object.entries<any>(scheduledData)) {
               const assetNames = data
@@ -1983,12 +1976,8 @@ export class HomePage implements OnInit {
 
               let scheduleTime: Date;
 
-              const isExpiredSchedule = moment(key)
-                .subtract(1, 'd')
-                .isBefore(moment().format('YYYY-MM-DD HH:mm:ss'));
-              const isUpcomingSchedule = moment(key)
-                .subtract(1, 'd')
-                .isAfter(moment().format('YYYY-MM-DD HH:mm:ss'));
+              const isExpiredSchedule = moment(key).subtract(1, 'd').isBefore(moment().format('YYYY-MM-DD HH:mm:ss'));
+              const isUpcomingSchedule = moment(key).subtract(1, 'd').isAfter(moment().format('YYYY-MM-DD HH:mm:ss'));
 
               // eslint-disable-next-line @typescript-eslint/no-shadow
               const notificationSchema: LocalNotificationSchema = {
@@ -1997,10 +1986,10 @@ export class HomePage implements OnInit {
                 body: `Waktu untuk scan ${assetNames}`,
                 schedule: {
                   at: new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')),
-                  allowWhileIdle: true,
+                  allowWhileIdle: true
                 },
                 smallIcon: 'ic_notification_schedule',
-                largeIcon: 'ic_notification_schedule',
+                largeIcon: 'ic_notification_schedule'
               };
 
               if (isExpiredSchedule) {
@@ -2063,7 +2052,7 @@ export class HomePage implements OnInit {
             throw response;
           }
 
-          console.log('getSchedulesNonSift', response);
+          //console.log('getSchedulesNonSift', response);
 
           if (response?.data?.data?.length) {
             const notifications = [];
@@ -2092,6 +2081,7 @@ export class HomePage implements OnInit {
                   condition: dataschedule.condition,
                   merk: dataschedule.merk,
                   capacityValue: dataschedule.capacityValue,
+                  detailLocation: dataschedule.detailLocation,
                   unitCapacity: dataschedule.unitCapacity,
                   supplyDate: dataschedule.supplyDate,
                   reportPhoto: dataschedule.reportPhoto,
@@ -2127,27 +2117,33 @@ export class HomePage implements OnInit {
                 };
 
                 return data;
-              }
-            );
+              });
             const assetIdSchedule = [];
             const assetIdType = [];
 
             const assetiduniq = uniqBy(response?.data?.data, 'assetId');
 
-            assetiduniq?.map?.((dataschedule: any) => {
-              assetIdType.push(dataschedule.assetId);
-              assetIdSchedule.push({
-                assetId: dataschedule.assetId,
-                categoryId: dataschedule.assetCategoryId,
+            assetiduniq
+              ?.map?.((dataschedule: any) => {
+                assetIdType.push(dataschedule.assetId);
+                assetIdSchedule.push({
+                  assetId: dataschedule.assetId,
+                  categoryId: dataschedule.assetCategoryId
+                });
               });
-            });
-            // console.log('assetIdSchedule', assetIdSchedule);
-            const assetIdScheduleType = {
-              asset: JSON.stringify(assetIdSchedule),
-            };
+            // //console.log('assetIdSchedule', assetIdSchedule);
+            const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
             const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+            //console.log('assetIdSchedule', assetIdSchedule);
+
             this.getTypeScan(assetIdScheduleType1);
-            this.getParameterByAssetId(assetIdScheduleType);
+            // this.getParameterByAssetId(assetIdScheduleType);
+            let splitAssetIdSchedule = [];
+            splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
+            splitAssetIdSchedule?.map?.(async val => {
+              const payload = { asset: JSON.stringify(val) };
+              await this.getParameterByAssetId(payload);
+            });
             //Jika ada record yang belum di upload
             // if (uploadedSchedules?.length) {
             //   const marks = this.database.marks(uploadedSchedules.length).join(',');
@@ -2159,8 +2155,8 @@ export class HomePage implements OnInit {
             //   this.database.update('record', { isUploaded: 1 }, where);
             // }
 
-            // console.log('assetIdSchedule', assetIdSchedule);
-            // console.log('schedules cek', schedules);
+            // //console.log('assetIdSchedule', assetIdSchedule);
+            // //console.log('schedules cek', schedules);
             this.database.insertbatch('schedule', schedules);
 
             this.shared.addLogActivity({
@@ -2182,8 +2178,8 @@ export class HomePage implements OnInit {
                 .map((item: any) => item.asset_number)
                 .join(',');
 
-              // console.log(moment(key).format('YYYY-MM-DDTHH:mm:ss'));
-              // console.log(new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')));
+              // //console.log(moment(key).format('YYYY-MM-DDTHH:mm:ss'));
+              // //console.log(new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')));
 
               // eslint-disable-next-line @typescript-eslint/no-shadow
               const notificationSchema: LocalNotificationSchema = {
@@ -2265,12 +2261,12 @@ export class HomePage implements OnInit {
       this.http.requests({
         requests: [() => this.http.getSchedulesManual(usernonId)],
         onSuccess: async ([response]) => {
-          console.log(response.data.data);
+          //console.log(response.data.data)
           if (response.status >= 400) {
             throw response;
           }
 
-          console.log('getSchedulesManual', response);
+          //console.log('getSchedulesManual', response);
 
           if (response?.data?.data?.length) {
             const notifications = [];
@@ -2299,6 +2295,7 @@ export class HomePage implements OnInit {
                   condition: dataschedule.condition,
                   merk: dataschedule.merk,
                   capacityValue: dataschedule.capacityValue,
+                  detailLocation: dataschedule.detailLocation,
                   unitCapacity: dataschedule.unitCapacity,
                   supplyDate: dataschedule.supplyDate,
                   reportPhoto: dataschedule.reportPhoto,
@@ -2338,24 +2335,34 @@ export class HomePage implements OnInit {
             );
             const assetIdSchedule = [];
             const assetIdType = [];
-            response?.data?.data?.map?.((dataschedule: any) => {
-              assetIdType.push(dataschedule.assetId);
-              assetIdSchedule.push({
-                assetId: dataschedule.assetId,
-                categoryId: dataschedule.assetCategoryId,
+            response?.data?.data
+              ?.map?.((dataschedule: any) => {
+
+                assetIdType.push(dataschedule.assetId);
+                assetIdSchedule.push({
+                  assetId: dataschedule.assetId,
+                  categoryId: dataschedule.assetCategoryId
+                });
               });
-            });
-            // console.log('assetIdSchedule', assetIdSchedule);
-            const assetIdScheduleType = {
-              asset: JSON.stringify(assetIdSchedule),
-            };
+            // //console.log('assetIdSchedule', assetIdSchedule);
+            const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
             const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
+            //console.log('assetIdSchedule', assetIdSchedule);
+
             this.getTypeScan(assetIdScheduleType1);
-            this.getParameterByAssetId(assetIdScheduleType);
+            // this.getParameterByAssetId(assetIdScheduleType);
+            let splitAssetIdSchedule = [];
+            splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
+            splitAssetIdSchedule?.map?.(async val => {
+              const payload = { asset: JSON.stringify(val) };
+              await this.getParameterByAssetId(payload);
+            });
+
             //Jika ada record yang belum di upload
 
-            // console.log('assetIdSchedule', assetIdSchedule);
-            // console.log('schedules cek', schedules);
+
+            // //console.log('assetIdSchedule', assetIdSchedule);
+            // //console.log('schedules cek', schedules);
             this.database.insertbatch('schedule', schedules);
 
             this.shared.addLogActivity({
@@ -2377,8 +2384,8 @@ export class HomePage implements OnInit {
                 .map((item: any) => item.asset_number)
                 .join(',');
 
-              // console.log(moment(key).format('YYYY-MM-DDTHH:mm:ss'));
-              // console.log(new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')));
+              // //console.log(moment(key).format('YYYY-MM-DDTHH:mm:ss'));
+              // //console.log(new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')));
 
               // eslint-disable-next-line @typescript-eslint/no-shadow
               const notificationSchema: LocalNotificationSchema = {
@@ -2456,6 +2463,8 @@ export class HomePage implements OnInit {
     return this.http.requests({
       requests: [() => this.http.getAssetTags()],
       onSuccess: async ([responseAssetTags]) => {
+        //console.log('responseAssetTags', responseAssetTags);
+
         if (responseAssetTags.status >= 400) {
           throw responseAssetTags;
         }
@@ -2483,9 +2492,13 @@ export class HomePage implements OnInit {
     });
   }
   private async getTypeScan(data) {
+    //console.log('getTypeScan', data);
+
     return this.http.requests({
       requests: [() => this.http.typeTag(data)],
       onSuccess: async ([responseAssetTags]) => {
+        //console.log('responseAssetTags', responseAssetTags);
+
         if (responseAssetTags.status >= 400) {
           throw responseAssetTags;
         }
@@ -2497,13 +2510,13 @@ export class HomePage implements OnInit {
             assetTaggingType: assetTag.assetTaggingType,
             description: assetTag.description,
             created_at: assetTag.created_at,
-            updated_at: assetTag.updated_at,
-          })
-        );
-        // console.log('assetTag', assetTags)
-        // console.log('assetTag Data', data)
-        await this.database
-          .emptyTable('assetTag')
+            updated_at: assetTag.updated_at
+          }
+
+          ));
+        // //console.log('assetTag', assetTags)
+        // //console.log('assetTag Data', data)
+        await this.database.emptyTable('assetTag')
           .then(() => this.database.insert('assetTag', assetTags));
 
         this.shared.addLogActivity({
@@ -2525,34 +2538,29 @@ export class HomePage implements OnInit {
           if (responseCategory.status >= 400) {
             throw responseCategory;
           }
-          console.log('responseCategory', responseCategory);
+          //console.log('responseCategory', responseCategory);
 
           let previousPhotos: any = {};
 
           if (this.shared.isOfflineImages) {
             previousPhotos = await this.getPreviousPhotos('asset');
-            console.log('previousPhotos', previousPhotos);
+            //console.log('previousPhotos', previousPhotos);
 
-            const newPhotos = responseCategory.data.data.map(
-              (asset: any) => asset.assetCategoryIconUrl
-            );
-            console.log('newPhotos', newPhotos);
+            const newPhotos = responseCategory.data.data.map((asset: any) => asset.assetCategoryIconUrl);
+            //console.log('newPhotos', newPhotos);
 
             const exceptions = Object.entries<string>(previousPhotos)
               .filter(([photo]) => newPhotos.includes(photo))
               .map(([photo, path]) => path?.split?.('/').pop());
-            console.log('exceptions', exceptions);
+            //console.log('exceptions', exceptions);
 
             await this.prepareDirectory('asset', exceptions);
           }
 
           const kategori = [];
           for (const category of responseCategory?.data?.data) {
-            const offlinePhoto = await this.offlinePhoto(
-              'category',
-              category.assetCategoryIconUrl
-            );
-            console.log('offlinePhoto', offlinePhoto);
+            const offlinePhoto = await this.offlinePhoto('category', category.assetCategoryIconUrl);
+            //console.log('offlinePhoto', offlinePhoto);
 
             const data = {
               assetCategoryId: category.id,
@@ -2627,7 +2635,7 @@ export class HomePage implements OnInit {
         complexMessage: Object.values(this.syncJob.order),
       });
 
-      // console.log({ uploadActivityLogs: JSON.stringify(activityLogs) });
+      // //console.log({ uploadActivityLogs: JSON.stringify(activityLogs) });
 
       return this.http.requests({
         requests: [() => this.http.uploadActivityLogs(activityLogs)],
@@ -2668,21 +2676,24 @@ export class HomePage implements OnInit {
 
   private async processResponseAssetTags(response: any) {
     if (response?.data?.data?.length) {
-      const assetTags = response?.data?.data?.map?.((assetTag: any) => ({
-        assetTaggingId: assetTag.assetTaggingId,
-        assetId: assetTag.assetId,
-        assetTaggingValue: assetTag.assetTaggingValue,
-        assetTaggingType: assetTag.assetTaggingType,
-        description: assetTag.description,
-        created_at: assetTag.created_at,
-        updated_at: assetTag.updated_at,
-      }));
-      // console.log('assetTags', assetTags);
+      const assetTags = response?.data?.data
+        ?.map?.((assetTag: any) => ({
+          assetTaggingId: assetTag.assetTaggingId,
+          assetId: assetTag.assetId,
+          assetTaggingValue: assetTag.assetTaggingValue,
+          assetTaggingType: assetTag.assetTaggingType,
+          description: assetTag.description,
+          created_at: assetTag.created_at,
+          updated_at: assetTag.updated_at
+        }
+
+        ));
+      // //console.log('assetTags', assetTags);
       for (const assetT of assetTags) {
         // await this.getParameterByAssetId(assetT?.assetId);
-        // console.log('assetTags ID isi:', assetT?.assetId);
+        // //console.log('assetTags ID isi:', assetT?.assetId);
       }
-      // console.log('assetTags  ke 2:', assetTags);
+      // //console.log('assetTags  ke 2:', assetTags);
 
       await this.database
         .emptyTable('assetTag')
@@ -2846,6 +2857,8 @@ export class HomePage implements OnInit {
             type: 'qr',
             data: assetId,
           });
+          //console.log('data', data);
+
           this.router.navigate(['asset-detail', { data }]);
         }
       });
@@ -2860,8 +2873,9 @@ export class HomePage implements OnInit {
   }
   async openScan() {
     const stat = await this.checkStatus();
-    console.log('cek status nfc', stat);
+    //console.log('cek status nfc', stat)
     if (stat == 'NO_NFC') {
+
       const confirm = await this.utils.createCustomAlert({
         type: 'error',
         header: stat,
@@ -2869,9 +2883,9 @@ export class HomePage implements OnInit {
         buttons: [
           {
             text: 'Tutup',
-            handler: () => confirm.dismiss(),
-          },
-        ],
+            handler: () => confirm.dismiss()
+          }
+        ]
       });
 
       confirm.present();
@@ -2882,7 +2896,7 @@ export class HomePage implements OnInit {
         document.body.classList.add('qrscanner');
 
         const options: ScanOptions = {
-          targetedFormats: [SupportedFormat.QR_CODE],
+          targetedFormats: [SupportedFormat.QR_CODE]
         };
 
         BarcodeScanner.startScan(options).then(async (result) => {
@@ -2919,9 +2933,10 @@ export class HomePage implements OnInit {
             const assetId = result.content;
             const data = JSON.stringify({
               type: 'qr',
-              data: assetId,
+              data: assetId
             });
             this.router.navigate(['change-rfid', { data }]);
+
           }
         });
 
@@ -2942,6 +2957,8 @@ export class HomePage implements OnInit {
         this.nfcStatus = error;
       }
     }
+    return this.nfcStatus;
+  }
 
     return this.nfcStatus;
   }
