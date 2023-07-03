@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/adjacent-overload-signatures */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable no-underscore-dangle */
 import { Injectable, Injector } from '@angular/core';
@@ -51,52 +52,55 @@ type DataKey = {
 })
 export class SharedService {
   asset: {
-    scheduleTrxId: string;
-    abbreviation: string;
-    adviceDate: string;
-    approvedAt: string;
-    approvedBy: string;
-    approvedNotes: string;
-    assetId: string;
-    photo: string;
-    offlinePhoto: string;
-    assetNumber: string;
-    assetStatusId: string;
-    assetStatusName: string;
-    condition: string;
-    merk: string;
-    capacityValue: string;
-    unitCapacity: string;
-    supplyDate: string;
-    reportPhoto: string;
-    scannedAccuration: string;
-    scannedAt: string;
-    scannedBy: string;
-    scannedEnd: string;
-    scannedNotes: string;
-    scannedWith: string;
-    schDays: string;
-    schFrequency: string;
-    schManual: string;
-    schType: string;
-    schWeekDays: string;
-    schWeeks: string;
-    scheduleFrom: string;
-    scheduleTo: string;
-    syncAt: string;
-    tagId: string;
-    tagNumber: string;
-    unit: string;
-    unitId: string;
-    area: string;
-    areaId: string;
-    latitude: string;
-    longitude: string;
-    created_at: string;
-    deleted_at: string;
-    date: string;
-    assetForm: string;
-
+    abbreviation?: string;
+    adviceDate?: string;
+    approvedAt?: string;
+    approvedBy?: string;
+    approvedNotes?: string;
+    area?: string;
+    areaId?: string;
+    assetCategoryId?: string;
+    assetCategoryName?: string;
+    assetForm?: string;
+    assetId?: string;
+    assetNumber?: string;
+    assetStatusId?: string;
+    assetStatusName?: string;
+    capacityValue?: string;
+    condition?: string;
+    created_at?: string;
+    date?: string;
+    deleted_at?: string;
+    detailLocation?: string;
+    idschedule?: string;
+    latitude?: string;
+    longitude?: string;
+    merk?: string;
+    photo?: string;
+    offlinePhoto?: string;
+    reportPhoto?: string;
+    scannedAccuration?: string;
+    scannedAt?: string;
+    scannedBy?: string;
+    scannedEnd?: string;
+    scannedNotes?: string;
+    scannedWith?: string;
+    schDays?: string;
+    schFrequency?: string;
+    schManual?: string;
+    schType?: string;
+    schWeekDays?: string;
+    schWeeks?: string;
+    scheduleFrom?: string;
+    scheduleTo?: string;
+    scheduleTrxId?: string;
+    supplyDate?: string;
+    syncAt?: string;
+    tagId?: string;
+    tagNumber?: string;
+    unit?: string;
+    unitCapacity?: string;
+    unitId?: string;
   };
   apar: {
     assetId: string;
@@ -126,6 +130,7 @@ export class SharedService {
     abbreviation: string;
     capacityId: string;
     capacityValue: string;
+    detailLocation: string;
     unitCapacity: string;
     unit: string;
     typeTag: string;
@@ -184,6 +189,9 @@ export class SharedService {
   private applicationDataKeys: DataKey[];
   private attachmentSettingKeys: DataKey[];
   public radiovalue: any;
+
+  private _currentRoute: string;
+
   constructor(
     private injector: Injector,
     private platform: Platform
@@ -204,6 +212,7 @@ export class SharedService {
       condition: '',
       merk: '',
       capacityValue: '',
+      detailLocation: '',
       unitCapacity: '',
       supplyDate: '',
       reportPhoto: '',
@@ -299,9 +308,12 @@ export class SharedService {
   get isInitialCheck() {
     return this._initialCheck;
   }
-get isvalueradio(){
-  return this.radiovalue;
-}
+  get isvalueradio() {
+    return this.radiovalue;
+  }
+  get currentRoute(): string {
+    return this._currentRoute;
+  }
   get isAuthenticated() {
     return (
       this._user.id &&
@@ -354,9 +366,12 @@ get isvalueradio(){
   get notificationIds() {
     return this._notificationIds;
   }
-set isradiovalue(value){
-  this.radiovalue = value;
-}
+  set isradiovalue(value) {
+    this.radiovalue = value;
+  }
+  set currentRoute(value: string) {
+    this._currentRoute = value;
+  }
   setUserData(data: UserData) {
     for (const key of this.userDataKeys) {
       if (data[key.key]) {
@@ -607,6 +622,7 @@ set isradiovalue(value){
       condition: '',
       merk: '',
       capacityValue: '',
+      detailLocation: '',
       unitCapacity: '',
       supplyDate: '',
       reportPhoto: '',

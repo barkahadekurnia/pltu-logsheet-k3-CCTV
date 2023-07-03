@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { IonicModule, IonicRouteStrategy, iosTransitionAnimation } from '@ionic/angular';
 
@@ -55,6 +56,7 @@ import { StreamingMedia } from '@awesome-cordova-plugins/streaming-media/ngx';
     }),
     AppRoutingModule,
     FormsModule,
+    HttpClientModule,
     BadgeStatComponentModule,
     CustomAlertComponentModule,
     IllustrationAttachFileComponentModule,

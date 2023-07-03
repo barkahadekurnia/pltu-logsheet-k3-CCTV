@@ -31,7 +31,7 @@ export class CustomAlertComponent implements OnInit {
   ngdata: any;
   constructor(
     private navParams: NavParams,
-    private injector:Injector,
+    private injector: Injector,
     private shared: SharedService,
 
   ) {
@@ -46,7 +46,16 @@ export class CustomAlertComponent implements OnInit {
 
       this.options = { ...this.options, img, color };
     }
-    console.log('param',this.options.param)
+    // console.log('param',this.options.param)
+  }
+
+  radioSelect(value) {
+    // console.log('cek', value?.detail?.value)
+
+    this.shared.setSchType({
+      type: value?.detail?.value,
+    });
+    // console.log('cek simpan', this.shared.schtype.type)
   }
 
   private getImg() {
@@ -92,14 +101,5 @@ export class CustomAlertComponent implements OnInit {
 
     return 'primary';
   }
-  radioSelect(value){
-    console.log('cek', value?.detail?.value)
-
-    this.shared.setSchType({
-      type: value?.detail?.value,
-    });
-    console.log('cek simpan', this.shared.schtype.type)
-  }
-
 
 }

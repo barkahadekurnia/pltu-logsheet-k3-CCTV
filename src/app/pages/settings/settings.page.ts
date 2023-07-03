@@ -164,14 +164,7 @@ export class SettingsPage implements OnInit {
   }
 
   async checkRecords() {
-    const loader = await this.loadingCtrl.create({
-      spinner: 'dots',
-      message: 'Checking data...',
-      cssClass: 'dark:ion-bg-gray-800',
-      mode: 'ios'
-    });
-
-    loader.present();
+    const loader = await this.utils.presentLoader();
 
     try {
       const result = await this.database.select('record', {
@@ -218,7 +211,7 @@ export class SettingsPage implements OnInit {
 
   private async confirmLogout() {
     const confirm = await this.utils.createCustomAlert({
-      color: 'danger',
+      type: 'warning',
       header: 'Confirm',
       message: 'Are you sure want to logout?',
       buttons: [
@@ -240,14 +233,8 @@ export class SettingsPage implements OnInit {
   }
 
   private async logout() {
-    const loader = await this.loadingCtrl.create({
-      spinner: 'dots',
-      message: 'Logging out...',
-      cssClass: 'dark:ion-bg-gray-800',
-      mode: 'ios'
-    });
+    const loader = await this.utils.presentLoader();
 
-    loader.present();
     this.utils.stopMonitor();
     await this.shared.clearAppData();
 

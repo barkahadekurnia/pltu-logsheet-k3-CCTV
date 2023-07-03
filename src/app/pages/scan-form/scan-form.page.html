@@ -2,11 +2,7 @@
   <ion-toolbar class="ion-bg-white dark:ion-bg-gray-900">
     <ion-buttons slot="start" mode="md">
       <ion-button color="dark" (click)="confirmLeave()">
-        <ion-icon
-          slot="icon-only"
-          name="chevron-back-outline"
-          color="primary"
-        ></ion-icon>
+        <ion-icon slot="icon-only" name="chevron-back-outline" color="primary"></ion-icon>
       </ion-button>
     </ion-buttons>
 
@@ -47,11 +43,11 @@
           </div>
         </ion-col>
         <ion-col size="12">
-          <span class="text-base font-semibold">{{ currentSlide }}</span>
+          <span class="text-base font-semibold text-gray-500">{{ currentSlide }}</span>
         </ion-col>
         <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6" *ngIf="!isEnd">
-          <div class="w-full flex justify-between items-center">
-            <h6 class="text-center" style="color: red;">
+          <div class="w-full my-2 flex justify-between items-center">
+            <h6 class="text-center text-error text-xs font-bold">
               *Tekan panah untuk mengisi catatan dan file
             </h6>
           </div>
@@ -134,14 +130,14 @@
 
                             <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
                               <ion-input *ngIf="parameter.inputType === 'input' || parameter.inputType === 'textarea'"
-                                class="ion-no-padding min-w-12 flex-grow" [ngClass]="[parameter.parameterId]"
+                                class="ion-no-padding min-w-12 flex-grow text-sm" [ngClass]="[parameter.parameterId]"
                                 [type]="parameter.inputType === 'input' ? 'number' : 'text'" placeholder="-"
                                 (ionChange)="checkDeviation(parameter)" [(ngModel)]="parameter.value">
                               </ion-input>
 
                               <ion-select
                                 *ngIf="parameter.inputType === 'select' || parameter.inputType === 'checkbox' || parameter.inputType === 'radio'"
-                                class="ion-no-padding min-w-12 flex-grow" [ngClass]="[parameter.parameterId]"
+                                class="ion-no-padding min-w-12 flex-grow text-sm" [ngClass]="[parameter.parameterId]"
                                 interface="alert" [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
                                 placeholder="Pilih" [multiple]="parameter.inputType === 'checkbox'"
                                 (ionChange)="checkDeviation(parameter)" [(ngModel)]="parameter.value">
@@ -153,11 +149,11 @@
                           </div>
 
                           <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                              Catatan
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                              Catatan (Opsional)
                             </p>
 
-                            <ion-textarea class="ion-no-padding text-xs" rows="3" autoGrow="true"
+                            <ion-textarea class="ion-no-padding text-sm" rows="3" autoGrow="true"
                               placeholder="Masukan Catatan disini..." (ionChange)="notes(parameter)"
                               [(ngModel)]="parameter.notes">
                             </ion-textarea>
@@ -166,7 +162,7 @@
                           <!-- <div *ngIf="parameter.hasAttachments" class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl"> -->
                           <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl">
                             <p class="p-2 text-xs text-gray-500 dark:text-gray-400">
-                              Media Files
+                              Lampiran (Opsional)
                             </p>
 
                             <div class="overflow-auto whitespace-nowrap">
@@ -227,15 +223,15 @@
                   <ion-row *ngIf="isEnd">
                     <ion-col>
                       <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Catatan</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Catatan</p>
 
-                        <ion-textarea class="ion-no-padding text-xs" rows="3" autoGrow="true"
+                        <ion-textarea class="ion-no-padding text-sm" rows="3" autoGrow="true"
                           placeholder="Tulis Catatan disini..." [(ngModel)]="record.scannedNotes">
                         </ion-textarea>
                       </div>
 
                       <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-xl mt-4">
-                        <p class="p-2 text-xs text-gray-500 dark:text-gray-400">Foto Alat Pemadam</p>
+                        <p class="p-2 text-sm text-gray-500 dark:text-gray-400">Foto Alat Pemadam</p>
                         <div class="overflow-auto whitespace-nowrap">
                           <div *ngFor="let foto of attach" class="
                         relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent
@@ -284,11 +280,11 @@
     <div class="w-full p-2 flex items-center justify-between">
       <ion-button class="w-32 font-bold rounded-btn" color="dark" [style.visibility]="(isBeginning) ? 'hidden' : ''"
         (click)="onBackButtonTouched()">
-        <span class="text-white">Back</span>
+        <span class="text-white">Kembali</span>
         <ion-icon slot="start" name="chevron-back"></ion-icon>
       </ion-button>
       <ion-button class="w-32 font-bold rounded-btn" color="primary" (click)="onNextButtonTouched()">
-        <span class="text-white">Next</span>
+        <span class="text-white">Lanjut</span>
       </ion-button>
     </div>
   </ion-toolbar>
