@@ -18,7 +18,7 @@ import { PhotoViewer } from '@awesome-cordova-plugins/photo-viewer/ngx';
 import { VideoPlayer, VideoOptions } from '@awesome-cordova-plugins/video-player/ngx';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-
+import { StreamingAudioOptions, StreamingMedia, StreamingVideoOptions } from '@awesome-cordova-plugins/streaming-media/ngx';
 @Injectable({
   providedIn: 'root'
 })
@@ -31,7 +31,8 @@ export class MediaService {
     private mediaCapture: MediaCapture,
     private media: Media,
     private photoViewer: PhotoViewer,
-    private videoPlayer: VideoPlayer
+    private videoPlayer: VideoPlayer,
+    private stream: StreamingMedia
   ) { }
 
   async getPicture() {
@@ -269,50 +270,57 @@ console.log('file',file)
     try {
       console.log(filePath);
 
-      if (!this.platform.is('android')) {
-        const file: MediaObject = this.media.create(filePath);
-        // to listen to plugin events:
+      // if (!this.platform.is('android')) {
+      //   const file: MediaObject = this.media.create(filePath);
+      //   // to listen to plugin events:
 
-        file.onStatusUpdate.subscribe(status => console.log(status)); // fires when file status changes
+      //   file.onStatusUpdate.subscribe(status => console.log(status)); // fires when file status changes
 
-        file.onSuccess.subscribe(() => console.log('Action is successful'));
+      //   file.onSuccess.subscribe(() => console.log('Action is successful'));
 
-        file.onError.subscribe(error => console.log('Error!', error));
+      //   file.onError.subscribe(error => console.log('Error!', error));
 
-        // play the file
-        file.play();
+      //   // play the file
+      //   file.play();
 
-        // pause the file
-        file.pause();
+      //   // pause the file
+      //   file.pause();
 
-        // get current playback position
-        file.getCurrentPosition().then((position) => {
-          console.log(position);
-        });
+      //   // get current playback position
+      //   file.getCurrentPosition().then((position) => {
+      //     console.log(position);
+      //   });
 
-        // get file duration
-        const duration = file.getDuration();
-        console.log(duration);
+      //   // get file duration
+      //   const duration = file.getDuration();
+      //   console.log(duration);
 
-        // skip to 10 seconds (expects int value in ms)
-        file.seekTo(10000);
+      //   // skip to 10 seconds (expects int value in ms)
+      //   file.seekTo(10000);
 
-        // stop playing the file
-        file.stop();
+      //   // stop playing the file
+      //   file.stop();
 
-        // release the native audio resource
-        // Platform Quirks:
-        // iOS simply create a new instance and the old one will be overwritten
-        // Android you must call release() to destroy instances of media when you are done
-        file.release();
-        // throw new Error('Platform not supported');
-      }
+      //   // release the native audio resource
+      //   // Platform Quirks:
+      //   // iOS simply create a new instance and the old one will be overwritten
+      //   // Android you must call release() to destroy instances of media when you are done
+      //   file.release();
+      //   // throw new Error('Platform not supported');
+      // }
 
       // const videoOptions: VideoOptions = {
       //   volume: 0.5
       // };
 
       // await this.videoPlayer.play(filePath, videoOptions);
+
+      const options: StreamingVideoOptions = {
+        shouldAutoClose: true,
+        controls: true,
+      };
+
+      this.stream.playVideo(filePath, options);
     } catch (error) {
       const utils = this.injector.get(UtilsService);
 

@@ -1,0 +1,44 @@
+.accordion::part(native) {
+  background: #f2f2f2;
+  color: #020202;
+  border-color: #fff;
+  border-width: 2px;
+  border-radius: 14px;
+  padding-top: 8px;
+  padding-left: 20px;
+  padding-bottom: 8px;
+}
+
+.buttonsend {
+  background-color: #1629f7;
+  border-radius: 15px;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, .3), 0px 1px 3px 1px rgba(0, 0, 0, .15);
+  color: white;
+}
+
+.buttoncancel {
+  background-color: #f71616;
+  border-radius: 15px;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, .3), 0px 1px 3px 1px rgba(0, 0, 0, .15);
+  color: white;
+}
+
+ion-fab-button {
+  width: 100vw;
+
+}
+
+ion-fab-button::part(native) {
+  background-color: #1629f7;
+  border-radius: 15px;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, .3), 0px 1px 3px 1px rgba(0, 0, 0, .15);
+  color: white;
+}
+
+ion-fab-button::part(native):hover::after {
+  background-color: #1629f7;
+}
+
+ion-fab-button::part(native):active::after {
+  background-color: #1629f7;
+}

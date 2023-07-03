@@ -9,7 +9,7 @@ export class PercentageComponent implements OnInit, OnChanges {
   @Input() className?: string;
   @Input() uploaded: number;
   @Input() unuploaded: number;
-  @Input() holded: number;
+  // @Input() holded: number;
   @Input() unscanned: number;
   @Input() darkMode: boolean;
 
@@ -36,13 +36,13 @@ export class PercentageComponent implements OnInit, OnChanges {
     return Math.round(this.unuploaded / this.total * 100);
   }
 
-  private get holdedPercentage() {
-    if (this.holded == null || this.total === 0) {
-      return 0;
-    }
+  // private get holdedPercentage() {
+  //   if (this.holded == null || this.total === 0) {
+  //     return 0;
+  //   }
 
-    return Math.round(this.holded / this.total * 100);
-  }
+  //   return Math.round(this.holded / this.total * 100);
+  // }
 
   private get unscannedPercentage() {
     if (this.unscanned == null || this.total === 0) {
@@ -63,9 +63,9 @@ export class PercentageComponent implements OnInit, OnChanges {
       total += this.unuploaded;
     }
 
-    if (this.holded != null) {
-      total += this.holded;
-    }
+    // if (this.holded != null) {
+    //   total += this.holded;
+    // }
 
     if (this.unscanned != null) {
       total += this.unscanned;
@@ -90,34 +90,34 @@ export class PercentageComponent implements OnInit, OnChanges {
     const data = [
       {
         value: this.uploadedPercentage,
-        name: 'Uploaded',
+        name: 'Upload',
         itemStyle: {
           color: '#10b981'
         }
       },
       {
         value: this.unuploadedPercentage,
-        name: 'Unuploaded',
+        name: 'Belum Upload',
         itemStyle: {
-          color: '#84cc16'
+          color: '#DB2927'
         },
         label: {
           show: false
         }
       },
-      {
-        value: this.holdedPercentage,
-        name: 'Holded',
-        itemStyle: {
-          color: '#eab308'
-        },
-        label: {
-          show: false
-        }
-      },
+      // {
+      //   value: this.holdedPercentage,
+      //   name: 'Holded',
+      //   itemStyle: {
+      //     color: '#eab308'
+      //   },
+      //   label: {
+      //     show: false
+      //   }
+      // },
       {
         value: this.unscannedPercentage,
-        name: 'Unscanned',
+        name: 'Belum Scan',
         itemStyle: {
           color: this.darkMode ? '#4B5563' : '#D1D5DB'
         },

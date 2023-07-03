@@ -1,4 +1,4 @@
-<ion-content color="ion-bg-white" [scrollEvents]="true" (ionScroll)="onScroll($event)">
+<ion-content color="ion-bg-white">
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" mode="md">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
@@ -106,7 +106,7 @@
     class="pt-native-safe realtive sticky top-0 h-44 w-full rounded-b-3xl bg-center cursor-pointer object-cover z-10 shadow-lg bg-[#275da0]">
     <nav class="p-2 flex flex-grow relative justify-between z-10 items-center mx-auto h-18">
       <div class="inline relative">
-        <button *ngIf="user?.group == 'ADMIN'" type="button"
+        <button *ngIf="user?.group === 'ADMIN'" type="button"
           class="inline-flex items-center relative text-gray-300 hover:text-white mr-3" (click)="showDetails()">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"></path>
@@ -123,7 +123,7 @@
                 <span class="text-center">{{ gruprole }}</span>
                 <ul class="dropdown">
                   <li><a>Grup Operator</a></li>
-                  <li *ngIf="gruprole == 'PETUGAS' && datanonsift.status == 1">
+                  <li *ngIf="gruprole === 'PETUGAS' && datanonsift.status === 1">
                     <a
                       ><p
                         class="text-white text-xl font-semibold leading-tight truncate"
@@ -134,7 +134,7 @@
                       </p></a
                     >
                   </li>
-                  <li *ngIf="gruprole == 'PETUGAS' && datasift.status == 1">
+                  <li *ngIf="gruprole === 'PETUGAS' && datasift.status === 1">
                     <a
                       ><h4
                         class="text-white text-xl font-semibold leading-tight truncate"
@@ -145,7 +145,7 @@
                       </h4>
                     </a>
                   </li>
-                  <li *ngIf="gruprole == 'PETUGAS' && datalk3.status == 1">
+                  <li *ngIf="gruprole === 'PETUGAS' && datalk3.status === 1">
                     <a
                       ><h4
                         class="text-white text-xl font-semibold leading-tight truncate"
@@ -182,11 +182,18 @@
       <div class="relative w-full">
         <input type="text" class="bg-white shadow rounded-xl border border-gray-300 p-3 w-full"
           placeholder="Cari Alat Pemadam Api..." readonly (click)="openModal()" />
-        <div class="absolute top-0 right-0 p-4 pr-3 text-purple-lighter">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="absolute top-0 right-0 pr-3 text-black">
+          <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
+          </svg> -->
+          <button *ngIf="gruprole === 'ADMIN'" class="btn btn-info rounded-full text-white" (click)="openScan()">
+            <ion-icon name="card-outline"></ion-icon>
+          </button>
+          <button class="btn btn-primary rounded-full bttext-white ml-1" (click)="cekScan()" >
+            <ion-icon name="qr-code-outline" ></ion-icon>
+          </button>
+
         </div>
       </div>
     </div>
@@ -199,12 +206,12 @@
             <!-- <app-percentage
               [uploaded]="count.uploaded"
               [unuploaded]="count.unuploaded"
+              [holded]="count.holded"
               [unscanned]="count.unscanned"
             > -->
             <app-percentage
               [uploaded]="count.uploaded"
               [unuploaded]="count.unuploaded"
-              [holded]="count.holded"
               [unscanned]="count.unscanned"
             >
             </app-percentage>
@@ -244,7 +251,7 @@
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat [count]="count.uploaded + count.unuploaded" label="Transactions" theme="warning"
+          <app-badge-stat [countSudah]="count.uploaded" [countBelum]="count.unuploaded"  label="Transactions" theme="warning"
             icon="assets/icon/file-invoice-light.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true"
             (click)="openPage(['transactions'])">
             <!-- <app-badge-stat
@@ -261,11 +268,11 @@
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat label="Laporan" theme="error" icon="assets/icon/report.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openPage(['laporan-harian'])"></app-badge-stat>
+          <app-badge-stat  [countSudah]="count.sudahlaporan"  [countBelum]="count.belumlaporan" label="Laporan" theme="error" icon="assets/icon/report.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openHarian()"></app-badge-stat>
         </ion-col>
       </ion-row>
 
-      <ion-row class="pt-6 w-full">
+      <ion-row class="pt-6 w-full" >
         <ion-col size="12">
           <button class="btn btn-block rounded-full text-white capitalize space-x-1 focus:outline-none"
             [ngClass]="[application?.bgSyncButton || 'btn-primary']" (click)="synchronize()">

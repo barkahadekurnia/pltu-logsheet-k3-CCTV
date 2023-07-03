@@ -3,7 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
+  production: true,
   url: {
     base: 'http://114.6.64.2:11241/api/logsheet_new',
     // base: 'http://192.168.4.99',
@@ -24,11 +24,23 @@ export const environment = {
     get assetsid() {
       return this.base + '/api/asset/assetPerId';
     },
+    get assetsdetail() {
+      return this.base + '/api/asset/show';
+    },
     get changerfid() {
       return this.base + '/api/rfid/change';
     },
     get countassets() {
       return this.base + '/api/asset/jumlah';
+    },
+    get laporanpetugas() {
+      return this.base + '/api/transaction/schedule/indexTrxParent';
+    },
+    get detaillaporan() {
+      return this.base + '/api/transaction/schedule/viewTrxParent';
+    },
+    get kirimlaporan() {
+      return this.base + '/api/transaction/schedule/reportTrxParent/';
     },
     get assetTags() {
       return this.base + `/api/transaction/asset/tagging`;
@@ -39,7 +51,9 @@ export const environment = {
     get tagsscan() {
       return this.base + '/api/transaction/assetTagging/byManyAsset';
     },
-
+    get attach() {
+      return this.base + '/api/transaction/attachment';
+    },
     get parameters() {
       return this.base + '/api/transaction/asset/param';
     },

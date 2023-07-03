@@ -144,32 +144,33 @@ export class SchedulesPage implements OnInit {
     console.log('grup ',grup);
     this.selectedDate.lokasi = grup;
     let filteredSchedule = [];
+    let isigrup = [];
+    let isifilter = [];
     console.log('cek per tgl :', schdata1)
-    this.datakategori.forEach((value) => {
-      let scanned = schdata1.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded ==  true);
-      let unscanned = schdata1.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded == false);
-      console.log(scanned)
-      console.log(unscanned)
-      // const data = {
-      //   scanned: {
-      //     count: scanned.length,
-      //     data: scanned
-      //   },
-      //   unscanned: {
-      //     count: unscanned.length,
-      //     data: unscanned
-      //   },
-      // }
-      const data = {
-        countScanned: scanned.length,
-        scanned: scanned,
-        countUnscanned: unscanned.length,
-        unscanned: unscanned
-      }
-      filteredSchedule.push(data);
-    });
 
-    this.countsc = filteredSchedule;
+    grup.forEach((values) =>{
+      isigrup.push(values);
+    })
+    isigrup.forEach((b, ind) => {
+      let schdatalokasi = schdata1.filter((v) => v.area == b.area);
+      this.datakategori.forEach((value,i) => {
+        let scanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded ==  true);
+        let unscanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded == false);
+        const data = {
+          countScanned: scanned.length,
+          scanned: scanned,
+          countUnscanned: unscanned.length,
+          unscanned: unscanned,
+          index: ind
+        }
+        filteredSchedule.push(data);
+      });
+    })
+
+    this.countsc = chain(filteredSchedule).groupBy('index').map(res => res).value();
+    console.log(chain(this.countsc).groupBy('index').map(res => res).value());
+
+    console.log('isigr', isigrup);
     console.log('countsc', this.countsc);
   }
 
@@ -657,6 +658,11 @@ export class SchedulesPage implements OnInit {
     this.navCtrl.navigateForward(path, { state: { params, listDataScan } });
   }
   navPageAset(path, params, listDataScan, kategori, countsc) {
+    console.log('params klik', params)
+    console.log('listDataScan klik', listDataScan)
+    console.log('kategori klik', kategori)
+    console.log('countsc klik', countsc)
+
     this.navCtrl.navigateForward(path, { state: { params, listDataScan, kategori, countsc } });
   }
 

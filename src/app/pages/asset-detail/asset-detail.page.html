@@ -1,0 +1,102 @@
+<ion-header mode="ios">
+  <ion-toolbar class="ion-bg-white dark:ion-bg-gray-900">
+    <ion-buttons slot="start" mode="md">
+      <ion-back-button defaultHref="/assets" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-semibold">Alat Pemadam</ion-title>
+
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <div class="card">
+    <h3 class="text-white"><ion-icon name="pricetag-outline"></ion-icon> {{ resultParam?.more.category.name }}</h3>
+    <img [src]="resultParam?.photo[0]?.path" (click)="showImageViewer($event)" width="90%" alt="Avatar user" class="w-32 md:w-16  rounded-full mx-auto"/>
+    <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>No {{ resultParam?.more?.category?.name }}</ion-label></ion-col>
+          <ion-col>{{ resultParam?.asset_number }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Type </ion-label></ion-col>
+          <ion-col>{{ resultParam?.more?.type?.name }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4 text-white" *ngFor="let jenis of resultParam?.assetForm">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>{{ jenis?.formLabel }}</ion-label></ion-col>
+          <ion-col>{{ jenis?.optionName }}</ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+  </div>
+  <br>
+  <div class="card mt-2">
+    <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
+      <h3 class="text-white"><ion-icon name="location-outline"></ion-icon> Lokasi</h3>
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>No TP/Lokasi</ion-label></ion-col>
+          <ion-col>{{ resultParam?.more?.tag[0]?.tag_number }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Lokasi</ion-label></ion-col>
+          <ion-col>{{ resultParam?.more?.tag[0]?.unit }} <br> {{ resultParam?.more.tag[0].area }} <br> {{ resultParam?.more.tag[0].location }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Detail Lokasi</ion-label></ion-col>
+          <ion-col>{{ resultParam?.more?.tag[0]?.detail_location }}</ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+  </div>
+  <br>
+  <div class="card mt-2">
+    <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
+      <h3 class="text-white"><ion-icon name="unlink-outline"></ion-icon> Lainnya</h3>
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Status</ion-label></ion-col>
+          <ion-col>{{ resultParam?.more?.status?.name }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Tanggal Pengadaan</ion-label></ion-col>
+          <ion-col>{{ resultParam?.supply_date }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Tanggal Expaired</ion-label></ion-col>
+          <ion-col>{{ resultParam?.expireDate }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4 text-white">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Type Pengecekan</ion-label></ion-col>
+          <ion-col>{{ resultParam?.sch_type }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4 text-white" *ngFor="let tagging of resultParam?.more?.tagging">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>{{ tagging?.type }}</ion-label></ion-col>
+          <ion-col *ngIf="tagging?.type =='qr'"><img [src]="resultParam?.qr" (click)="showImageViewer($event)" alt=""></ion-col>
+          <ion-col *ngIf="tagging?.type !='qr'">{{ tagging?.value }}</ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+  </div>
+</ion-content>

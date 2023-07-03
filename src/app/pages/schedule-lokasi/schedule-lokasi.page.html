@@ -6,7 +6,7 @@
     </ion-buttons>
 
     <ion-title class="text-lg font-bold text-center">
-      Asset Lokasi
+      Asset Scan
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -20,26 +20,49 @@
     </ion-toolbar>
   </ion-header>
   <div class="pl-6">
-    <h4 class="text-2xl font-bold">Asset Lokasi</h4>
+    <h4 class="text-2xl font-bold">Asset Scan</h4>
   </div>
-
-  <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
 
   <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
 
   <!-- <app-screen-view *ngIf="!loading && !sourceAssets?.length" type="no-data"
     message="Data Kosong" description="Synchronize untuk mendapatkan schedule">
   </app-screen-view> -->
-  <div *ngIf="!loading" class="w-full min-h-full pb-24">
+  <div *ngIf="!loading" class="w-full min-h-full">
+    <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
+    <ion-grid class="w-full space-y-4">
+      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+        <ion-col><ion-label>Kode Lokasi</ion-label></ion-col>
+        <ion-col>{{ params?.tagNumber }}</ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid class="w-full space-y-4">
+      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+        <ion-col><ion-label>Tanggal</ion-label></ion-col>
+        <ion-col>{{ params?.adviceDate }}</ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid class="w-full space-y-4">
+      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+        <ion-col><ion-label>Unit</ion-label></ion-col>
+        <ion-col>{{ params?.unit }}</ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid class="w-full space-y-4">
+      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+        <ion-col><ion-label>Kode Lokasi</ion-label></ion-col>
+        <ion-col>{{ params?.area }}</ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
     <ion-grid class="w-full space-y-4">
       <ion-row class="justify-center">
         <ion-col size="12" sizeLg="12">
           <ion-row  class="w-full pt-3 justify-center items-center">
             <div class="relative min-h-screen pt-2 pb-12">
-              <div class="max-w-md mx-auto shadow-xl min-w-0">
-                <ion-grid class="w-full ion-padding flex flex-col justify-center items-center space-y-4">
+              <!-- <div class="max-w-md mx-auto shadow-xl min-w-0"> -->
+                <!-- <ion-grid class="w-full ion-padding flex flex-col justify-center items-center space-y-4"> -->
                   <ion-row class="w-full pt-3 justify-center items-center">
                     <div *ngFor="let kat of datakategori; index as idx;">
                     <ion-col size="6" sizeMd="6" sizeLg="6" *ngIf="countsc[idx].countScanned != 0 || countsc[idx].countUnscanned != 0">
@@ -49,7 +72,7 @@
                           <button class="relative duration-300 py-2 px-4 text-blue-100 rounded"
                             style="width: 120px">
                             <img [src]="kat.urlOffline" alt="" width="80px" />
-                            <label style="width: 80px" for="">{{kat.assetCategoryName}}
+                            <label style="width: 80px" class="text-xs"for="">{{kat.assetCategoryName}}
                             </label>
                             <span
                               class="absolute px-2 py-1 text-xs font-bold rounded-full -top-3 -right-3 bg-success text-white">
@@ -65,8 +88,8 @@
                     </ion-col>
                   </div>
                   </ion-row>
-                </ion-grid>
-              </div>
+                <!-- </ion-grid> -->
+              <!-- </div> -->
             </div>
           </ion-row>
         </ion-col>

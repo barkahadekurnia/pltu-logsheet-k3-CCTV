@@ -20,6 +20,10 @@ export type LoginData = {
   username: string;
   password: string;
 };
+export type LaporanData = {
+  reportDate: string;
+  parentNotes: string;
+};
 
 export type RecordData = {
   trxId: string;
@@ -47,6 +51,14 @@ export type RecordAttachment = {
   type: string;
   notes: string;
   parameterId: string;
+  timestamp: string;
+};
+export type RecordAttachmentApar = {
+  scheduleTrxId: string;
+  trxId?: string;
+  filePath: string;
+  type: string;
+  notes: string;
   timestamp: string;
 };
 
@@ -94,6 +106,19 @@ export class HttpService {
 
     return Http.post(options);
   }
+  kirimlaporan(id: string, data: LaporanData) {
+
+    const options: HttpOptions = {
+      url: environment.url.kirimlaporan+ "/" + id,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      data,
+      responseType: 'json'
+    };
+
+    return Http.post(options);
+  }
 
   getAssets(params: { tag?: string; tagLocation?: string } = {}) {
     const options: HttpOptions = {
@@ -110,6 +135,17 @@ export class HttpService {
   getAssetsId(params: string) {
     const options: HttpOptions = {
       url: environment.url.assetsid + "/" + params,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
+  getAssetsDetail(params: string) {
+    const options: HttpOptions = {
+      url: environment.url.assetsdetail + "/" + params,
       headers: {
         Authorization: `Bearer ${this.token}`
       },
@@ -289,6 +325,17 @@ export class HttpService {
 
     return Http.get(options);
   }
+  getSchedulesnonsiftadmin() {
+    const options: HttpOptions = {
+      url: environment.url.schedulesnonsift,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
   getSchedulesManual(params: { userId?: string } = {}) {
     const options: HttpOptions = {
       url: environment.url.schedulesnonmanual,
@@ -301,10 +348,32 @@ export class HttpService {
 
     return Http.get(options);
   }
+  getSchedulesManualadmin() {
+    const options: HttpOptions = {
+      url: environment.url.schedulesnonmanual,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
   //http://114.6.64.2:11241/api/logsheet_dev/api/transaction/schedule/nonShift?userId=6596
+  //http://114.6.64.2:11241/api/logsheet_new/api/transaction/schedule/viewTrxParent/
   getGroupOperator(params) {
     const options: HttpOptions = {
       url: environment.url.grupoperator + '/' + params,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+    return Http.get(options);
+  }
+  getDetailLaporan(params) {
+    const options: HttpOptions = {
+      url: environment.url.detaillaporan + '/' + params,
       headers: {
         Authorization: `Bearer ${this.token}`
       },
@@ -318,6 +387,17 @@ export class HttpService {
       headers: {
         Authorization: `Bearer ${this.token}`
       },
+      responseType: 'json'
+    };
+    return Http.get(options);
+  }
+  getLaporan(params: { userId?: string } = {}) {
+    const options: HttpOptions = {
+      url: environment.url.laporanpetugas,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      params,
       responseType: 'json'
     };
     return Http.get(options);
@@ -350,6 +430,30 @@ export class HttpService {
         trxId: attachment.trxId,
         timestamp: attachment.timestamp,
         parameterId: attachment.parameterId
+      },
+      filePath: attachment.filePath,
+      responseType: 'json',
+    };
+
+    if (attachment.trxId) {
+      options.data.trxId = attachment.trxId;
+    }
+
+    return Http.uploadFile(options);
+  }
+
+  uploadRecordAttachmentApar(attachment: RecordAttachmentApar) {
+    const options: HttpUploadFileOptions = {
+      url: environment.url.attach,
+      name: 'filePath',
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      data: {
+        scheduleTrxId: attachment.scheduleTrxId,
+        notes: attachment.notes,
+        trxId: attachment.trxId,
+        timestamp: attachment.timestamp
       },
       filePath: attachment.filePath,
       responseType: 'json',

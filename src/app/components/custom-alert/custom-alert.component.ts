@@ -101,4 +101,5 @@ export class CustomAlertComponent implements OnInit {
     console.log('cek simpan', this.shared.schtype.type)
   }
 
+
 }

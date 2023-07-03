@@ -148,6 +148,18 @@ const routes: Routes = [
   {
     path: 'laporan-harian',
     loadChildren: () => import('./pages/laporan-harian/laporan-harian.module').then( m => m.LaporanHarianPageModule)
+  },
+  {
+    path: 'laporan-harian-detail',
+    loadChildren: () => import('./pages/laporan-harian-detail/laporan-harian-detail.module').then( m => m.LaporanHarianDetailPageModule)
+  },
+  {
+    path: 'transaction-detail',
+    loadChildren: () => import('./pages/transaction-detail/transaction-detail.module').then( m => m.TransactionDetailPageModule)
+  },
+  {
+    path: 'asset-detail',
+    loadChildren: () => import('./pages/asset-detail/asset-detail.module').then( m => m.AssetDetailPageModule)
   }
 ];
 

@@ -1,7 +1,7 @@
 import { SchType } from './../../services/shared/shared.service';
 import { AttachmentSettings } from 'src/app/services/shared/shared.service';
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, ViewChild, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActionSheetOptions } from '@ionic/core';
 
@@ -11,7 +11,8 @@ import {
   ActionSheetController,
   AlertController,
   LoadingController,
-  MenuController
+  MenuController,
+  IonSlides
 } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
@@ -21,7 +22,7 @@ import { MediaService } from 'src/app/services/media/media.service';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-import { toLower, zip } from 'lodash';
+import { chain, groupBy, toLower, zip } from 'lodash';
 import Viewer from 'viewerjs';
 import * as moment from 'moment';
 import {Directory} from "@capacitor/filesystem";
@@ -32,7 +33,19 @@ import write_blob from "capacitor-blob-writer";
   styleUrls: ['./scan-form.page.scss'],
 })
 export class ScanFormPage implements OnInit {
-  @ViewChild(IonContent) ionContent: IonContent;
+  // @ViewChild(IonContent) ionContent: IonContent;
+  @ViewChild(IonContent, { static: true }) ionContent: IonContent;
+  @ViewChild(IonSlides, { static: false }) ionSlides: IonSlides;
+
+  public slidesOpts = {
+    allowTouchMove: false,
+    autoHeight: true,
+  };
+
+  public slides: string[];
+  public currentSlide: string;
+  public isBeginning: boolean;
+  public isEnd: boolean;
   resultParam = [];
   attach = [];
   sch = [];
@@ -81,6 +94,10 @@ export class ScanFormPage implements OnInit {
     created_at: string;
     deleted_at: string;
     date: string;
+    assetCategoryId: string,
+    assetCategoryName: string,
+    assetForm: string,
+    idschedule: string,
   };
   param: {
     assetId: string,
@@ -112,7 +129,7 @@ export class ScanFormPage implements OnInit {
     reportType: string;
     value: string;
     attachment: any[];
-  }
+  };
   record: {
     scannedAt: string;
     scannedEnd: string;
@@ -154,8 +171,12 @@ export class ScanFormPage implements OnInit {
     private media: MediaService,
     private notification: NotificationService,
     private shared: SharedService,
-    private utils: UtilsService
+    private utils: UtilsService,
+    private cdr: ChangeDetectorRef
   ) {
+    this.isBeginning = true;
+    this.isEnd = false;
+
     this.asset = {
       scheduleTrxId: '',
       abbreviation: '',
@@ -201,6 +222,10 @@ export class ScanFormPage implements OnInit {
       created_at: '',
       deleted_at: '',
       date: '',
+      assetCategoryId: '',
+      assetCategoryName: '',
+      assetForm: '',
+      idschedule: ''
     };
 
     this.record = {
@@ -235,13 +260,13 @@ export class ScanFormPage implements OnInit {
       return this.utils.back();
     }
 
-    console.log('transitionData :', this.transitionData);
+    console.log('1. transitionData hasil scan:', this.transitionData);
 
     this.platform.ready().then(() => {
       this.getAsset().finally(() => {
+        console.log('2. cek assetid on init :', this.asset);
         if (this.asset.assetId) {
           this.shared.asset = this.asset;
-          console.log('cek assetid on init :', this.asset);
         } else {
           this.menuCtrl.swipeGesture(false, 'asset-information')
             .then(() => this.menuCtrl.enable(false, 'asset-information'));
@@ -263,16 +288,68 @@ export class ScanFormPage implements OnInit {
     await this.menuCtrl.enable(false, 'asset-information');
     await this.menuCtrl.swipeGesture(false, 'asset-information');
   }
-//leave page
+
+
+  buildSlides(slides?: any[]) {
+    this.currentSlide = slides[0];
+    this.slides = slides;
+  }
+
+  async onSlidesChanged() {
+    const index = await this.ionSlides.getActiveIndex();
+    this.currentSlide = this.slides[index];
+    this.isBeginning = await this.ionSlides.isBeginning();
+    this.isEnd = await this.ionSlides.isEnd();
+  }
+
+  onSlidesDidChange() {
+    this.ionContent.scrollToTop();
+  }
+
+  onBackButtonTouched() {
+    this.ionSlides.slidePrev();
+    this.ionContent.scrollToTop();
+  }
+
+  async onNextButtonTouched() {
+    const index = await this.ionSlides.getActiveIndex();
+
+    if (!this.isEnd) {
+      const emptyParameter = this.resultParam[index]
+        .find(param => param.value === null || param.value === '' || param.value === undefined);
+
+      if (emptyParameter) {
+        const alert = await this.utils.createCustomAlert({
+          type: 'error',
+          header: 'Gagal',
+          message: 'Silahkan isi semua parameter',
+          buttons: [{
+            text: 'Okay',
+            handler: () => alert.dismiss()
+          }]
+        });
+        await alert.present();
+
+        return this.ionContent.scrollToTop(2000);
+      } else {
+        this.ionSlides.slideNext();
+        this.ionContent.scrollToTop();
+        this.cdr.detectChanges();
+      }
+    }
+
+    if (this.isEnd && this.currentSlide.includes('Catatan & Lampiran')) {
+      this.preview();
+    }
+  }
+  //leave page
   async confirmLeave() {
-    if (
-      !this.loading
-    ) {
+    if (!this.loading && this.resultParam?.length < 0) {
       const confirm = await this.utils.createCustomAlert({
         color: 'danger',
         type: 'warning',
-        header: 'Confirm',
-        message: 'Apakah Anda yakin ingin meninggalkan halaman ini?',
+        header: 'Tinggalkan Halaman',
+        message: 'Data Akan hilang dan tidak bisa di kembalikan',
         buttons: [
           {
             text: 'Keluar',
@@ -317,10 +394,10 @@ export class ScanFormPage implements OnInit {
   hasValue(value: any) {
     return value != null && value !== '';
   }
-  notes(parameter?: any) {
-    this.resultParam.filter(res => {
-      return res.parameterId === parameter?.parameterId;
-    })[0].notes = parameter.notes;
+  async notes(parameter?: any) {
+    const idx = await this.ionSlides.getActiveIndex();
+
+    this.resultParam[idx].filter(res => res.parameterId === parameter?.parameterId)[0].notes = parameter.notes;
   }
   async selectMedia(parameter?: any) {
     console.log('data all: ', this.resultParam);
@@ -599,78 +676,157 @@ console.log(media)
     actionSheet.present();
   }
 
-  async preview() {
-    const emptyParameter = this.resultParam
-      .find(parameter => parameter.value == null || parameter.value === '');
-    this.record.scannedNotes ='catatan';
-    this.validated = true;
-    console.log('this.resultParam',this.resultParam)
-    console.log('emptyParameter',emptyParameter)
-    if (emptyParameter) {
-      const alert = await this.utils.createCustomAlert({
-        type: 'error',
-        header: 'Gagal',
-        message: 'Silahkan isi semua parameter',
-        buttons: [{
-          text: 'Okay',
-          handler: () => alert.dismiss()
-        }]
+//   async preview() {
+//     const emptyParameter = this.resultParam
+//       .find(parameter => parameter.value == null || parameter.value === '');
+//     this.record.scannedNotes ='catatan';
+//     this.validated = true;
+//     console.log('this.resultParam',this.resultParam)
+//     console.log('emptyParameter',emptyParameter)
+//     if (emptyParameter) {
+//       const alert = await this.utils.createCustomAlert({
+//         type: 'error',
+//         header: 'Gagal',
+//         message: 'Silahkan isi semua parameter',
+//         buttons: [{
+//           text: 'Okay',
+//           handler: () => alert.dismiss()
+//         }]
+//       });
+
+//       alert.present();
+//       return this.ionContent.scrollToTop(2000);
+
+//     }
+//     console.log('sch', this.sch)
+// this.sch = this.sch.filter(sch => sch.schType == this.shared.schtype.type)
+// console.log('sch', this.sch)
+// console.log('type', this.shared.schtype.type)
+//     moment.locale('id')
+//     const now = this.utils.getTime();
+//     const current = new Date();
+//     this.record.scannedAt = moment(current).format('YYYY-MM-DD HH:mm:ss');
+//     this.validated = true;
+//     const attdata = [];
+//     this.schedule.scheduleTrxId = this.sch[0]?.scheduleTrxId;
+//     this.schedule.scheduleTo = this.sch[0]?.scheduleTo;
+//     this.schedule.schType = this.sch[0]?.schType;
+//     this.schedule.schFrequency = this.sch[0]?.schFrequency;
+//     this.schedule.schWeeks = this.sch[0]?.schWeeks;
+//     this.schedule.schWeekDays = this.sch[0]?.schWeekDays;
+//     this.schedule.schDays = this.sch[0]?.schDays;
+//     this.resultParam.map(res => {
+//       res.attachments.map(att => {
+//         attdata.push({
+//           name: att.name,
+//           type: att.type,
+//           filePath: att.filePath,
+//           notes: res.notes,
+//           parameterId: res.parameterId
+//         });
+//       })
+//     })
+//     const data = JSON.stringify({
+//       asset: this.schedule,
+//       record: this.record,
+//       schedule: this.resultParam,
+//       offset: this.transitionData?.offset || 0,
+
+//       data: this.resultParam
+//         .map(v => ({
+//           value: v.value,
+//           parameterName: v.parameterName,
+//           isDeviation: v.isDeviation,
+//           parameterId: v.parameterId,
+//           isExpanded: false
+//         })),
+//       attachments: attdata,
+//       attachmentsapar: this.attach
+
+//     });
+//     console.log('data json :', JSON.parse(data));
+//     return this.router.navigate(['form-preview', { data }]);
+//   }
+
+
+async preview() {
+  // const emptyParameter = this.resultParam
+  //   .find(parameter => parameter.value == null || parameter.value === '');
+  // this.record.scannedNotes = 'catatan';
+  // this.validated = true;
+  console.log('this.resultParam', this.resultParam);
+  // console.log('emptyParameter', emptyParameter);
+  // if (emptyParameter) {
+  //   const alert = await this.utils.createCustomAlert({
+  //     type: 'error',
+  //     header: 'Gagal',
+  //     message: 'Silahkan isi semua parameter',
+  //     buttons: [{
+  //       text: 'Okay',
+  //       handler: () => alert.dismiss()
+  //     }]
+  //   });
+
+  //   alert.present();
+  //   return this.ionContent.scrollToTop(2000);
+
+  // }
+  console.log('sch', this.sch)
+  this.sch = this.sch.filter(sch => sch.schType == this.shared.schtype.type)
+  console.log('sch', this.sch)
+  console.log('type', this.shared.schtype.type)
+  moment.locale('id')
+  const now = this.utils.getTime();
+  const current = new Date();
+  this.record.scannedAt = moment(current).format('YYYY-MM-DD HH:mm:ss');
+  this.validated = true;
+  const attdata = [];
+  this.schedule.scheduleTrxId = this.sch[0]?.scheduleTrxId;
+  this.schedule.scheduleTo = this.sch[0]?.scheduleTo;
+  this.schedule.schType = this.sch[0]?.schType;
+  this.schedule.schFrequency = this.sch[0]?.schFrequency;
+  this.schedule.schWeeks = this.sch[0]?.schWeeks;
+  this.schedule.schWeekDays = this.sch[0]?.schWeekDays;
+  this.schedule.schDays = this.sch[0]?.schDays;
+
+  const mergeDataFormSlides = [].concat.apply([], this.resultParam);
+
+  mergeDataFormSlides.map(res => {
+    res.attachments.map(att => {
+      attdata.push({
+        name: att.name,
+        type: att.type,
+        filePath: att.filePath,
+        notes: res.notes,
+        parameterId: res.parameterId
       });
-
-      alert.present();
-      return this.ionContent.scrollToTop(2000);
-
-    }
-    console.log('sch', this.sch)
-this.sch = this.sch.filter(sch => sch.schType == this.shared.schtype.type)
-console.log('sch', this.sch)
-console.log('type', this.shared.schtype.type)
-    moment.locale('id')
-    const now = this.utils.getTime();
-    const current = new Date();
-    this.record.scannedAt = moment(current).format('YYYY-MM-DD HH:mm:ss');
-    this.validated = true;
-    const attdata = [];
-    this.schedule.scheduleTrxId = this.sch[0]?.scheduleTrxId;
-    this.schedule.scheduleTo = this.sch[0]?.scheduleTo;
-    this.schedule.schType = this.sch[0]?.schType;
-    this.schedule.schFrequency = this.sch[0]?.schFrequency;
-    this.schedule.schWeeks = this.sch[0]?.schWeeks;
-    this.schedule.schWeekDays = this.sch[0]?.schWeekDays;
-    this.schedule.schDays = this.sch[0]?.schDays;
-    this.resultParam.map(res => {
-      res.attachments.map(att => {
-        attdata.push({
-          name: att.name,
-          type: att.type,
-          filePath: att.filePath,
-          notes: res.notes,
-          parameterId: res.parameterId
-        });
-      })
-    })
-    const data = JSON.stringify({
-      asset: this.schedule,
-      record: this.record,
-      schedule: this.resultParam,
-      offset: this.transitionData?.offset || 0,
-
-      data: this.resultParam
-        .map(v => ({
-          value: v.value,
-          parameterName: v.parameterName,
-          isDeviation: v.isDeviation,
-          parameterId: v.parameterId,
-          isExpanded: false
-        })),
-      attachments: attdata,
-      attachmentsapar: this.attach
-
     });
-    console.log('data json :', JSON.parse(data));
-    return this.router.navigate(['form-preview', { data }]);
-  }
+  });
+  console.log('attdata', attdata);
 
+  console.log(this.slides);
+
+  const data = JSON.stringify({
+    asset: this.schedule,
+    record: this.record,
+    schedule: mergeDataFormSlides,
+    offset: this.transitionData?.offset || 0,
+    data: mergeDataFormSlides
+      .map(v => ({
+        value: v.value,
+        parameterName: v.parameterName,
+        isDeviation: v.isDeviation,
+        parameterId: v.parameterId,
+        isExpanded: false
+      })),
+    attachments: attdata,
+    attachmentsapar: this.attach,
+    dataSlides: this.slides,
+    rawSchedule: this.resultParam
+  });
+  console.log('data json :', JSON.parse(data));
+  return this.router.navigate(['form-preview', { data }]);
+}
   async saveTemporary() {
     const loader = await this.loadingCtrl.create({
       spinner: 'dots',
@@ -841,19 +997,34 @@ console.log('type', this.shared.schtype.type)
 
       this.record.scannedBy = this.shared.user.name;
       this.record.scannedWith = this.transitionData?.type;
-      const value = this.transitionData.data;
+      let value='';
+      if(this.record.scannedWith == 'qr'){
+         value = this.transitionData.data;
+      }else{
+        const tagg = await this.database.select('assetTag', {
+          where: {
+            query: `assetTaggingType=? AND assetTaggingValue=?`,
+            params: [this.transitionData?.type, this.transitionData.data]
+          }
+        });
+        const [astag] = this.database.parseResult(tagg);
+        console.log('astag', astag);
+        value = astag.assetId;
+
+      }
 
 
       const resultAsset = await this.database.select('schedule', {
         where: {
-          query: `assetId=?`,
-          params: [value]
+          query: `assetId=? AND date<=?`,
+          params: [value, moment(now).format('YYYY-MM-DD')]
         }
       });
 
       const [asset] = this.database.parseResult(resultAsset);
       const assetarr = this.database.parseResult(resultAsset);
       console.log('value :', value);
+      console.log('assetarr :', assetarr);
 
       const resultParameters = await this.database.select('parameter', {
         where: {
@@ -929,11 +1100,11 @@ console.log('type', this.shared.schtype.type)
       console.log('value :', value);
       console.log('cek jumlah jadwal :', asset)
 
-      if(assetarr.length > 1){
-        const datatype = assetarr.map(k =>({
-        label: k.schType,
-        type: "radio",
-        value: k.schType
+      if (assetarr.length > 1) {
+        const datatype = assetarr.map(k => ({
+          label: k.schType,
+          type: "radio",
+          value: k.schType
         }))
         const alert = await this.utils.createCustomAlert({
           type: 'radio',
@@ -969,11 +1140,14 @@ console.log('type', this.shared.schtype.type)
                 })
                 )
 
-                this.resultParam = ak
-                console.log(this.resultParam)
+                this.resultParam = chain(ak).groupBy('parameterGroup').map(res => res).value();
+                console.log(this.resultParam);
+                console.log(chain(ak).groupBy('parameterGroup').map(res => res).value());
 
+                const dataSlides = Object.keys(groupBy(ak, 'parameterGroup'));
+                dataSlides.push('Catatan & Lampiran');
+                this.buildSlides(dataSlides);
               }
-
             }
           ],
         });
@@ -1001,8 +1175,13 @@ console.log('type', this.shared.schtype.type)
         })
         )
 
-        this.resultParam = ak
-        console.log(this.resultParam)
+        this.resultParam = chain(ak).groupBy('parameterGroup').map(res => res).value();
+        console.log(this.resultParam);
+        console.log(chain(ak).groupBy('parameterGroup').map(res => res).value());
+
+        const dataSlides = Object.keys(groupBy(ak, 'parameterGroup'));
+        dataSlides.push('Catatan & Lampiran');
+        this.buildSlides(dataSlides);
       }
 
 
@@ -1179,11 +1358,12 @@ console.log('type', this.shared.schtype.type)
 
     // this.asset.id = asset?.id;
     // this.asset.asset_number = asset?.asset_number;
-    // this.asset.photo = asset?.photo;
+    this.asset.photo = asset?.photo;
     // this.asset.description = asset?.description;
     // this.asset.sch_manual = this.utils.parseJson(asset?.sch_manual);
     this.asset.schType = this.sch[0].schType;
     this.asset.merk = this.sch[0].merk;
+    this.asset.assetForm = asset.form;
     // this.asset.sch_frequency = asset?.sch_frequency;
     // this.asset.sch_weeks = asset?.sch_weeks;
     // this.asset.schWeekDays = asset?.schWeekDays;
@@ -1321,6 +1501,7 @@ console.log('type', this.shared.schtype.type)
   }
 
   private async getPicture(parameter?: any, index?: any) {
+    const slideIndex = await this.ionSlides.getActiveIndex();
     const filePath = await this.media.getPicture();
     // console.log('parameter select: ', parameter)
     if (filePath) {
@@ -1332,11 +1513,8 @@ console.log('type', this.shared.schtype.type)
         paramId: parameter?.parameterId,
       };
 
-      // this.resultParam[index]?.attachments?.push(attachment);
-      // this.resultParam[index]
-      this.resultParam.filter(res => {
-        return res.parameterId === parameter?.parameterId;
-      })[0].attachments = [...parameter.attachments, attachment];
+      this.resultParam[slideIndex]
+      .filter(res => res.parameterId === parameter?.parameterId)[0].attachments = [...parameter.attachments, attachment];
     }
     // this.resultParam[0].attachments.push({ nama: 'irfan' })
     // console.log('index keluar: ', index)
@@ -1370,9 +1548,10 @@ console.log('type', this.shared.schtype.type)
     const audio:any = await this.media.captureAudio();
     console.log('audio', audio);
     if (audio) {
+      const type = audio.type ? audio.type : `audio/${audio.fullPath?.substring(audio.fullPath?.indexOf('.') + 1)}`;
       const attachment = {
         name: audio.name,
-        type: audio.type,
+        type: type,
         filePath: audio.fullPath,
         notes: ''
       };
@@ -1420,7 +1599,7 @@ console.log('type', this.shared.schtype.type)
       const attachment = {
         name: video.name,
         type: video.type,
-        filePath: video.fullPath,
+        filePath: `file://${video.fullPath}`,
         notes: ''
       };
 
@@ -1469,6 +1648,7 @@ console.log('type', this.shared.schtype.type)
   }
 
   private async confirmDeleteAttachment(media: any, parameter?: any, index?: any) {
+    const idx = await this.ionSlides.getActiveIndex();
     const confirm = await this.utils.createCustomAlert({
       color: 'danger',
       type: 'warning',
@@ -1486,9 +1666,9 @@ console.log('type', this.shared.schtype.type)
             console.log('mediaIndex val:', mediaIndex);
 
             if (mediaIndex >= 0 && parameter) {
-              this.resultParam[index].attachments = [
-                ...this.resultParam[index].attachments.slice(0, mediaIndex),
-                ...this.resultParam[index].attachments.slice(mediaIndex + 1)
+              this.resultParam[idx][index].attachments = [
+                ...this.resultParam[idx][index].attachments.slice(0, mediaIndex),
+                ...this.resultParam[idx][index].attachments.slice(mediaIndex + 1)
               ];
               // parameter = [
               //   ...parameter.slice(0, mediaIndex),
@@ -1496,9 +1676,9 @@ console.log('type', this.shared.schtype.type)
               // ];
               console.log('parameter val:', parameter);
             } else if (mediaIndex >= 0) {
-              this.resultParam[index].attachments = [
-                ...this.resultParam[index].attachments.slice(0, mediaIndex),
-                ...this.resultParam[index].attachments.slice(mediaIndex + 1)
+              this.resultParam[idx][index].attachments = [
+                ...this.resultParam[idx][index].attachments.slice(0, mediaIndex),
+                ...this.resultParam[idx][index].attachments.slice(mediaIndex + 1)
               ];
             }
 

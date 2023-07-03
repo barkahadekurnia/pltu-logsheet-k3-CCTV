@@ -1,0 +1,132 @@
+<ion-header class="ion-bo-border shadow fixed" [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
+  position="fixed">
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" class="p-2" mode="ios">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold text-center">
+      {{ dataParent?.assetNumber }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-header class="ion-no-border">
+    <ion-toolbar class="ion-bg-white">
+      <ion-buttons slot="start" class="p-2" mode="ios">
+        <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <div class="pl-6">
+    <h4 class="text-2xl font-bold">
+      {{ dataParent?.assetNumber }}
+    </h4>
+  </div>
+  <ion-item *ngIf="dataParent?.photo" lines="none">
+    <ion-label>
+      <img
+        class="w-48 max-w-full m-auto rounded-btn"
+        [src]="dataParent?.photo"
+        alt="Asset Info"
+        onerror="this.src='assets/img/empty.jpg'"
+
+      />
+      <!-- (click)="showImageViewer($event)" -->
+    </ion-label>
+  </ion-item>
+  <div class="p-4 mt-6">
+    <div class="border border-gray-400 rounded-box overflow-hidden">
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Jenis Asset</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ dataParent?.assetCategoryName }}</ion-note>
+      </ion-item>
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Nomor Asset</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ dataParent?.assetNumber }}</ion-note>
+      </ion-item>
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Tanggal Pengadaan</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ dataParent?.supplyDate }}</ion-note>
+      </ion-item>
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Tipe Schedule</p>
+        <ion-badge color="primary" mode="ios" slot="end">{{ dataParent?.schType }}</ion-badge>
+      </ion-item>
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Jadwal Scan</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ dataParent?.scheduleFrom }}</ion-note>
+      </ion-item>
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Asset Status</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ dataParent?.assetStatusName }}</ion-note>
+      </ion-item>
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Unit</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ dataParent?.unit }}</ion-note>
+      </ion-item>
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Area</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ dataParent?.area }}</ion-note>
+      </ion-item>
+      <ion-item class="dark:ion-border-gray-600" button [detail]="false">
+        <p class="text-base font-semibold">Tanggal Upload</p>
+        <ion-note class="text-base text-gray-500" slot="end">{{ dataParent?.scheduleType }}</ion-note>
+      </ion-item>
+
+      <ion-item class="dark:ion-border-gray-600" lines="none" button [detail]="false">
+        <p class="text-base font-semibold">Status Upload</p>
+        <ion-badge [color]="dataParent?.isUploaded == true ? 'success' : 'warning'" mode="ios" slot="end">{{
+          transaction?.isUploaded == true ? 'Terupload' : 'Pending' }}</ion-badge>
+      </ion-item>
+    </div>
+  </div>
+  <ion-grid class="w-full p-2">
+    <ion-row class="justify-center">
+      <ion-accordion-group expand="inset" *ngIf="parameter.length">
+        <ion-accordion [value]="item?.assetId" toggleIcon="chevron-down-circle" *ngFor="let item of parameter">
+          <ion-item slot="header" class="accordion">
+            <p class="text-base font-semibold">{{ item?.parameterName }}</p>
+          </ion-item>
+          <div class="ion-no-padding" slot="content">
+            <ion-row>
+              <ion-col size="12" sizeSm="6" sizeXl="4">
+                <div class="w-full p-4 bg-white border border-gray-300 rounded-xl">
+                  <ion-list>
+                    <ion-item>
+                      <ion-label>Status</ion-label>
+                      <ion-badge [color]="item?.isUploaded == 1 ? 'success' : 'danger'" mode="ios" slot="end">
+                        {{ item?.isUploaded == '1' ? 'Sudah Di Upload' : 'Belum Di Upload' }}
+                      </ion-badge>
+                    </ion-item>
+                    <ion-item class="text-xs">
+                      <ion-label>Deskripsi</ion-label>
+                      <ion-input class="text-right" readonly [value]="item?.description"></ion-input>
+                    </ion-item>
+                    <ion-item class="text-xs">
+                      <ion-label>Kondisi</ion-label>
+                      <ion-input class="text-right" readonly [value]="item?.condition"></ion-input>
+                    </ion-item>
+                    <ion-item class="text-xs">
+                      <ion-label>Scan</ion-label>
+                      <ion-input class="text-right" readonly [value]="item?.scannedWith"></ion-input>
+                    </ion-item>
+                    <ion-item class="text-xs">
+                      <ion-label>Petugas</ion-label>
+                      <ion-input class="text-right" readonly [value]="item?.scannedBy"></ion-input>
+                    </ion-item>
+                    <ion-item class="text-xs">
+                      <ion-label>Value</ion-label>
+                      <ion-input class="text-right" readonly [value]="item?.value"></ion-input>
+                    </ion-item>
+                  </ion-list>
+                </div>
+              </ion-col>
+            </ion-row>
+          </div>
+        </ion-accordion>
+      </ion-accordion-group>
+    </ion-row>
+  </ion-grid>
+</ion-content>

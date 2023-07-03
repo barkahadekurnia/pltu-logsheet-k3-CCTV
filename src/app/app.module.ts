@@ -35,7 +35,7 @@ import { SaveOptionsComponentModule } from './components/save-options/save-optio
 import { ScreenViewComponentModule } from './components/screen-view/screen-view.component.module';
 import { SynchronizeCardComponentModule } from './components/synchronize-card/synchronize-card.component.module';
 import { UploadRecordsComponentModule } from './components/upload-records/upload-records.component.module';
-
+import { StreamingMedia } from '@awesome-cordova-plugins/streaming-media/ngx';
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -85,6 +85,7 @@ import { UploadRecordsComponentModule } from './components/upload-records/upload
     ScreenOrientation,
     SQLite,
     VideoPlayer,
+    StreamingMedia
   ],
   bootstrap: [AppComponent],
 })

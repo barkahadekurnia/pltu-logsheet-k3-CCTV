@@ -1,6 +1,6 @@
 <ion-header class="ion-bo-border shadow fixed" [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
   position="fixed">
-  <ion-toolbar class="ion-bg-white">
+  <ion-toolbar class="ion-bg-white" color="primary">
     <ion-buttons slot="start" class="p-2" mode="ios">
       <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
     </ion-buttons>
@@ -9,6 +9,25 @@
       {{ params?.assetCategoryName }}
     </ion-title>
   </ion-toolbar>
+
+  <ion-toolbar class="dark:ion-base-gray-800" color="primary">
+    <ion-segment class="W-full bg-primary" [value]="segment" (ionChange)="onSegmentChanged($event)">
+      <!-- <ion-segment-button class="font-bold uppercase expanded" value="holded">Holded</ion-segment-button> -->
+      <ion-segment-button  *ngIf="listDataScan" class="font-bold capitalize" value="scanned">
+        <div class="bg-transparent">
+          <ion-label class="tracking-normal">Sudah Di Scan </ion-label>
+          <ion-badge color="success" class="align-middle">{{listDataScan.countScanned}}</ion-badge>
+        </div>
+      </ion-segment-button>
+      <ion-segment-button  *ngIf="listDataScan" class="font-bold capitalize" value="unscanned">
+        <div class="bg-transparent">
+          <ion-label class="tracking-normal">Belum di Scan </ion-label>
+          <ion-badge color="danger" class="align-middle">{{listDataScan.countUnscanned}}</ion-badge>
+        </div>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+
 </ion-header>
 
 <ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
@@ -24,9 +43,22 @@
   </div>
   <div class="py-0">
     <ion-toolbar class="ion-bg-white">
-      <ion-segment class="w-11/12" [value]="segment" (ionChange)="onSegmentChanged($event)">
-        <ion-segment-button class="font-bold uppercase" value="scanned">Sudah Di Scan</ion-segment-button>
-        <ion-segment-button class="font-bold uppercase" value="unscanned">Belum Di Scan</ion-segment-button>
+      <ion-segment class="w-full" [value]="segment" (ionChange)="onSegmentChanged($event)">
+        <!-- <ion-segment-button class="font-bold uppercase" value="scanned">Sudah Di Scan</ion-segment-button>
+        <ion-segment-button class="font-bold uppercase" value="unscanned">Belum Di Scan</ion-segment-button> -->
+
+        <ion-segment-button  *ngIf="listDataScan" class="font-bold capitalize" value="scanned">
+          <div class="bg-transparent">
+            <ion-label class="tracking-normal">Sudah Di Scan </ion-label>
+            <ion-badge color="success" class="align-middle">{{listDataScan.countScanned}}</ion-badge>
+          </div>
+        </ion-segment-button>
+        <ion-segment-button  *ngIf="listDataScan" class="font-bold capitalize" value="unscanned">
+          <div class="bg-transparent">
+            <ion-label class="tracking-normal">Belum di Scan </ion-label>
+            <ion-badge color="danger" class="align-middle">{{listDataScan.countUnscanned}}</ion-badge>
+          </div>
+        </ion-segment-button>
       </ion-segment>
     </ion-toolbar>
   </div>

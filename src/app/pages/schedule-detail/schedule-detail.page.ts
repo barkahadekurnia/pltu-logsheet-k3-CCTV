@@ -14,14 +14,15 @@ export class ScheduleDetailPage implements OnInit {
 
   params: any;
   listDataScan: {
-    countScanned: number,
+    countScanned: any,
     scanned: any[],
-    countUnscanned: number,
+    countUnscanned: any,
     unscanned: any[],
   };
   filteredData: any[];
   sourceData: any[];
   loaded: number;
+
 
   constructor(
     private router: Router,
@@ -48,6 +49,9 @@ export class ScheduleDetailPage implements OnInit {
 
       this.listDataScan = navValues?.listDataScan;
       console.log('this.listDataScan ',this.listDataScan)
+
+      // console.log('this.listDataScan countScanned',this.listDataScan.countScanned);
+      // console.log('this.listDataScan countUnscanned',this.listDataScan.countUnscanned);
 
       this.filteredData = this.listDataScan.scanned.slice(0, this.loaded);
       console.log('this.filteredData ',this.filteredData)

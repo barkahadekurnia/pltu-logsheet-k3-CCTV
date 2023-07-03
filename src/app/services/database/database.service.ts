@@ -258,6 +258,13 @@ export class DatabaseService {
           schType TEXT,
           assetCategoryType TEXT
         )
+      `,
+      jumlah: `
+        CREATE TABLE IF NOT EXISTS category(
+          jumlahId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          jumlahNama TEXT NOT NULL,
+          jumlahCount INTEGER
+        )
       `
     };
   }
@@ -277,7 +284,24 @@ export class DatabaseService {
     const { query, params } = querySet;
     return this.database.executeSql(query, params);
   }
+  insertbatch(table: string, data: { [key: string]: any }[], chunkSize = 200): Promise<any> | void {
+    const querySets = [];
 
+    for (let i = 0; i < data?.length; i += chunkSize) {
+      const sliced = data.slice(i, i + chunkSize);
+      querySets.push(...this.buildInsertQuery(table, sliced));
+    }
+
+
+    if (querySets.length > 1) {
+      return this.executeSQLBatch(querySets);
+    }
+
+    if (querySets.length) {
+      const [querySet] = querySets;
+      return this.executeSQL(querySet);
+    }
+  }
   async executeSQLBatch(querySets: QuerySet[]) {
     if (!this.platform.is('capacitor')) {
       throw new Error('Platform not supported!');

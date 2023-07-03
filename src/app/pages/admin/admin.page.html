@@ -63,41 +63,17 @@
         <div
           class="ml-2 mt-2 mr-2 p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl"
         >
-          <ion-item>
-            <ion-icon
-              name="images-outline"
-              slot="start"
-              color="dark"
-            ></ion-icon>
-            <p class="text-lg font-semibold">Offline Images</p>
-            <ion-toggle
-              slot="end"
-              [checked]="offlinePhotos"
-              (ionChange)="onOfflinePhotosChanged($event)"
-            ></ion-toggle>
+          <ion-item
+            *ngIf="isAuthenticated"
+            class="dark:ion-border-gray-600"
+            button
+            [detail]="true"
+            (click)="cekScan()"
+          >
+            <ion-icon name="file-tray-full-outline" slot="start" color="dark"></ion-icon>
+            <p class="text-lg font-semibold">Scan Alat Pemadam</p>
           </ion-item>
         </div>
-        <div
-          class="ml-2 mt-2 mr-2 p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl"
-        >
-          <ion-item>
-            <ion-icon
-              name="cloud-upload-outline"
-              slot="start"
-              color="dark"
-            ></ion-icon>
-            <p class="text-lg font-semibold">Auto upload</p>
-            <ion-toggle
-              slot="end"
-              [checked]="autoUpload"
-              (ionChange)="onAutoUploadChanged($event)"
-            ></ion-toggle>
-          </ion-item>
-        </div>
-        <!-- <ion-item class="dark:ion-border-gray-600" button [detail]="true" (click)="openPage(['attachment-settings'])">
-          <ion-icon name="extension-puzzle-outline" slot="start" color="dark"></ion-icon>
-          <ion-label>Attachment Config</ion-label>
-        </ion-item> -->
         <div
           class="ml-2 mt-2 mr-2 p-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-800 rounded-xl"
         >

@@ -104,21 +104,27 @@ export class NfcService {
     // if (this.platform.is('android')) {
     //   this.tagListener = this.nfc.addTagDiscoveredListener().subscribe(listener);
     // }
+var kali =0;
+
     this.nfc.addTagDiscoveredListener().subscribe(async event => {
       const res = this.nfc.bytesToHexString(event.tag.id)
       console.log('res', res);
+
       const data = JSON.stringify({
         type: 'rfid',
         data: res
       });
       const reco = { rfid: res };
+      console.log('kali1', kali)
 
+      if(kali < 1){
       await this.http.requests({
         requests: [() => this.http.changerfid(this.shared.asset.assetId, reco)],
         onSuccess: async ([responseParameters]) => {
           if (responseParameters.status >= 400) {
             throw responseParameters;
           }
+
           const alert = await this.utils.createCustomAlert({
             type: 'success',
             header: 'Berhasil',
@@ -130,12 +136,16 @@ export class NfcService {
           });
 
           alert.present();
-          this.router.navigate(['tabs/admin', { data }]);
+          this.router.navigate(['tabs/home', { data }]);
 
         },
         onError: error => console.error(error)
       });
+      console.log('kali2', kali)
+    }
+    console.log('kali3', kali)
 
+kali++;
     });
 
     if (this.platform.is('ios')) {

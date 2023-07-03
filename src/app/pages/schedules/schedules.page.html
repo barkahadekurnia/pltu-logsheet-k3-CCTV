@@ -185,7 +185,7 @@
           </ion-row>
           <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full pt-3 justify-center items-center">
             <div class="center" *ngFor="let kat of selectedDate?.lokasi; index as idx;">
-              <ul (click)="navPageAset('schedule-lokasi', kat, selectedDate, datakategori, countsc)">
+              <ul (click)="navPageAset('schedule-lokasi', kat, selectedDate, datakategori, countsc[idx])">
                 <li>
                   <div class="image">
                     <ion-icon slot="icon-only" name="location-outline"></ion-icon>{{kat.unit}}
@@ -202,38 +202,6 @@
               </ul>
             </div>
           </ion-row>
-          <!-- <ion-row *ngIf="selectedDate?.schedules?.length" class="w-full pt-3 justify-center items-center">
-            <div class="relative min-h-screen pt-2 pb-12">
-              <div class="max-w-md mx-auto bg-white shadow-xl min-w-0 dark:bg-slate-800 dark:highlight-white/5">
-                <ion-grid class="w-full ion-padding flex flex-col justify-center items-center space-y-4">
-                  <ion-row class="w-full pt-3 justify-center items-center">
-                    <ion-col *ngFor="let kat of datakategori; index as idx;" size="6" sizeMd="6" sizeLg="6">
-                      <div class="flex-none py-6 px-3 first:pl-6 last:pr-6"
-                        (click)="navPage('schedule-detail', kat, countsc[idx])">
-                        <div class="flex space-x-5 space-y-5 flex-wrap justify-center items-baseline">
-                          <button class="relative bg-blue hover:bg-blue-800 duration-300 py-2 px-4 text-blue-100 rounded"
-                            style="width: 120px">
-                            <img [src]="kat.urlOffline" alt="" width="80px" />
-                            <label style="width: 80px" for="">{{kat.assetCategoryName}}
-                            </label>
-
-                            <span
-                              class="absolute px-2 py-1 text-xs font-bold rounded-full -top-3 -right-3 bg-success text-white">
-                              {{countsc[idx].countScanned}}
-                            </span>
-                            <span
-                              class="absolute px-2 py-1 text-xs font-bold rounded-full top-4 -right-3 bg-error text-white">
-                              {{countsc[idx].countUnscanned}}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </div>
-            </div>
-          </ion-row> -->
         </ion-col>
       </ion-row>
     </ion-grid>

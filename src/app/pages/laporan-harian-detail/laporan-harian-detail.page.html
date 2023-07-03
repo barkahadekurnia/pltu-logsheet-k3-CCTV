@@ -1,0 +1,127 @@
+<ion-header class="ion-bo-border shadow fixed" [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
+  position="fixed">
+  <ion-toolbar class="ion-bg-white">
+    <ion-buttons slot="start" class="p-2" mode="ios">
+      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="text-lg font-bold text-center">
+      Detail Pengecekan
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <ion-header class="ion-no-border">
+    <ion-toolbar class="ion-bg-white">
+      <ion-buttons slot="start" class="p-2" mode="ios">
+        <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <div class="pl-6">
+    <h4 class="text-2xl font-bold">Detail Pengecekan</h4>
+  </div>
+
+  <!-- <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher> -->
+
+  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
+
+  <!-- <app-screen-view *ngIf="!loading && !sourceAssets?.length" type="no-data"
+    message="Data Kosong" description="Synchronize untuk mendapatkan schedule">
+  </app-screen-view> -->
+  <div *ngIf="!loading && laporan?.trxData?.length" class="w-full min-h-full">
+    <ion-grid class="w-full space-y-4">
+      <ion-row class="w-full">
+        <ion-col size="12">
+          <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 text-white">
+            <ion-list class="text-white rounded-3xl">
+              <ion-item class="text-xs dark:ion-border-gray-600">
+                <ion-label>Petugas</ion-label>
+                <ion-input class="text-right" readonly [value]="laporan?.scannedBy"></ion-input>
+              </ion-item>
+              <ion-item class="text-xs dark:ion-border-gray-600">
+                <ion-label>Tanggal</ion-label>
+                <ion-input class="text-right" readonly [value]="laporan?.scannedDate"></ion-input>
+              </ion-item>
+              <ion-item class="text-xs dark:ion-border-gray-600">
+                <ion-label>Status</ion-label>
+                <ion-input class="text-right" readonly [value]="laporan?.reportDate === null ? 'Belum Dilaporkan' : 'Sudah Dilaporkan'"></ion-input>
+              </ion-item>
+              <ion-item class="text-xs dark:ion-border-gray-600">
+                <ion-label>Catatan</ion-label>
+                <ion-input class="text-right" readonly [value]="laporan?.notes"></ion-input>
+              </ion-item>
+            </ion-list>
+          </div>
+        </ion-col>
+      </ion-row>
+
+    </ion-grid>
+    <div class="w-full pb-24 bg-white">
+      <ion-row class="px-4">
+        <ion-col size="12">
+            <h4 class="text-2xl font-bold">Alat Pemadam Scan</h4>
+        </ion-col>
+      </ion-row>
+
+      <ion-accordion-group expand="inset" *ngIf="laporan?.trxData?.length">
+        <ion-accordion [value]="item?.assetId" toggleIcon="chevron-down-circle" *ngFor="let item of laporan?.trxData">
+          <ion-item slot="header" class="accordion">
+            <p class="text-base font-semibold"><ion-badge [color]="laporan?.reportDate === null ? 'danger' : 'success'" mode="ios" slot="end">
+              {{ laporan?.reportDate === null ? ' ' : ' ' }}
+            </ion-badge>{{ item.assetNumber }}</p>
+          </ion-item>
+          <div class="ion-no-padding" slot="content">
+            <ion-row>
+              <ion-col size="12" sizeSm="6" sizeXl="4">
+                <div class="w-full p-4 bg-white border border-gray-300 rounded-xl">
+                  <ion-list>
+                    <ion-item class="text-xs dark:ion-border-gray-600">
+                      <ion-label>Status</ion-label>
+                      <ion-badge [color]="laporan?.reportDate === null? 'danger' : 'success'" mode="ios" slot="end">
+                        {{ laporan?.reportDate === null ? 'Belum Laporan' : 'Sudah Laporan' }}
+                      </ion-badge>
+                    </ion-item>
+                    <ion-item class="text-xs dark:ion-border-gray-600">
+                      <ion-label>Nama</ion-label>
+                      <ion-input class="text-right" readonly [value]="item?.assetNumber"></ion-input>
+                    </ion-item>
+                    <ion-item class="text-xs dark:ion-border-gray-600">
+                      <ion-label>Petugas</ion-label>
+                      <ion-input class="text-right" readonly [value]="item?.scannedBy"></ion-input>
+                    </ion-item>
+                    <ion-item class="text-xs dark:ion-border-gray-600">
+                      <ion-label>Jadwal Scan</ion-label>
+                      <ion-input class="text-right" readonly [value]="item?.date"></ion-input>
+                    </ion-item>
+                  </ion-list>
+                  <button class="btn btn-sm btn-primary text-white btn-block rounded-lg space-x-1 focus:outline-none" >
+                    <!-- (click)="openDetail(item?.trxParentId)" -->
+                    <p class="text-xs font-medium capitalize">Detail</p>
+                    <ion-icon name="chevron-forward-outline"></ion-icon>
+                  </button>
+                </div>
+              </ion-col>
+            </ion-row>
+          </div>
+        </ion-accordion>
+      </ion-accordion-group>
+      <div *ngIf="!laporan?.trxData?.length">
+        <app-screen-view type="no-data" message="Data Kosong" description="Data tidak ditemukan"></app-screen-view>
+      </div>
+    </div>
+
+    <!-- <ion-fab center bottom>
+      <button ion-fab mini><ion-icon name="add"></ion-icon></button>
+    </ion-fab> -->
+
+  </div>
+  <ion-fab *ngIf="laporan?.reportDate === null" slot="fixed" vertical="bottom" horizontal="end" (click)="sendModal()">
+    <ion-fab-button>
+      Kirim &nbsp; &nbsp; <ion-icon name="send"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

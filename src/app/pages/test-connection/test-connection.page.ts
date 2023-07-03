@@ -35,7 +35,7 @@ export class TestConnectionPage implements OnInit {
       if (this.shared.isAuthenticated) {
         this.testList.push({
           label: 'Get Assets',
-          request: () => this.http.getAssets()
+          request: () => this.http.getCountAsset()
         });
 
         if (!this.selectedTest) {

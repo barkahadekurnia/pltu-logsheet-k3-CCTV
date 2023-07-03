@@ -230,6 +230,43 @@ export class AdminPage implements OnInit {
     }
   }
 
+  async cekScan() {
+      const permission = await BarcodeScanner.checkPermission({ force: true });
+      if (permission.granted) {
+        BarcodeScanner.hideBackground();
+        document.body.classList.add('qrscanner');
+
+        const options: ScanOptions = {
+          targetedFormats: [SupportedFormat.QR_CODE]
+        };
+
+        BarcodeScanner.startScan(options).then(async (result) => {
+          this.utils.overrideBackButton();
+          document.body.classList.remove('qrscanner');
+
+          if (result.hasContent) {
+            const key = 'assetId=';
+            const startIndex = result.content.indexOf(key) + key.length;
+
+            const assetId = result.content;
+            const data = JSON.stringify({
+              type: 'qr',
+              data: assetId
+            });
+            this.router.navigate(['asset-detail', { data }]);
+
+          }
+        });
+
+        this.utils.overrideBackButton(() => {
+          this.utils.overrideBackButton();
+          document.body.classList.remove('qrscanner');
+          BarcodeScanner.showBackground();
+          BarcodeScanner.stopScan();
+        });
+      }
+  }
+
   async checkRecords() {
     const loader = await this.loadingCtrl.create({
       spinner: 'dots',
