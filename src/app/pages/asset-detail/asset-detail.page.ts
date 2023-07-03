@@ -12,7 +12,7 @@ import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
 
 import { Subscription, of } from 'rxjs';
 import Viewer from 'viewerjs';
-import { find, intersectionWith, map, merge } from 'lodash';
+import { find, findIndex, intersectionWith, map, merge } from 'lodash';
 import { map as rxjsMap, tap } from 'rxjs/operators';
 
 import { NfcService } from 'src/app/services/nfc/nfc.service';
@@ -298,17 +298,17 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
 
         const mappedArray: AssetFormDetails[] = map(bodyformAssetCategory, (form, idx) => {
           const result = intersectionWith(
-            this.utils.parseJson(form.formOption),
+            this.utils.parseJson(form?.formOption),
             this.resultParam.assetForm,
             (a: any, b: any) => a?.id === b?.formValue
           );
 
           return {
             ...form,
-            formOption: this.utils.parseJson(form.formOption),
+            formOption: this.utils.parseJson(form?.formOption),
             selected: result.length ? true : false,
             value: result[0].id,
-            assetFormId: bodyformAssetDetail?.assetForm[idx]?.id,
+            assetFormId: bodyformAssetDetail.assetForm[idx]?.id,
             disabled: (form.assetCategoryCode === 'PH' && (form.formName === 'kapasitas')) ? true :
               (form.assetCategoryCode === 'HB' && (form.formName === 'tipekonektor')) ? true :
                 (form.assetCategoryCode === 'DV' && (form.formName === 'diameter' || form.formName === 'jenis')) ? true :
@@ -318,20 +318,21 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
           };
         });
 
-        const initData = mappedArray?.filter(
+        const initData = mappedArray?.filter?.(
           (item) =>
             item.assetCategoryCode === 'PH' && item.formName === 'jenis' ||
             item.assetCategoryCode === 'HB' && item.formName === 'jenis' ||
-            item.assetCategoryCode === 'PTD' && item.formName === 'jenis' ||
-            item.assetCategoryCode === 'DV' && item.formName === 'merk' ||
+            item?.assetCategoryCode === 'DV' && item?.formName === 'merk' ||
             item.assetCategoryCode === 'FT' && item.formName === 'merk' ||
+            item.assetCategoryCode === 'PTD' && item.formName === 'jenis' ||
             item.assetCategoryCode === 'AP' && item.formName === 'media'
         );
 
         let dataFormTypeAsset: TypeForm[] = [];
 
-        if (initData?.length) {
-          const formId = initData[0]?.value;
+        if (mappedArray.length && initData.length && bodyformAssetDetail) {
+          const formId = initData[0].value;
+
           const response = await this.http.getAnyData(`${environment.url.formType}/${formId}`);
 
           if (![200, 201].includes(response.status)) {
@@ -352,14 +353,15 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
             formName: 'type',
             formOption: dataFormTypeAsset,
             formType: 'select',
-            index: (mappedArray?.length + 1)?.toString?.(),
-            selected: bodyformAssetDetail.more?.type ? true : false,
+            index: (mappedArray.length + 1)?.toString(),
+            selected: typeof bodyformAssetDetail.more?.type === 'object' ? true : false,
             updated_at: null,
             value: null,
             disabled: false,
           };
 
-          const idxDataMerk = mappedArray?.findIndex?.(obj => obj?.formName === 'merk');
+          // const idxDataMerk = mappedArray?.findIndex((obj: any) => obj.formName === 'merk');
+          const idxDataMerk = findIndex(mappedArray, (obj) => obj.index?.includes('2'));
 
           // add object (mappedAssetDetail) to index (idxDataMerk) of array (mappedArray)
           of(mappedArray)
@@ -387,6 +389,9 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       return null;
     }
 
+    console.log('fetchFormType', ev);
+
+
     const loader = await this.utils.presentLoader();
     const formValue = ev.detail?.value;
 
@@ -398,6 +403,7 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       }
 
       const bodyFormType = response.data?.data;
+      console.log('bodyFormType', bodyFormType);
 
       const updatedArray = this.dataFormDetailAsset
         ?.map?.((obj) => {

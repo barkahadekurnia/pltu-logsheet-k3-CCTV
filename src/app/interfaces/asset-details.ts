@@ -4,7 +4,7 @@ import { Parameter } from './parameter';
 export interface AssetDetails {
     assetForm: AssetForm[];
     asset_number: string;
-    description: string;
+    description?: string;
     expireDate: string;
     historyActive: string;
     id: string;
@@ -20,8 +20,8 @@ export interface AssetDetails {
     };
     photo: Photo[];
     qr: string;
-    sch_frequency: string;
-    sch_manual: string;
+    sch_frequency?: string;
+    sch_manual?: string;
     sch_type: string;
     supply_date: string;
 }
@@ -30,8 +30,8 @@ export interface AssetFormDetails {
     assetCategoryCode: string;
     assetCategoryId: string;
     assetCategoryName: string;
-    created_at: string;
-    deleted_at: string;
+    created_at?: string;
+    deleted_at?: string;
     formId: string;
     formLabel: string;
     formName: string;
@@ -39,8 +39,8 @@ export interface AssetFormDetails {
     formType: string;
     index: string;
     selected: boolean;
-    updated_at: string;
-    value: string;
+    updated_at?: string;
+    value?: string;
     disabled: boolean;
 }
 
