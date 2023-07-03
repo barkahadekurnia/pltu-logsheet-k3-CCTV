@@ -136,6 +136,7 @@
                 <ul class="dropdown">
                   <li><a>Grup Operator</a></li>
                   <li *ngIf="gruprole === 'PETUGAS' && datanonsift.status === 1">
+
                     <a>
                       <p class="text-white text-xl font-semibold leading-tight truncate">
                         <ion-badge color="warning" mode="ios">
@@ -145,6 +146,7 @@
                     </a>
                   </li>
                   <li *ngIf="gruprole === 'PETUGAS' && datasift.status === 1">
+
                     <a>
                       <h4 class="text-white text-xl font-semibold leading-tight truncate">
                         <ion-badge color="warning" mode="ios">
@@ -154,6 +156,7 @@
                     </a>
                   </li>
                   <li *ngIf="gruprole === 'PETUGAS' && datalk3.status === 1">
+
                     <a>
                       <h4 class="text-white text-xl font-semibold leading-tight truncate">
                         <ion-badge color="warning" mode="ios">
@@ -244,7 +247,7 @@
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat [count]="count.unuploaded" label="Transaksi" theme="warning"
+          <app-badge-stat [countSudah]="count.uploaded" [countBelum]="count.unuploaded"  label="Transactions" theme="warning"
             icon="assets/icon/file-invoice-light.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true"
             (click)="openPage(['transactions'])">
             <!-- <app-badge-stat
@@ -261,12 +264,11 @@
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat [count]="count.laporan" label="Laporan" theme="error" icon="assets/icon/report.svg"
-            type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openHarian()"></app-badge-stat>
+          <app-badge-stat  [countSudah]="count.sudahlaporan"  [countBelum]="count.belumlaporan" label="Laporan" theme="error" icon="assets/icon/report.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openHarian()"></app-badge-stat>
         </ion-col>
       </ion-row>
 
-      <ion-row class="pt-6 w-full">
+      <ion-row class="pt-6 w-full" >
         <ion-col size="12">
           <button class="btn btn-block rounded-full text-white capitalize space-x-1 focus:outline-none"
             [ngClass]="[application?.bgSyncButton || 'btn-primary']" (click)="synchronize()">

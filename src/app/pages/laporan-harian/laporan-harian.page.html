@@ -1,13 +1,30 @@
 <ion-header class="ion-bo-border shadow fixed" [ngClass]="[isHeaderVisible ? 'fixed-top' : 'above-top']"
   position="fixed">
-  <ion-toolbar class="ion-bg-white">
+  <ion-toolbar class="dark:ion-base-gray-800" color="primary">
     <ion-buttons slot="start" class="p-2" mode="ios">
-      <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+      <ion-back-button defaultHref="/tabs" icon="chevron-back"></ion-back-button>
     </ion-buttons>
 
-    <ion-title class="text-lg font-bold text-center">
+    <ion-title class="text-lg font-bold text-center text-white">
       Laporan Harian
     </ion-title>
+  </ion-toolbar>
+  <ion-toolbar class="dark:ion-base-gray-800" color="primary">
+    <ion-segment class="W-full bg-primary" [value]="segment" (ionChange)="onSegmentChanged($event)">
+      <!-- <ion-segment-button class="font-bold uppercase expanded" value="holded">Holded</ion-segment-button> -->
+      <ion-segment-button  *ngIf="dataBelum" class="font-bold capitalize" value="belum">
+        <div class="bg-transparent">
+          <ion-label class="tracking-normal">Belum Laporan </ion-label>
+          <ion-badge color="danger" class="align-middle">{{dataBelum.length}}</ion-badge>
+        </div>
+      </ion-segment-button>
+      <ion-segment-button  *ngIf="dataSudah" class="font-bold capitalize" value="sudah">
+        <div class="bg-transparent">
+          <ion-label class="tracking-normal">Sudah Laporan </ion-label>
+          <ion-badge color="success" class="align-middle">{{dataSudah.length}}</ion-badge>
+        </div>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
@@ -18,15 +35,26 @@
         <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
       </ion-buttons>
     </ion-toolbar>
+   
   </ion-header>
   <div class="pl-6">
     <h4 class="text-2xl font-bold">Laporan Harian</h4>
   </div>
   <div class="py-0">
     <ion-toolbar class="ion-bg-white">
-      <ion-segment class="w-11/12" [value]="segment" (ionChange)="onSegmentChanged($event)">
-        <ion-segment-button class="font-bold uppercase" value="belum">Belum Laporan</ion-segment-button>
-        <ion-segment-button class="font-bold uppercase" value="sudah">Sudah Laporan</ion-segment-button>
+      <ion-segment class="w-full" [value]="segment" (ionChange)="onSegmentChanged($event)">
+        <ion-segment-button  *ngIf="dataBelum" class="font-bold capitalize" value="belum">
+          <div class="bg-transparent">
+            <ion-label class="tracking-normal">Belum Laporan </ion-label>
+            <ion-badge color="danger" class="align-middle">{{dataBelum.length}}</ion-badge>
+          </div>
+        </ion-segment-button>
+        <ion-segment-button  *ngIf="dataSudah" class="font-bold capitalize" value="sudah">
+          <div class="bg-transparent">
+            <ion-label class="tracking-normal">Sudah Laporan </ion-label>
+            <ion-badge color="success" class="align-middle">{{dataSudah.length}}</ion-badge>
+          </div>
+        </ion-segment-button>
       </ion-segment>
     </ion-toolbar>
   </div>

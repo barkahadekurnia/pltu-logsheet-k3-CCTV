@@ -1,29 +1,56 @@
+/* eslint-disable @typescript-eslint/semi */
 /* eslint-disable @typescript-eslint/member-ordering */
 import { UserDetail } from './../../services/shared/shared.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, Injector, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MenuController, ModalController, NavController, Platform, PopoverController } from '@ionic/angular';
+import {
+  MenuController,
+  ModalController,
+  NavController,
+  Platform,
+  PopoverController,
+} from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { LocalNotificationSchema } from '@capacitor/local-notifications';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { HttpService } from 'src/app/services/http/http.service';
 import { NotificationService } from 'src/app/services/notification/notification.service';
-import { SharedService, UserData } from 'src/app/services/shared/shared.service';
+import {
+  SharedService,
+  UserData,
+} from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { Subscriber, Observable } from 'rxjs';
-import { chain, cond, groupBy, intersection, toLower, uniq, uniqBy, zip } from 'lodash';
+import {
+  chain,
+  cond,
+  groupBy,
+  intersection,
+  toLower,
+  uniq,
+  uniqBy,
+  zip,
+} from 'lodash';
 import * as moment from 'moment';
 
 import { CustomAlertButton } from 'src/app/components/custom-alert/custom-alert.component';
 import { SynchronizeCardComponent } from 'src/app/components/synchronize-card/synchronize-card.component';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AssetsPage } from '../assets/assets.page';
-import { BarcodeScanner, ScanOptions, SupportedFormat } from '@capacitor-community/barcode-scanner';
+import {
+  BarcodeScanner,
+  ScanOptions,
+  SupportedFormat,
+} from '@capacitor-community/barcode-scanner';
 import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
-import { environment } from 'src/environments/environment';
-type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK';
+
+type NfcStatus =
+  | 'NO_NFC'
+  | 'NFC_DISABLED'
+  | 'NO_NFC_OR_NFC_DISABLED'
+  | 'NFC_OK';
 
 type RequestOrder = {
   [key: string]: {
@@ -55,7 +82,7 @@ export class HomePage implements OnInit {
   akun: {
     nama: string;
     role: string;
-  }
+  };
   count: {
     uploaded: number;
     unuploaded: number;
@@ -63,9 +90,14 @@ export class HomePage implements OnInit {
     unscanned: number;
     assets: number;
     laporan: number;
+    sudahtransaksi: number;
+    belumtransaksi: number;
+    sudahlaporan: number;
+    belumlaporan: number;
   };
   datalaporan = [];
 
+  jumlahlaporan: any;
 
   isHeaderVisible: boolean;
   loading: boolean;
@@ -96,17 +128,16 @@ export class HomePage implements OnInit {
     private menuCtrl: MenuController,
     private injector: Injector,
     private nfc1: NFC
-
   ) {
     this.application = {
       name: 'Digital Logsheet',
       logo: {
         default: 'assets/img/s2p-logo.png',
         light: 'assets/img/s2p-logo.png',
-        dark: ''
+        dark: '',
       },
       lastSync: null,
-      bgSyncButton: 'btn-primary'
+      bgSyncButton: 'btn-primary',
     };
 
     this.count = {
@@ -115,7 +146,11 @@ export class HomePage implements OnInit {
       unuploaded: 0,
       holded: 0,
       unscanned: 0,
-      laporan: 0,
+      laporan:0,
+      sudahtransaksi:0,
+      belumtransaksi:0,
+      sudahlaporan: 0,
+      belumlaporan: 0,
     };
 
     this.syncJob = {
@@ -132,8 +167,8 @@ export class HomePage implements OnInit {
     this.datasift = this.shared.userdetail.shift;
     this.datanonsift = this.shared.userdetail.nonshift;
     this.datalk3 = this.shared.userdetail.lk3;
-    //console.log(this.gruprole, this.datasift, this.datanonsift, this.datalk3);
 
+    console.log(this.gruprole, this.datasift, this.datanonsift, this.datalk3);
   }
 
   get applicationLogo() {
@@ -158,7 +193,6 @@ export class HomePage implements OnInit {
       this.application.logo.light = 'assets/img/s2p-logo.png';
       this.application.logo.dark = 'assets/img/s2p-logo.png';
     });
-
   }
 
   ionViewWillEnter() {
@@ -169,8 +203,11 @@ export class HomePage implements OnInit {
         const difference = now - lastSync;
 
         this.application.lastSync = moment(lastSync).from(now);
-        this.application.bgSyncButton = difference > 18000000 ? 'btn-error' // 5 hours
-          : difference > 7200000 ? 'btn-warning' // 3 hours
+        this.application.bgSyncButton =
+          difference > 18000000
+            ? 'btn-error' // 5 hours
+            : difference > 7200000
+            ? 'btn-warning' // 3 hours
             : 'btn-success';
       } else {
         this.application.lastSync = null;
@@ -201,7 +238,7 @@ export class HomePage implements OnInit {
     const modal = await this.modalCtrl.create({
       component: AssetsPage,
       componentProps: {
-        isSearchFocus: true
+        isSearchFocus: true,
       },
       backdropDismiss: true,
     });
@@ -237,8 +274,8 @@ export class HomePage implements OnInit {
       activityLogs: {
         label: 'Activity Logs',
         status: 'loading',
-        message: 'Periksa Aktivitas Log...'
-      }
+        message: 'Periksa Aktivitas Log...',
+      },
     };
 
     const loader = await this.popoverCtrl.create({
@@ -266,7 +303,7 @@ export class HomePage implements OnInit {
               this.uploadActivityLogs(subscriber, loader);
           }),
         },
-      }
+      },
     });
 
     await loader.present();
@@ -290,54 +327,49 @@ export class HomePage implements OnInit {
           throw response;
         }
         this.count.assets = response?.data?.data;
-        //console.log('data', response?.data?.data);
 
-
+        console.log('data', response?.data?.data);
       },
       onError: (error) => {
         this.shared.addLogActivity({
           activity: 'Gagal mendapatkan data jumlah asset',
           data: {
             message: this.http.getErrorMessage(error),
-            status: 'failed'
+            status: 'failed',
           },
         });
-
       },
     });
   }
   async openHarian() {
     const data = JSON.stringify({
-      data: this.datalaporan
-    })
-    //console.log('data json :', JSON.parse(data));
+      data: this.datalaporan,
+    });
+    console.log('data json :', JSON.parse(data));
     return this.router.navigate(['laporan-harian', { data }]);
   }
   private async getLocalAssets() {
     try {
       const result = await this.database.select('schedule', {
-        column: [
-          'assetId',
-          'assetStatusName',
-          'assetNumber',
-          'assetStatusId',
-        ],
-        groupBy: ['assetId']
+        column: ['assetId', 'assetStatusName', 'assetNumber', 'assetStatusId'],
+        groupBy: ['assetId'],
       });
 
       const assetsParameterStatuses = await this.getAssetsParameterStatuses();
       // const holdedRecords = await this.getHoldedRecords();
-      // //console.log('0. chart ', result)
-      // //console.log('1. data schedule chart ', assetsParameterStatuses)
-      const assets = this.database.parseResult(result)
-        .filter(asset => {
-          const assetParameterStatuses = assetsParameterStatuses[asset.assetId] || [];
-          // //console.log('2. data asetid filter', asset.assetId)
-          // //console.log('2. data chart filter', assetParameterStatuses)
+      // console.log('0. chart ', result)
+      // console.log('1. data schedule chart ', assetsParameterStatuses)
+      const assets = this.database
+        .parseResult(result)
+        .filter((asset) => {
+          const assetParameterStatuses =
+            assetsParameterStatuses[asset.assetId] || [];
+          // console.log('2. data asetid filter', asset.assetId)
+          // console.log('2. data chart filter', assetParameterStatuses)
 
           return assetParameterStatuses;
         })
-        .map(asset => {
+        .map((asset) => {
           // const hasRecordHold = holdedRecords.includes(asset.assetId);
 
           const schedule = {
@@ -346,13 +378,12 @@ export class HomePage implements OnInit {
             holded: 0,
             unscanned: 0,
             total: 0,
-            percentage: 0
+            percentage: 0,
           };
 
           return { ...asset, schedule };
         });
-      // //console.log('3. data chart jumlah', assets)
-
+      // console.log('3. data chart jumlah', assets)
 
       await this.getLocalSchedules(assets);
     } catch (error) {
@@ -361,6 +392,35 @@ export class HomePage implements OnInit {
       this.loading = false;
     }
   }
+
+  // private async getTransaction(){
+  //   this.http.requests({
+  //     requests: [() => this.http.getLaporan(userId)],
+  //     onSuccess: async ([responseLaporan]) => {
+  //       if (responseLaporan.status >= 400) {
+  //         throw responseLaporan;
+  //       }
+  //       console.log('responseLaporan', responseLaporan);
+  //       this.jumlahlaporan = responseLaporan?.data?.data?.length
+  //       console.log('jumlahLaporan',this.jumlahlaporan);
+        
+  //       if (this.jumlahlaporan) {
+  //         const filterdata = responseLaporan?.data?.data?.filter(
+  //           (scan) => scan.reportDate == null
+  //         );
+  //         console.log('filterdata', filterdata);
+  //         count.laporan = filterdata?.length;
+  //         count.belumlaporan = filterdata?.length;
+  //         count.sudahlaporan = this.jumlahlaporan-count.laporan;
+  //         console.log('belum laporan',count.sudahlaporan);
+          
+  //         this.datalaporan = filterdata;
+  //         console.log('dataLaporan',this.datalaporan)
+  //       }
+  //     },
+  //     onError: (error) => console.error(error),
+  //   });
+  // }
 
   private async getLocalSchedules(assets: any[]) {
     // //console.log('4. data local asset ke get localSchedule', assets);
@@ -371,32 +431,32 @@ export class HomePage implements OnInit {
         unuploaded: 0,
         holded: 0,
         unscanned: 0,
-        laporan: 0
+        laporan: 0,
+        sudahtransaksi: 0,
+        belumtransaksi: 0,
+        sudahlaporan: 0,
+        belumlaporan: 0,
       };
 
-      const assetIds = assets.map(asset => asset.assetId);
+      const assetIds = assets.map((asset) => asset.assetId);
       const marks = this.database.marks(assetIds.length).join(',');
 
       const result = await this.database.select('schedule', {
-        column: [
-          'scheduleTrxId',
-          'assetId',
-          'scannedAt',
-        ],
+        column: ['scheduleTrxId', 'assetId', 'scannedAt'],
         groupBy: ['scheduleTrxId'],
         where: {
           query: `assetId IN (${marks})`,
-          params: assetIds
-        }
+          params: assetIds,
+        },
       });
 
       const now = this.utils.getTime();
       const dateInThisMonth = this.getDateInThisMonth(now);
-      const lastWeek = Math.max(...dateInThisMonth.map(item => item.week));
-      const schedules = this.database.parseResult(result)
-      // //console.log('5. data localSchedule', schedules);
-      // //console.log('6. bulan ini', dateInThisMonth);
-      // //console.log('7. lastWeek', lastWeek);
+      const lastWeek = Math.max(...dateInThisMonth.map((item) => item.week));
+      const schedules = this.database.parseResult(result);
+      // console.log('5. data localSchedule', schedules);
+      // console.log('6. bulan ini', dateInThisMonth);
+      // console.log('7. lastWeek', lastWeek);
 
       // .filter(schedule => this.filterSchedule(schedule, now, dateInThisMonth, lastWeek));
 
@@ -404,14 +464,22 @@ export class HomePage implements OnInit {
       // //console.log('8. belum upload', unuploadedRecords);
 
       for (const item of schedules) {
-        const assetIndex = assets.findIndex(asset => asset.assetId === item.assetId);
-        if (assetIndex >= 0 && item.scannedAt != null) { // Uploaded
+        const assetIndex = assets.findIndex(
+          (asset) => asset.assetId === item.assetId
+        );
+        if (assetIndex >= 0 && item.scannedAt != null) {
+          // Uploaded
           assets[assetIndex].schedule.uploaded++;
           count.uploaded++;
-        } else if (assetIndex >= 0 && unuploadedRecords.includes(item.scheduleTrxId)) { // Unuploaded
+        } else if (
+          assetIndex >= 0 &&
+          unuploadedRecords.includes(item.scheduleTrxId)
+        ) {
+          // Unuploaded
           assets[assetIndex].schedule.unuploaded++;
           count.unuploaded++;
-        } else if (assetIndex >= 0) { // Unscanned
+        } else if (assetIndex >= 0) {
+          // Unscanned
           assets[assetIndex].schedule.unscanned++;
           count.unscanned++;
         } else {
@@ -429,58 +497,70 @@ export class HomePage implements OnInit {
         //   count.unscanned++;
         // }
       }
-      // //console.log('10. upload', count.uploaded);
-      // //console.log('11. belum upload', count.unuploaded);
-      // //console.log('12. belum scan', count.unscanned);
+      console.log('10. upload', count.uploaded);
+      console.log('11. belum upload', count.unuploaded);
+      console.log('12. belum scan', count.unscanned);
 
       // count.assets = assets.length;
       this.count = count;
       this.getCountAssets();
-      const userId = { userId: this.shared.user.id }
+      const userId = { userId: this.shared.user.id };
 
       this.http.requests({
-        requests: [
-          () => this.http.getLaporan(userId),
-        ],
+        requests: [() => this.http.getLaporan(userId)],
         onSuccess: async ([responseLaporan]) => {
           if (responseLaporan.status >= 400) {
             throw responseLaporan;
           }
-          //console.log('responseLaporan', responseLaporan);
-          if (responseLaporan?.data?.data?.length) {
-            const filterdata = responseLaporan?.data?.data?.filter((scan) => scan.reportDate == null);
-            //console.log('filterdata', filterdata)
+          console.log('responseLaporan', responseLaporan);
+          this.jumlahlaporan = responseLaporan?.data?.data?.length
+          console.log('jumlahLaporan',this.jumlahlaporan);
+          
+          if (this.jumlahlaporan) {
+            const filterdata = responseLaporan?.data?.data?.filter(
+              (scan) => scan.reportDate == null
+            );
+            console.log('filterdata', filterdata);
             count.laporan = filterdata?.length;
+            count.belumlaporan = filterdata?.length;
+            count.sudahlaporan = this.jumlahlaporan-count.laporan;
+            console.log('belum laporan',count.sudahlaporan);
+            
             this.datalaporan = filterdata;
+            console.log('dataLaporan',this.datalaporan)
           }
         },
-        onError: error => console.error(error)
+        onError: (error) => console.error(error),
       });
-      //console.log('data kirim', this.datalaporan)
+      console.log('data kirim', this.datalaporan);
     } catch (error) {
       console.error(error);
     }
   }
-  private async prepareDirectory(type: 'asset' | 'parameter', exceptions: string[] = []) {
+
+  private async prepareDirectory(
+    type: 'asset' | 'parameter',
+    exceptions: string[] = []
+  ) {
     try {
       const { files } = await Filesystem.readdir({
         path: type,
-        directory: Directory.Data
+        directory: Directory.Data,
       });
 
-      const fileToDeleted = files.filter(file => !exceptions.includes(file));
+      const fileToDeleted = files.filter((file) => !exceptions.includes(file));
 
       for (const file of fileToDeleted) {
         await Filesystem.deleteFile({
           path: `${type}/${file}`,
-          directory: Directory.Data
+          directory: Directory.Data,
         });
       }
     } catch (error) {
       // //console.log(error)
       await Filesystem.mkdir({
         path: type,
-        directory: Directory.Data
+        directory: Directory.Data,
       });
     }
   }
@@ -492,21 +572,22 @@ export class HomePage implements OnInit {
 
       const result = await this.database.select('parameter', {
         column: columns,
-        groupBy: columns
+        groupBy: columns,
       });
 
       const parameterStatuses = this.database.parseResult(result);
 
-      Object.entries(groupBy(parameterStatuses, 'assetId'))
-        .forEach(([assetId, parameters]) => {
+      Object.entries(groupBy(parameterStatuses, 'assetId')).forEach(
+        ([assetId, parameters]) => {
           assetParameterStatuses[assetId] = uniq<string>(
             parameters
-              .map(parameter =>
+              .map((parameter) =>
                 parameter.showOn?.length ? parameter.showOn?.split?.(',') : []
               )
               .reduce((prev, curr) => prev.concat(curr), [])
           );
-        });
+        }
+      );
     } catch (error) {
       console.error(error);
     }
@@ -522,7 +603,7 @@ export class HomePage implements OnInit {
       const { path } = await this.http.download({
         url,
         filePath: `${type}/${name}`,
-        fileDirectory: Directory.Data
+        fileDirectory: Directory.Data,
       });
 
       filePath = path;
@@ -532,7 +613,7 @@ export class HomePage implements OnInit {
 
     return filePath;
   }
-
+  
   async showDetails(akun?: any) {
     await this.menuCtrl.enable(true, 'sidebar');
     return this.menuCtrl.open('sidebar');
@@ -541,9 +622,7 @@ export class HomePage implements OnInit {
   private async getParameterByAssetId(assetId) {
     const loader = await this.utils.presentLoader();
     return this.http.requests({
-      requests: [
-        () => this.http.getParameters(assetId)
-      ],
+      requests: [() => this.http.getParameters(assetId)],
       onSuccess: async ([responseParameters]) => {
         if (![200, 201].includes(responseParameters.status)) {
           throw responseParameters;
@@ -629,13 +708,15 @@ export class HomePage implements OnInit {
         column: ['scheduleTrxId'],
         where: {
           query: 'isUploaded=?',
-          params: [0]
+          params: [0],
         },
-        groupBy: ['scheduleTrxId']
+        groupBy: ['scheduleTrxId'],
       });
 
       records.push(
-        ...this.database.parseResult(result).map(record => record.scheduleTrxId)
+        ...this.database
+          .parseResult(result)
+          .map((record) => record.scheduleTrxId)
       );
     } catch (error) {
       console.error(error);
@@ -650,22 +731,29 @@ export class HomePage implements OnInit {
     try {
       const recordHold = await this.database.select('recordHold', {
         column: ['assetId'],
-        groupBy: ['assetId']
+        groupBy: ['assetId'],
       });
 
-      const recordAttachmentHold = await this.database.select('recordAttachment', {
-        column: ['scheduleTrxId'],
-        where: {
-          query: 'isUploaded=?',
-          params: [-1]
-        },
-        groupBy: ['scheduleTrxId']
-      });
+      const recordAttachmentHold = await this.database.select(
+        'recordAttachment',
+        {
+          column: ['scheduleTrxId'],
+          where: {
+            query: 'isUploaded=?',
+            params: [-1],
+          },
+          groupBy: ['scheduleTrxId'],
+        }
+      );
 
-      records.push(...uniq([
-        ...this.database.parseResult(recordHold).map(item => item.assetId),
-        ...this.database.parseResult(recordAttachmentHold).map(item => item.key)
-      ]));
+      records.push(
+        ...uniq([
+          ...this.database.parseResult(recordHold).map((item) => item.assetId),
+          ...this.database
+            .parseResult(recordAttachmentHold)
+            .map((item) => item.key),
+        ])
+      );
     } catch (error) {
       console.error(error);
     }
@@ -673,26 +761,32 @@ export class HomePage implements OnInit {
     return records;
   }
 
-  private onProcessFinished(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
+  private onProcessFinished(
+    subscriber: Subscriber<any>,
+    loader: HTMLIonPopoverElement
+  ) {
     this.syncJob.counter++;
     const maxCount = Object.keys(this.syncJob.order).length;
     // //console.log('jumlah syc', this.syncJob.counter);
 
     if (this.syncJob.counter < maxCount) {
       subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
+        complexMessage: Object.values(this.syncJob.order),
       });
     } else {
       const data: any = {
         complexMessage: Object.values(this.syncJob.order),
-        buttons: [{
-          text: 'Tutup',
-          handler: () => loader.dismiss()
-        }]
+        buttons: [
+          {
+            text: 'Tutup',
+            handler: () => loader.dismiss(),
+          },
+        ],
       };
 
-      const hasFailedSync = Object.values(this.syncJob.order)
-        .find(item => item.status === 'failed');
+      const hasFailedSync = Object.values(this.syncJob.order).find(
+        (item) => item.status === 'failed'
+      );
 
       if (hasFailedSync) {
         data.buttons.push({
@@ -700,7 +794,7 @@ export class HomePage implements OnInit {
           handler: () => {
             loader.dismiss();
             this.router.navigate(['activity-logs']);
-          }
+          },
         });
       }
 
@@ -724,13 +818,11 @@ export class HomePage implements OnInit {
       const result = await this.database.select(table, {
         where: {
           query: 'isUploaded=?',
-          params: [0]
-        }
+          params: [0],
+        },
       });
 
-      data.push(
-        ...this.database.parseResult(result)
-      );
+      data.push(...this.database.parseResult(result));
     } catch (error) {
       console.error(error);
     }
@@ -739,23 +831,26 @@ export class HomePage implements OnInit {
   }
 
   private async checkSharedRecords() {
-    this.shared.records.forEach(async record => {
+    this.shared.records.forEach(async (record) => {
       for (const index of record.requests.keys()) {
-        if (record.requests[index].status !== 'success' && record.requests[index].type === 'record') {
+        if (
+          record.requests[index].status !== 'success' &&
+          record.requests[index].type === 'record'
+        ) {
           const [{ scheduleTrxId }] = record.requests[index].data;
 
           const extra = {
             where: {
               query: 'scheduleTrxId=?',
-              params: [scheduleTrxId]
+              params: [scheduleTrxId],
             },
             groupBy: ['scheduleTrxId'],
-            limit: 1
+            limit: 1,
           };
 
           const localRecord = await this.database.select('record', {
             column: ['isUploaded'],
-            ...extra
+            ...extra,
           });
 
           const [{ isUploaded }] = this.database.parseResult(localRecord);
@@ -767,11 +862,12 @@ export class HomePage implements OnInit {
 
           const localSchedule = await this.database.select('dataschedule', {
             column: ['syncAt'],
-            ...extra
+            ...extra,
           });
 
           const [{ syncAt }] = this.database.parseResult(localSchedule);
-          record.requests[index].status = syncAt != null ? 'success' : record.requests[index].status;
+          record.requests[index].status =
+            syncAt != null ? 'success' : record.requests[index].status;
         } else if (record.requests[index].status !== 'success') {
           const { recordAttachmentId } = record.requests[index].data;
 
@@ -779,19 +875,24 @@ export class HomePage implements OnInit {
             column: ['isUploaded'],
             where: {
               query: 'recordAttachmentId=?',
-              params: [recordAttachmentId]
+              params: [recordAttachmentId],
             },
             groupBy: ['recordAttachmentId'],
-            limit: 1
+            limit: 1,
           });
 
           const [{ isUploaded }] = this.database.parseResult(result);
-          record.requests[index].status = isUploaded ? 'success' : record.requests[index].status;
+          record.requests[index].status = isUploaded
+            ? 'success'
+            : record.requests[index].status;
         }
       }
 
-      record.status = record.requests.find((request: any) => request.status !== 'success')
-        ? record.status : 'success';
+      record.status = record.requests.find(
+        (request: any) => request.status !== 'success'
+      )
+        ? record.status
+        : 'success';
     });
   }
 
@@ -800,18 +901,17 @@ export class HomePage implements OnInit {
 
     try {
       const result = await this.database.select(table, {
-        column: [
-          'photo'
-        ],
+        column: ['photo'],
         groupBy: ['photo'],
         where: {
           query: 'photo IS NOT NULL',
-          params: []
-        }
+          params: [],
+        },
       });
 
-      this.database.parseResult(result)
-        .forEach(({ photo, offlinePhoto }) => photos[photo] = offlinePhoto);
+      this.database
+        .parseResult(result)
+        .forEach(({ photo, offlinePhoto }) => (photos[photo] = offlinePhoto));
     } catch (error) {
       console.error(error);
     }
@@ -819,26 +919,28 @@ export class HomePage implements OnInit {
     return photos;
   }
 
-  private async uploadRecords(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
+  private async uploadRecords(
+    subscriber: Subscriber<any>,
+    loader: HTMLIonPopoverElement
+  ) {
     const now = this.utils.getTime();
     const syncAt = moment(now).format('YYYY-MM-DD HH:mm:ss');
 
-    const records = (await this.getUnuploadedData('record'))
-      .map((record) => ({
-        condition: record.condition,
-        parameterId: record.parameterId,
-        scannedAt: record.scannedAt,
-        scannedBy: record.scannedBy,
-        scannedEnd: record.scannedEnd,
-        scannedNotes: record.scannedNotes,
-        scannedWith: record.scannedWith,
-        scheduleTrxId: record.scheduleTrxId,
-        syncAt,
-        trxId: record.trxId,
-        value: record.value,
-        userId: this.shared.user.id,
-        updated_at: syncAt,
-      }));
+    const records = (await this.getUnuploadedData('record')).map((record) => ({
+      condition: record.condition,
+      parameterId: record.parameterId,
+      scannedAt: record.scannedAt,
+      scannedBy: record.scannedBy,
+      scannedEnd: record.scannedEnd,
+      scannedNotes: record.scannedNotes,
+      scannedWith: record.scannedWith,
+      scheduleTrxId: record.scheduleTrxId,
+      syncAt,
+      trxId: record.trxId,
+      value: record.value,
+      userId: this.shared.user.id,
+      updated_at: syncAt,
+    }));
 
     // //console.log('records', records);
 
@@ -847,7 +949,7 @@ export class HomePage implements OnInit {
       this.syncJob.order.records.message = 'Uploading data records...';
 
       const scheduleTrxIds = uniq(
-        records.map(record => record.scheduleTrxId)
+        records.map((record) => record.scheduleTrxId)
       );
 
       if (scheduleTrxIds.length > 1) {
@@ -855,7 +957,7 @@ export class HomePage implements OnInit {
       }
 
       subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
+        complexMessage: Object.values(this.syncJob.order),
       });
 
       return this.http.requests({
@@ -865,33 +967,31 @@ export class HomePage implements OnInit {
             throw response;
           }
 
-          const uploaded = response?.data?.data?.sch200
-            ?.map?.((schedule: any) => schedule.scheduleId);
+          const uploaded = response?.data?.data?.sch200?.map?.(
+            (schedule: any) => schedule.scheduleId
+          );
 
-          const activityLogs = response?.data?.data?.sch200
-            ?.map?.((schedule: any) => ({
+          const activityLogs =
+            response?.data?.data?.sch200?.map?.((schedule: any) => ({
               scheduleTrxId: schedule.scheduleId,
               status: 'success',
               message: 'Success add data',
-            }))
-            || [];
+            })) || [];
 
-          activityLogs.push(...(
-            response?.data?.data?.sch404
-              ?.map?.((schedule: any) => ({
-                scheduleTrxId: schedule.scheduleId,
-                status: 'success',
-                message: 'Success add data',
-              }))
-            || []
-          ));
+          activityLogs.push(
+            ...(response?.data?.data?.sch404?.map?.((schedule: any) => ({
+              scheduleTrxId: schedule.scheduleId,
+              status: 'success',
+              message: 'Success add data',
+            })) || [])
+          );
 
           if (uploaded?.length) {
             const marks = this.database.marks(uploaded.length).join(',');
 
             const where = {
               query: `scheduleTrxId IN (${marks})`,
-              params: uploaded
+              params: uploaded,
             };
 
             this.database.update('dataschedule', { syncAt }, where);
@@ -907,8 +1007,10 @@ export class HomePage implements OnInit {
             }
           } else {
             this.syncJob.order.records.status = 'failed';
-            this.syncJob.order.records.message = 'Failed to upload data records';
-            const failureCount = scheduleTrxIds.length - (uploaded?.length || 0);
+            this.syncJob.order.records.message =
+              'Failed to upload data records';
+            const failureCount =
+              scheduleTrxIds.length - (uploaded?.length || 0);
 
             if (failureCount > 0) {
               this.syncJob.order.records.message += ` (${failureCount})`;
@@ -917,20 +1019,19 @@ export class HomePage implements OnInit {
 
           this.shared.addLogActivity({
             activity: 'User upload data ke server',
-            data: activityLogs
+            data: activityLogs,
           });
         },
         onError: (error) => {
-          const activityLogs = scheduleTrxIds
-            .map(scheduleTrxId => ({
-              scheduleTrxId,
-              status: 'failed',
-              message: this.http.getErrorMessage(error)
-            }));
+          const activityLogs = scheduleTrxIds.map((scheduleTrxId) => ({
+            scheduleTrxId,
+            status: 'failed',
+            message: this.http.getErrorMessage(error),
+          }));
 
           this.shared.addLogActivity({
             activity: 'User upload data ke server',
-            data: activityLogs
+            data: activityLogs,
           });
 
           this.syncJob.order.records.status = 'failed';
@@ -942,7 +1043,7 @@ export class HomePage implements OnInit {
       delete this.syncJob.order.records;
 
       subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
+        complexMessage: Object.values(this.syncJob.order),
       });
     }
   }
@@ -965,7 +1066,8 @@ export class HomePage implements OnInit {
       const uploaded = [];
       const activityLogs = [];
       this.syncJob.isUploading = true;
-      this.syncJob.order.recordAttachments.message = 'Upload file attachments...';
+      this.syncJob.order.recordAttachments.message =
+        'Upload file attachments...';
 
       if (recordAttachments.length > 1) {
         this.syncJob.order.recordAttachments.message += `(${recordAttachments.length})`;
@@ -977,14 +1079,16 @@ export class HomePage implements OnInit {
         .forEach(([scheduleTrxId, attachments]) => {
           //console.log('attachments cek1', attachments)
           attachmentBySchedule[scheduleTrxId] = {
-            attachmentIds: attachments
-              .map(attachment => attachment.recordAttachmentId),
+            attachmentIds: attachments.map(
+              (attachment) => attachment.recordAttachmentId
+            ),
             uploadedAttachmentIds: [],
           };
-        });
+        }
+      );
 
       subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
+        complexMessage: Object.values(this.syncJob.order),
       });
       //console.log('recordAttachmentId', recordAttachments.entries())
 
@@ -992,12 +1096,12 @@ export class HomePage implements OnInit {
         const { recordAttachmentId, ...data } = item;
 
         const leftover = recordAttachments.length - (i + 1);
-        // //console.log('recordAttachments.length :', recordAttachments.length)
-        // //console.log('i :', i)
-        // //console.log({ uploadRecordAttachment: JSON.stringify(data) });
-        //console.log('data upload', data)
-        //console.log('data upload item', item)
-        //console.log('data upload recordAttachmentId', recordAttachmentId)
+        // console.log('recordAttachments.length :', recordAttachments.length)
+        // console.log('i :', i)
+        // console.log({ uploadRecordAttachment: JSON.stringify(data) });
+        console.log('data upload', data);
+        console.log('data upload item', item);
+        console.log('data upload recordAttachmentId', recordAttachmentId);
 
         await this.http.requests({
           requests: [() => this.http.uploadRecordAttachment(data)],
@@ -1008,8 +1112,9 @@ export class HomePage implements OnInit {
             //console.log('recordAttachmentId', response)
             uploaded.push(recordAttachmentId);
 
-            attachmentBySchedule[item.scheduleTrxId].uploadedAttachmentIds
-              .push(recordAttachmentId);
+            attachmentBySchedule[item.scheduleTrxId].uploadedAttachmentIds.push(
+              recordAttachmentId
+            );
 
             activityLogs.push({
               scheduleTrxId: item.scheduleTrxId,
@@ -1024,24 +1129,29 @@ export class HomePage implements OnInit {
               status: 'failed',
               message: error?.data
                 ? this.http.getErrorMessage(error.data)
-                : this.http.getErrorMessage(error)
+                : this.http.getErrorMessage(error),
             });
           },
           onComplete: () => {
             if (leftover) {
-              this.syncJob.order.recordAttachments.message = 'Upload file attachments...';
+              this.syncJob.order.recordAttachments.message =
+                'Upload file attachments...';
 
               if (leftover > 1) {
                 this.syncJob.order.recordAttachments.message += ` (${leftover})`;
               }
 
               subscriber.next({
-                complexMessage: Object.values(this.syncJob.order)
+                complexMessage: Object.values(this.syncJob.order),
               });
             } else {
-              const uploadedBySchedule = Object.entries<any>(attachmentBySchedule)
-                .filter(([key, value]) =>
-                  value.attachmentIds?.length === value.uploadedAttachmentIds?.length
+              const uploadedBySchedule = Object.entries<any>(
+                attachmentBySchedule
+              )
+                .filter(
+                  ([key, value]) =>
+                    value.attachmentIds?.length ===
+                    value.uploadedAttachmentIds?.length
                 )
                 .map(([scheduleTrxId]) => scheduleTrxId);
               // //console.log('uploadedBySchedule', uploadedBySchedule);
@@ -1052,7 +1162,7 @@ export class HomePage implements OnInit {
 
                 const where = {
                   query: `trxId IN (${marks})`,
-                  params: uploadedBySchedule
+                  params: uploadedBySchedule,
                 };
                 //console.log(where)
                 this.database.update('recordAttachment', { isUploaded: 1 }, where);
@@ -1060,7 +1170,8 @@ export class HomePage implements OnInit {
 
               if (uploaded.length === recordAttachments.length) {
                 this.syncJob.order.recordAttachments.status = 'success';
-                this.syncJob.order.recordAttachments.message = 'Berhasil upload file attachment';
+                this.syncJob.order.recordAttachments.message =
+                  'Berhasil upload file attachment';
 
                 if (uploaded.length > 1) {
                   this.syncJob.order.recordAttachments.message += `s (${uploaded.length})`;
@@ -1068,7 +1179,8 @@ export class HomePage implements OnInit {
               } else {
                 const failureCount = recordAttachments.length - uploaded.length;
                 this.syncJob.order.recordAttachments.status = 'failed';
-                this.syncJob.order.recordAttachments.message = 'Gagal upload file attachment';
+                this.syncJob.order.recordAttachments.message =
+                  'Gagal upload file attachment';
 
                 if (failureCount > 0) {
                   this.syncJob.order.recordAttachments.message += ` (${failureCount})`;
@@ -1077,7 +1189,7 @@ export class HomePage implements OnInit {
 
               this.shared.addLogActivity({
                 activity: 'User upload file attachments ke server',
-                data: activityLogs
+                data: activityLogs,
               });
 
               this.onProcessFinished(subscriber, loader);
@@ -1089,13 +1201,15 @@ export class HomePage implements OnInit {
       delete this.syncJob.order.recordAttachments;
 
       subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
+        complexMessage: Object.values(this.syncJob.order),
       });
     }
   }
 
-  private async getSchedules(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
-
+  private async getSchedules(
+    subscriber: Subscriber<any>,
+    loader: HTMLIonPopoverElement
+  ) {
     const shared = this.injector.get(SharedService);
     if (shared.user.group === 'ADMIN') {
       return this.http.requests({
@@ -1109,8 +1223,8 @@ export class HomePage implements OnInit {
             const uploadedSchedules = [];
             const notifications = [];
 
-            const schedules = response?.data?.data
-              ?.map?.((dataschedule: any) => {
+            const schedules = response?.data?.data?.map?.(
+              (dataschedule: any) => {
                 if (dataschedule.syncAt != null) {
                   uploadedSchedules.push(dataschedule.scheduleTrxId);
                 } else {
@@ -1164,15 +1278,17 @@ export class HomePage implements OnInit {
                   deleted_at: dataschedule.deleted_at,
                   date: dataschedule.date,
                   assetForm: JSON.stringify(dataschedule.assetForm),
-                  idschedule: dataschedule.idschedule
+                  idschedule: dataschedule.idschedule,
                 };
 
                 return data;
-              });
+              }
+            );
 
             const assetIdSchedule = [];
             const assetIdType = [];
 
+            const assetiduniq = uniqBy(response?.data?.data, 'assetId');
 
             const assetiduniq = uniqBy(response?.data?.data, 'assetId');
 
@@ -1196,7 +1312,6 @@ export class HomePage implements OnInit {
               const payload = { asset: JSON.stringify(val) };
               await this.getParameterByAssetId(payload);
             });
-
             //Jika ada record yang belum di upload
             // if (uploadedSchedules?.length) {
             //   const marks = this.database.marks(uploadedSchedules.length).join(',');
@@ -1207,8 +1322,10 @@ export class HomePage implements OnInit {
 
             //   this.database.update('record', { isUploaded: 1 }, where);
             // }
-            await this.database.emptyTable('schedule')
-              .then(() => this.database.insertbatch('schedule', schedules)).then(() => {
+            await this.database
+              .emptyTable('schedule')
+              .then(() => this.database.insertbatch('schedule', schedules))
+              .then(() => {
                 this.http.requests({
                   requests: [() => this.http.getSchedulesnonsiftadmin()],
                   onSuccess: async ([response]) => {
@@ -1221,10 +1338,12 @@ export class HomePage implements OnInit {
                     if (response?.data?.data?.length) {
                       const notifications = [];
 
-                      const schedulesnonsift = response?.data?.data
-                        ?.map?.((dataschedule: any) => {
+                      const schedulesnonsift = response?.data?.data?.map?.(
+                        (dataschedule: any) => {
                           if (dataschedule.syncAt != null) {
-                            this.uploadedSchedules.push(dataschedule.scheduleTrxId);
+                            this.uploadedSchedules.push(
+                              dataschedule.scheduleTrxId
+                            );
                           } else {
                             notifications.push(dataschedule);
                           }
@@ -1277,7 +1396,7 @@ export class HomePage implements OnInit {
                             deleted_at: dataschedule.deleted_at,
                             date: dataschedule.date,
                             assetForm: JSON.stringify(dataschedule.assetForm),
-                            idschedule: dataschedule.idschedule
+                            idschedule: dataschedule.idschedule,
                           };
 
                           return data;
@@ -1287,14 +1406,11 @@ export class HomePage implements OnInit {
 
                       const assetiduniq = uniqBy(response?.data?.data, "assetId");
 
-                      assetiduniq
-                        ?.map?.((dataschedule: any) => {
-                          assetIdType.push(dataschedule.assetId)
-                          assetIdSchedule.push({
-                            "assetId": dataschedule.assetId,
-                            "categoryId": dataschedule.assetCategoryId
-                          }
-                          )
+                      assetiduniq?.map?.((dataschedule: any) => {
+                        assetIdType.push(dataschedule.assetId);
+                        assetIdSchedule.push({
+                          assetId: dataschedule.assetId,
+                          categoryId: dataschedule.assetCategoryId,
                         });
                       // //console.log('assetIdSchedule', assetIdSchedule);
                       const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
@@ -1311,7 +1427,8 @@ export class HomePage implements OnInit {
                       });
                       this.database.insertbatch('schedule', schedulesnonsift);
                       this.shared.addLogActivity({
-                        activity: 'User synchronizes data non-shift dari server',
+                        activity:
+                          'User synchronizes data non-shift dari server',
                         data: {
                           message: 'Berhasil synchronize schedules Non Sift',
                           status: 'success',
@@ -1320,9 +1437,14 @@ export class HomePage implements OnInit {
 
                       await this.notification.cancel('Scan Asset Notification');
 
-                      const groupedNotifications = groupBy(notifications, 'scheduleTo');
+                      const groupedNotifications = groupBy(
+                        notifications,
+                        'scheduleTo'
+                      );
 
-                      for (const [key, data] of Object.entries<any>(groupedNotifications)) {
+                      for (const [key, data] of Object.entries<any>(
+                        groupedNotifications
+                      )) {
                         const assetNames = data
                           .map((item: any) => item.asset_number)
                           .join(',');
@@ -1331,18 +1453,23 @@ export class HomePage implements OnInit {
                           title: 'Scan Asset Notification',
                           body: `Waktu untuk scan ${assetNames}`,
                           schedule: {
-                            at: new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')),
-                            allowWhileIdle: true
+                            at: new Date(
+                              moment(key).format('YYYY-MM-DDTHH:mm:ss')
+                            ),
+                            allowWhileIdle: true,
                           },
                           smallIcon: 'ic_notification_schedule',
-                          largeIcon: 'ic_notification_schedule'
+                          largeIcon: 'ic_notification_schedule',
                         };
 
                         notificationSchema.schedule.at.setHours(
                           notificationSchema.schedule.at.getHours() - 1
                         );
 
-                        await this.notification.schedule(key, notificationSchema);
+                        await this.notification.schedule(
+                          key,
+                          notificationSchema
+                        );
                       }
 
                       const notificationSchema: LocalNotificationSchema = {
@@ -1350,28 +1477,36 @@ export class HomePage implements OnInit {
                         title: 'Scan Asset Notification',
                         body: 'Waktu untuk scan',
                         schedule: {
-                          at: new Date(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')),
-                          allowWhileIdle: true
+                          at: new Date(
+                            moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')
+                          ),
+                          allowWhileIdle: true,
                         },
                         smallIcon: 'ic_notification_schedule',
-                        largeIcon: 'ic_notification_schedule'
+                        largeIcon: 'ic_notification_schedule',
                       };
 
-                      await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
+                      await this.notification.schedule(
+                        moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
+                        notificationSchema
+                      );
 
                       this.syncJob.order.schedules.status = 'success';
-                      this.syncJob.order.schedules.message = 'Success mengambil data schedules';
+                      this.syncJob.order.schedules.message =
+                        'Success mengambil data schedules';
                     } else {
                       this.shared.addLogActivity({
-                        activity: 'User synchronizes schedules non-shift dari server',
+                        activity:
+                          'User synchronizes schedules non-shift dari server',
                         data: {
                           message: 'Data schedules kosong',
-                          status: 'failed'
+                          status: 'failed',
                         },
                       });
 
                       this.syncJob.order.schedules.status = 'failed';
-                      this.syncJob.order.schedules.message = 'Data schedules kosong';
+                      this.syncJob.order.schedules.message =
+                        'Data schedules kosong';
                     }
                   },
                   onError: (error) => {
@@ -1379,15 +1514,17 @@ export class HomePage implements OnInit {
                       activity: 'User synchronizes schedules dari server',
                       data: {
                         message: this.http.getErrorMessage(error),
-                        status: 'failed'
+                        status: 'failed',
                       },
                     });
 
                     this.syncJob.order.schedules.status = 'failed';
-                    this.syncJob.order.schedules.message = 'Gagal mendapatkan data schedules';
+                    this.syncJob.order.schedules.message =
+                      'Gagal mendapatkan data schedules';
                   },
                 });
-              }).then(() => {
+              })
+              .then(() => {
                 this.http.requests({
                   requests: [() => this.http.getSchedulesManualadmin()],
                   onSuccess: async ([response]) => {
@@ -1398,14 +1535,15 @@ export class HomePage implements OnInit {
 
                     //console.log('getSchedulesManual', response);
 
-
                     if (response?.data?.data?.length) {
                       const notifications = [];
 
-                      const schedulesmanual = response?.data?.data
-                        ?.map?.((dataschedule: any) => {
+                      const schedulesmanual = response?.data?.data?.map?.(
+                        (dataschedule: any) => {
                           if (dataschedule.syncAt != null) {
-                            this.uploadedSchedules.push(dataschedule.scheduleTrxId);
+                            this.uploadedSchedules.push(
+                              dataschedule.scheduleTrxId
+                            );
                           } else {
                             notifications.push(dataschedule);
                           }
@@ -1458,25 +1596,19 @@ export class HomePage implements OnInit {
                             deleted_at: dataschedule.deleted_at,
                             date: dataschedule.date,
                             assetForm: JSON.stringify(dataschedule.assetForm),
-                            idschedule: dataschedule.idschedule
+                            idschedule: dataschedule.idschedule,
                           };
 
                           return data;
-                        });
+                        }
+                      );
                       const assetIdSchedule = [];
                       const assetIdType = [];
-                      response?.data?.data
-                        ?.map?.((dataschedule: any) => {
-
-                          assetIdType.push(dataschedule.assetId)
-                          assetIdSchedule.push({
-                            "assetId": dataschedule.assetId,
-                            "categoryId": dataschedule.assetCategoryId
-                          }
-
-                          )
-
-
+                      response?.data?.data?.map?.((dataschedule: any) => {
+                        assetIdType.push(dataschedule.assetId);
+                        assetIdSchedule.push({
+                          assetId: dataschedule.assetId,
+                          categoryId: dataschedule.assetCategoryId,
                         });
                       const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
                       const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
@@ -1490,7 +1622,6 @@ export class HomePage implements OnInit {
                         const payload = { asset: JSON.stringify(val) };
                         await this.getParameterByAssetId(payload);
                       });
-
                       this.database.insertbatch('schedule', schedulesmanual);
 
                       this.shared.addLogActivity({
@@ -1503,9 +1634,14 @@ export class HomePage implements OnInit {
 
                       await this.notification.cancel('Scan Asset Notification');
 
-                      const groupedNotifications = groupBy(notifications, 'scheduleTo');
+                      const groupedNotifications = groupBy(
+                        notifications,
+                        'scheduleTo'
+                      );
 
-                      for (const [key, data] of Object.entries<any>(groupedNotifications)) {
+                      for (const [key, data] of Object.entries<any>(
+                        groupedNotifications
+                      )) {
                         const assetNames = data
                           .map((item: any) => item.asset_number)
                           .join(',');
@@ -1514,18 +1650,23 @@ export class HomePage implements OnInit {
                           title: 'Scan Asset Notification',
                           body: `Waktu untuk scan ${assetNames}`,
                           schedule: {
-                            at: new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')),
-                            allowWhileIdle: true
+                            at: new Date(
+                              moment(key).format('YYYY-MM-DDTHH:mm:ss')
+                            ),
+                            allowWhileIdle: true,
                           },
                           smallIcon: 'ic_notification_schedule',
-                          largeIcon: 'ic_notification_schedule'
+                          largeIcon: 'ic_notification_schedule',
                         };
 
                         notificationSchema.schedule.at.setHours(
                           notificationSchema.schedule.at.getHours() - 1
                         );
 
-                        await this.notification.schedule(key, notificationSchema);
+                        await this.notification.schedule(
+                          key,
+                          notificationSchema
+                        );
                       }
 
                       const notificationSchema: LocalNotificationSchema = {
@@ -1533,28 +1674,35 @@ export class HomePage implements OnInit {
                         title: 'Scan Asset Notification',
                         body: 'Waktu untuk scan',
                         schedule: {
-                          at: new Date(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')),
-                          allowWhileIdle: true
+                          at: new Date(
+                            moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')
+                          ),
+                          allowWhileIdle: true,
                         },
                         smallIcon: 'ic_notification_schedule',
-                        largeIcon: 'ic_notification_schedule'
+                        largeIcon: 'ic_notification_schedule',
                       };
 
-                      await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
+                      await this.notification.schedule(
+                        moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
+                        notificationSchema
+                      );
 
                       this.syncJob.order.schedules.status = 'success';
-                      this.syncJob.order.schedules.message = 'Success mengambil data schedules';
+                      this.syncJob.order.schedules.message =
+                        'Success mengambil data schedules';
                     } else {
                       this.shared.addLogActivity({
                         activity: 'User synchronizes schedules dari server',
                         data: {
                           message: 'Data schedules kosong',
-                          status: 'failed'
+                          status: 'failed',
                         },
                       });
 
                       this.syncJob.order.schedules.status = 'failed';
-                      this.syncJob.order.schedules.message = 'Data schedules kosong';
+                      this.syncJob.order.schedules.message =
+                        'Data schedules kosong';
                     }
                   },
                   onError: (error) => {
@@ -1562,15 +1710,15 @@ export class HomePage implements OnInit {
                       activity: 'User synchronizes schedules dari server',
                       data: {
                         message: this.http.getErrorMessage(error),
-                        status: 'failed'
+                        status: 'failed',
                       },
                     });
 
                     this.syncJob.order.schedules.status = 'failed';
-                    this.syncJob.order.schedules.message = 'Gagal mendapatkan data schedules';
+                    this.syncJob.order.schedules.message =
+                      'Gagal mendapatkan data schedules';
                   },
                 });
-
               });
 
             this.shared.addLogActivity({
@@ -1586,7 +1734,9 @@ export class HomePage implements OnInit {
 
             const groupedNotifications = groupBy(notifications, 'scheduleTo');
 
-            for (const [key, data] of Object.entries<any>(groupedNotifications)) {
+            for (const [key, data] of Object.entries<any>(
+              groupedNotifications
+            )) {
               const assetNames = data
                 .map((item: any) => item.asset_number)
                 .join(',');
@@ -1601,10 +1751,10 @@ export class HomePage implements OnInit {
                 body: `Waktu untuk scan ${assetNames}`,
                 schedule: {
                   at: new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')),
-                  allowWhileIdle: true
+                  allowWhileIdle: true,
                 },
                 smallIcon: 'ic_notification_schedule',
-                largeIcon: 'ic_notification_schedule'
+                largeIcon: 'ic_notification_schedule',
               };
 
               notificationSchema.schedule.at.setHours(
@@ -1620,22 +1770,26 @@ export class HomePage implements OnInit {
               body: 'Waktu untuk scan',
               schedule: {
                 at: new Date(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')),
-                allowWhileIdle: true
+                allowWhileIdle: true,
               },
               smallIcon: 'ic_notification_schedule',
-              largeIcon: 'ic_notification_schedule'
+              largeIcon: 'ic_notification_schedule',
             };
 
-            await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
+            await this.notification.schedule(
+              moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
+              notificationSchema
+            );
 
             this.syncJob.order.schedules.status = 'success';
-            this.syncJob.order.schedules.message = 'Berhasil mendapatkan data schedules';
+            this.syncJob.order.schedules.message =
+              'Berhasil mendapatkan data schedules';
           } else {
             this.shared.addLogActivity({
               activity: 'User synchronizes schedules dari server',
               data: {
                 message: 'Data schedules kosong',
-                status: 'failed'
+                status: 'failed',
               },
             });
 
@@ -1648,29 +1802,29 @@ export class HomePage implements OnInit {
             activity: 'User synchronizes schedules dari server',
             data: {
               message: this.http.getErrorMessage(error),
-              status: 'failed'
+              status: 'failed',
             },
           });
 
           this.syncJob.order.schedules.status = 'failed';
-          this.syncJob.order.schedules.message = 'Gagal mendapatkan data schedules';
+          this.syncJob.order.schedules.message =
+            'Gagal mendapatkan data schedules';
         },
         onComplete: () => this.onProcessFinished(subscriber, loader),
       });
     } else {
-      await this.database.emptyTable('schedule')
-        .then(
-          () => this.getSchedulesShift()
-        ).then(
-          () => this.getSchedulesNonSift()
-        ).then(
-          () => this.getSchedulesManual()
-        );
+      await this.database
+        .emptyTable('schedule')
+        .then(() => this.getSchedulesShift())
+        .then(() => this.getSchedulesNonSift())
+        .then(() => this.getSchedulesManual());
       if (this.uploadedSchedules?.length) {
-        const marks = this.database.marks(this.uploadedSchedules.length).join(',');
+        const marks = this.database
+          .marks(this.uploadedSchedules.length)
+          .join(',');
         const where = {
           query: `scheduleTrxId IN (${marks})`,
-          params: this.uploadedSchedules
+          params: this.uploadedSchedules,
         };
 
         this.database.update('record', { isUploaded: 1 }, where);
@@ -1697,8 +1851,8 @@ export class HomePage implements OnInit {
           if (response?.data?.data?.length) {
             let notifications = [];
 
-            const schedules = response?.data?.data
-              ?.map?.((dataschedule: any) => {
+            const schedules = response?.data?.data?.map?.(
+              (dataschedule: any) => {
                 if (dataschedule.syncAt !== null) {
                   this.uploadedSchedules.push(dataschedule.scheduleTrxId);
                 } else if (!dataschedule.scannedAt) {
@@ -1755,7 +1909,7 @@ export class HomePage implements OnInit {
                   deleted_at: dataschedule.deleted_at,
                   date: dataschedule.date,
                   assetForm: JSON.stringify(dataschedule.assetForm),
-                  idschedule: dataschedule.idschedule
+                  idschedule: dataschedule.idschedule,
                 };
 
                 return dataScheduledShift;
@@ -1807,7 +1961,10 @@ export class HomePage implements OnInit {
 
             await this.notification.cancel('Notifikasi Scan');
 
-            const scheduleFromGroupNotify = groupBy(notifications, 'scheduleFrom');
+            const scheduleFromGroupNotify = groupBy(
+              notifications,
+              'scheduleFrom'
+            );
             const scheduleToGroupNotify = groupBy(notifications, 'scheduleTo');
             let scheduledData = { ...scheduleFromGroupNotify, ...scheduleToGroupNotify };
             // //console.log('scheduledData', scheduledData);
@@ -1849,13 +2006,14 @@ export class HomePage implements OnInit {
             }
 
             this.syncJob.order.schedules.status = 'success';
-            this.syncJob.order.schedules.message = 'Success mengambil data schedules';
+            this.syncJob.order.schedules.message =
+              'Success mengambil data schedules';
           } else {
             this.shared.addLogActivity({
               activity: 'User synchronizes schedules dari server',
               data: {
                 message: 'Data schedules kosong',
-                status: 'failed'
+                status: 'failed',
               },
             });
 
@@ -1868,12 +2026,13 @@ export class HomePage implements OnInit {
             activity: 'User synchronizes schedules dari server',
             data: {
               message: this.http.getErrorMessage(error),
-              status: 'failed'
+              status: 'failed',
             },
           });
 
           this.syncJob.order.schedules.status = 'failed';
-          this.syncJob.order.schedules.message = 'Gagal mendapatkan data schedules';
+          this.syncJob.order.schedules.message =
+            'Gagal mendapatkan data schedules';
         },
       });
     }
@@ -1883,7 +2042,9 @@ export class HomePage implements OnInit {
     const shared = this.injector.get(SharedService);
     const userIdNonShift = JSON.stringify(shared.userdetail.nonshift);
     if (JSON.parse(userIdNonShift).status == 1) {
-      const usernonId = { userId: JSON.parse(userIdNonShift).data.operatorUserId }
+      const usernonId = {
+        userId: JSON.parse(userIdNonShift).data.operatorUserId,
+      };
       this.http.requests({
         requests: [() => this.http.getSchedulesnonsift(usernonId)],
         onSuccess: async ([response]) => {
@@ -1896,8 +2057,8 @@ export class HomePage implements OnInit {
           if (response?.data?.data?.length) {
             const notifications = [];
 
-            const schedules = response?.data?.data
-              ?.map?.((dataschedule: any) => {
+            const schedules = response?.data?.data?.map?.(
+              (dataschedule: any) => {
                 if (dataschedule.syncAt != null) {
                   this.uploadedSchedules.push(dataschedule.scheduleTrxId);
                 } else {
@@ -1952,7 +2113,7 @@ export class HomePage implements OnInit {
                   deleted_at: dataschedule.deleted_at,
                   date: dataschedule.date,
                   assetForm: JSON.stringify(dataschedule.assetForm),
-                  idschedule: dataschedule.idschedule
+                  idschedule: dataschedule.idschedule,
                 };
 
                 return data;
@@ -1983,7 +2144,6 @@ export class HomePage implements OnInit {
               const payload = { asset: JSON.stringify(val) };
               await this.getParameterByAssetId(payload);
             });
-
             //Jika ada record yang belum di upload
             // if (uploadedSchedules?.length) {
             //   const marks = this.database.marks(uploadedSchedules.length).join(',');
@@ -2011,7 +2171,9 @@ export class HomePage implements OnInit {
 
             const groupedNotifications = groupBy(notifications, 'scheduleTo');
 
-            for (const [key, data] of Object.entries<any>(groupedNotifications)) {
+            for (const [key, data] of Object.entries<any>(
+              groupedNotifications
+            )) {
               const assetNames = data
                 .map((item: any) => item.asset_number)
                 .join(',');
@@ -2026,10 +2188,10 @@ export class HomePage implements OnInit {
                 body: `Waktu untuk scan ${assetNames}`,
                 schedule: {
                   at: new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')),
-                  allowWhileIdle: true
+                  allowWhileIdle: true,
                 },
                 smallIcon: 'ic_notification_schedule',
-                largeIcon: 'ic_notification_schedule'
+                largeIcon: 'ic_notification_schedule',
               };
 
               notificationSchema.schedule.at.setHours(
@@ -2045,22 +2207,26 @@ export class HomePage implements OnInit {
               body: 'Waktu untuk scan',
               schedule: {
                 at: new Date(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')),
-                allowWhileIdle: true
+                allowWhileIdle: true,
               },
               smallIcon: 'ic_notification_schedule',
-              largeIcon: 'ic_notification_schedule'
+              largeIcon: 'ic_notification_schedule',
             };
 
-            await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
+            await this.notification.schedule(
+              moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
+              notificationSchema
+            );
 
             this.syncJob.order.schedules.status = 'success';
-            this.syncJob.order.schedules.message = 'Success mengambil data schedules';
+            this.syncJob.order.schedules.message =
+              'Success mengambil data schedules';
           } else {
             this.shared.addLogActivity({
               activity: 'User synchronizes schedules dari server',
               data: {
                 message: 'Data schedules kosong',
-                status: 'failed'
+                status: 'failed',
               },
             });
 
@@ -2073,12 +2239,13 @@ export class HomePage implements OnInit {
             activity: 'User synchronizes schedules dari server',
             data: {
               message: this.http.getErrorMessage(error),
-              status: 'failed'
+              status: 'failed',
             },
           });
 
           this.syncJob.order.schedules.status = 'failed';
-          this.syncJob.order.schedules.message = 'Gagal mendapatkan data schedules';
+          this.syncJob.order.schedules.message =
+            'Gagal mendapatkan data schedules';
         },
       });
     }
@@ -2088,7 +2255,9 @@ export class HomePage implements OnInit {
     const userIdManual = JSON.stringify(shared.userdetail.lk3);
 
     if (JSON.parse(userIdManual).status == 1) {
-      const usernonId = { userId: JSON.parse(userIdManual).data.operatorUserId }
+      const usernonId = {
+        userId: JSON.parse(userIdManual).data.operatorUserId,
+      };
       this.http.requests({
         requests: [() => this.http.getSchedulesManual(usernonId)],
         onSuccess: async ([response]) => {
@@ -2099,12 +2268,11 @@ export class HomePage implements OnInit {
 
           //console.log('getSchedulesManual', response);
 
-
           if (response?.data?.data?.length) {
             const notifications = [];
 
-            const schedules = response?.data?.data
-              ?.map?.((dataschedule: any) => {
+            const schedules = response?.data?.data?.map?.(
+              (dataschedule: any) => {
                 if (dataschedule.syncAt != null) {
                   this.uploadedSchedules.push(dataschedule.scheduleTrxId);
                 } else {
@@ -2159,11 +2327,12 @@ export class HomePage implements OnInit {
                   deleted_at: dataschedule.deleted_at,
                   date: dataschedule.date,
                   assetForm: JSON.stringify(dataschedule.assetForm),
-                  idschedule: dataschedule.idschedule
+                  idschedule: dataschedule.idschedule,
                 };
 
                 return data;
-              });
+              }
+            );
             const assetIdSchedule = [];
             const assetIdType = [];
             response?.data?.data
@@ -2208,7 +2377,9 @@ export class HomePage implements OnInit {
 
             const groupedNotifications = groupBy(notifications, 'scheduleTo');
 
-            for (const [key, data] of Object.entries<any>(groupedNotifications)) {
+            for (const [key, data] of Object.entries<any>(
+              groupedNotifications
+            )) {
               const assetNames = data
                 .map((item: any) => item.asset_number)
                 .join(',');
@@ -2223,10 +2394,10 @@ export class HomePage implements OnInit {
                 body: `Waktu untuk scan ${assetNames}`,
                 schedule: {
                   at: new Date(moment(key).format('YYYY-MM-DDTHH:mm:ss')),
-                  allowWhileIdle: true
+                  allowWhileIdle: true,
                 },
                 smallIcon: 'ic_notification_schedule',
-                largeIcon: 'ic_notification_schedule'
+                largeIcon: 'ic_notification_schedule',
               };
 
               notificationSchema.schedule.at.setHours(
@@ -2242,22 +2413,26 @@ export class HomePage implements OnInit {
               body: 'Waktu untuk scan',
               schedule: {
                 at: new Date(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')),
-                allowWhileIdle: true
+                allowWhileIdle: true,
               },
               smallIcon: 'ic_notification_schedule',
-              largeIcon: 'ic_notification_schedule'
+              largeIcon: 'ic_notification_schedule',
             };
 
-            await this.notification.schedule(moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'), notificationSchema);
+            await this.notification.schedule(
+              moment(new Date()).format('YYYY-MM-DDTHH:mm:ss'),
+              notificationSchema
+            );
 
             this.syncJob.order.schedules.status = 'success';
-            this.syncJob.order.schedules.message = 'Success mengambil data schedules';
+            this.syncJob.order.schedules.message =
+              'Success mengambil data schedules';
           } else {
             this.shared.addLogActivity({
               activity: 'User synchronizes schedules dari server',
               data: {
                 message: 'Data schedules kosong',
-                status: 'failed'
+                status: 'failed',
               },
             });
 
@@ -2270,23 +2445,23 @@ export class HomePage implements OnInit {
             activity: 'User synchronizes schedules dari server',
             data: {
               message: this.http.getErrorMessage(error),
-              status: 'failed'
+              status: 'failed',
             },
           });
 
           this.syncJob.order.schedules.status = 'failed';
-          this.syncJob.order.schedules.message = 'Gagal mendapatkan data schedules';
+          this.syncJob.order.schedules.message =
+            'Gagal mendapatkan data schedules';
         },
       });
     }
   }
-  private async getAssets(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
-
-
+  private async getAssets(
+    subscriber: Subscriber<any>,
+    loader: HTMLIonPopoverElement
+  ) {
     return this.http.requests({
-      requests: [
-        () => this.http.getAssetTags()
-      ],
+      requests: [() => this.http.getAssetTags()],
       onSuccess: async ([responseAssetTags]) => {
         //console.log('responseAssetTags', responseAssetTags);
 
@@ -2306,7 +2481,7 @@ export class HomePage implements OnInit {
           activity: 'User synchronizes lokasi dari server',
           data: {
             message: this.http.getErrorMessage(error),
-            status: 'failed'
+            status: 'failed',
           },
         });
 
@@ -2320,17 +2495,15 @@ export class HomePage implements OnInit {
     //console.log('getTypeScan', data);
 
     return this.http.requests({
-      requests: [
-        () => this.http.typeTag(data)
-      ],
+      requests: [() => this.http.typeTag(data)],
       onSuccess: async ([responseAssetTags]) => {
         //console.log('responseAssetTags', responseAssetTags);
 
         if (responseAssetTags.status >= 400) {
           throw responseAssetTags;
         }
-        const assetTags = responseAssetTags?.data?.data
-          ?.map?.((assetTag: any) => ({
+        const assetTags = responseAssetTags?.data?.data?.map?.(
+          (assetTag: any) => ({
             assetTaggingId: assetTag.assetTaggingId,
             assetId: assetTag.assetId,
             assetTaggingValue: assetTag.assetTaggingValue,
@@ -2338,7 +2511,6 @@ export class HomePage implements OnInit {
             description: assetTag.description,
             created_at: assetTag.created_at,
             updated_at: assetTag.updated_at
-
           }
 
           ));
@@ -2351,21 +2523,17 @@ export class HomePage implements OnInit {
           activity: 'User synchronizes tanda pemasangan dari server',
           data: {
             message: 'Berhasil synchronize tanda pemasangan',
-            status: 'success'
+            status: 'success',
           },
         });
       },
-      onError: (error) => {
-
-      },
+      onError: (error) => {},
     });
   }
   private async downloadCategory() {
     try {
       this.http.requests({
-        requests: [
-          () => this.http.getCategory(),
-        ],
+        requests: [() => this.http.getCategory()],
         onSuccess: async ([responseCategory]) => {
           if (responseCategory.status >= 400) {
             throw responseCategory;
@@ -2381,12 +2549,10 @@ export class HomePage implements OnInit {
             const newPhotos = responseCategory.data.data.map((asset: any) => asset.assetCategoryIconUrl);
             //console.log('newPhotos', newPhotos);
 
-
             const exceptions = Object.entries<string>(previousPhotos)
               .filter(([photo]) => newPhotos.includes(photo))
               .map(([photo, path]) => path?.split?.('/').pop());
             //console.log('exceptions', exceptions);
-
 
             await this.prepareDirectory('asset', exceptions);
           }
@@ -2403,22 +2569,19 @@ export class HomePage implements OnInit {
               description: category.description,
               urlImage: category.assetCategoryIconUrl,
               urlOffline: offlinePhoto,
-              schType: toLower(category.schType)
+              schType: toLower(category.schType),
             };
             kategori.push(data);
           }
-          await this.database.emptyTable('category')
+          await this.database
+            .emptyTable('category')
             .then(() => this.database.insertbatch('category', kategori));
-
         },
-        onError: error => console.error(error)
+        onError: (error) => console.error(error),
       });
-
-
     } catch (error) {
       console.error(error);
     }
-
   }
 
   private async offlinePhoto(type: string, url: string) {
@@ -2430,7 +2593,7 @@ export class HomePage implements OnInit {
       const { path } = await this.http.download({
         url,
         filePath: `${name}`,
-        fileDirectory: Directory.Data
+        fileDirectory: Directory.Data,
       });
       filePath = path;
     } catch (error) {
@@ -2439,15 +2602,18 @@ export class HomePage implements OnInit {
 
     return filePath;
   }
-  private async uploadActivityLogs(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
-    const activityLogs = (await this.getUnuploadedData('activityLog'))
-      .map((activityLog) => {
+  private async uploadActivityLogs(
+    subscriber: Subscriber<any>,
+    loader: HTMLIonPopoverElement
+  ) {
+    const activityLogs = (await this.getUnuploadedData('activityLog')).map(
+      (activityLog) => {
         const data = {
           activity: activityLog.activity,
           ip: null,
           assetId: null,
           data: activityLog.data,
-          time: activityLog.time
+          time: activityLog.time,
         };
 
         if (Array.isArray(data.data) && data.data.length) {
@@ -2458,14 +2624,15 @@ export class HomePage implements OnInit {
         }
 
         return data;
-      });
+      }
+    );
 
     if (activityLogs.length) {
       this.syncJob.isUploading = true;
       this.syncJob.order.activityLogs.message = 'Uploading log activities...';
 
       subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
+        complexMessage: Object.values(this.syncJob.order),
       });
 
       // //console.log({ uploadActivityLogs: JSON.stringify(activityLogs) });
@@ -2477,18 +2644,24 @@ export class HomePage implements OnInit {
             throw response;
           }
 
-          this.database.update('activityLog', { isUploaded: 1 }, {
-            query: `isUploaded=?`,
-            params: [0]
-          });
+          this.database.update(
+            'activityLog',
+            { isUploaded: 1 },
+            {
+              query: `isUploaded=?`,
+              params: [0],
+            }
+          );
 
           this.syncJob.order.activityLogs.status = 'success';
-          this.syncJob.order.activityLogs.message = 'Berhasil upload activity logs';
+          this.syncJob.order.activityLogs.message =
+            'Berhasil upload activity logs';
         },
         onError: (error) => {
           console.error(error);
           this.syncJob.order.activityLogs.status = 'failed';
-          this.syncJob.order.activityLogs.message = 'Gagal upload activity logs';
+          this.syncJob.order.activityLogs.message =
+            'Gagal upload activity logs';
         },
         onComplete: () => this.onProcessFinished(subscriber, loader),
       });
@@ -2496,7 +2669,7 @@ export class HomePage implements OnInit {
       delete this.syncJob.order.activityLogs;
 
       subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
+        complexMessage: Object.values(this.syncJob.order),
       });
     }
   }
@@ -2512,7 +2685,6 @@ export class HomePage implements OnInit {
           description: assetTag.description,
           created_at: assetTag.created_at,
           updated_at: assetTag.updated_at
-
         }
 
         ));
@@ -2523,14 +2695,15 @@ export class HomePage implements OnInit {
       }
       // //console.log('assetTags  ke 2:', assetTags);
 
-      await this.database.emptyTable('assetTag')
+      await this.database
+        .emptyTable('assetTag')
         .then(() => this.database.insert('assetTag', assetTags));
 
       this.shared.addLogActivity({
         activity: 'User synchronizes tanda pemasangan dari server',
         data: {
           message: 'Berhasil synchronize tanda pemasangan',
-          status: 'success'
+          status: 'success',
         },
       });
     } else {
@@ -2538,19 +2711,30 @@ export class HomePage implements OnInit {
         activity: 'User synchronizes tanda pemasangan dari server',
         data: {
           message: 'Tanda pemasangan kosong',
-          status: 'failed'
+          status: 'failed',
         },
       });
     }
   }
 
-  private filterSchedule(schedule: any, now: number, dateInThisMonth: any[], lastWeek: number) {
+  private filterSchedule(
+    schedule: any,
+    now: number,
+    dateInThisMonth: any[],
+    lastWeek: number
+  ) {
     const schType = schedule.schType?.toLowerCase?.();
-    const weekdays = schedule?.schWeekDays ? schedule.schWeekDays?.toLowerCase?.().split(',') : [];
+    const weekdays = schedule?.schWeekDays
+      ? schedule.schWeekDays?.toLowerCase?.().split(',')
+      : [];
 
     if (schType === 'weekly') {
-      const dateNow = dateInThisMonth.find(item => item.date === moment(now).date());
-      const isWeekNow = moment(now).week() === moment(schedule.scheduleFrom, 'YYYY-MM-DD HH:mm:ss').week();
+      const dateNow = dateInThisMonth.find(
+        (item) => item.date === moment(now).date()
+      );
+      const isWeekNow =
+        moment(now).week() ===
+        moment(schedule.scheduleFrom, 'YYYY-MM-DD HH:mm:ss').week();
       return isWeekNow && weekdays.includes(dateNow?.day);
     }
 
@@ -2562,7 +2746,9 @@ export class HomePage implements OnInit {
         moment(schedule.scheduleFrom, 'YYYY-MM-DD HH:mm:ss').month();
 
       if (schedule.schWeeks || schedule.schWeekDays) {
-        const dateNow = dateInThisMonth.find(item => item.date === moment(now).date());
+        const dateNow = dateInThisMonth.find(
+          (item) => item.date === moment(now).date()
+        );
         const weeks = this.getSchWeeksAndDays(schedule.schWeeks, lastWeek);
         const matchWeek = weeks.includes(dateNow?.week);
         const matchWeekDay = weekdays.includes(dateNow?.day);
@@ -2601,20 +2787,19 @@ export class HomePage implements OnInit {
       .date(0)
       .date();
 
-    const dateInThisMonth = this.utils.generateArray(end)
-      .map(item => {
-        const date = moment(now).date(item);
-        const day = date.format('dd').toLowerCase();
-        const week = date.week();
+    const dateInThisMonth = this.utils.generateArray(end).map((item) => {
+      const date = moment(now).date(item);
+      const day = date.format('dd').toLowerCase();
+      const week = date.week();
 
-        return { date: item, day, week };
-      });
+      return { date: item, day, week };
+    });
 
     const [firstDay] = dateInThisMonth;
     const firstWeek = firstDay.week;
-    const maxWeek = Math.max(...dateInThisMonth.map(item => item.week));
+    const maxWeek = Math.max(...dateInThisMonth.map((item) => item.week));
 
-    return dateInThisMonth.map(item => {
+    return dateInThisMonth.map((item) => {
       item.week = item.week - (firstWeek - 1);
 
       if (item.week < 1) {
@@ -2628,7 +2813,7 @@ export class HomePage implements OnInit {
   private getSchWeeksAndDays(schWeeks: string, lastWeek: number) {
     let weeks: any[] = schWeeks ? schWeeks?.toLowerCase?.().split(',') : [];
 
-    weeks = weeks.map(item => {
+    weeks = weeks.map((item) => {
       if (item === 'first') {
         item = 1;
       } else if (item === 'second') {
@@ -2656,7 +2841,7 @@ export class HomePage implements OnInit {
       document.body.classList.add('qrscanner');
 
       const options: ScanOptions = {
-        targetedFormats: [SupportedFormat.QR_CODE]
+        targetedFormats: [SupportedFormat.QR_CODE],
       };
 
       BarcodeScanner.startScan(options).then(async (result) => {
@@ -2670,12 +2855,11 @@ export class HomePage implements OnInit {
           const assetId = result.content;
           const data = JSON.stringify({
             type: 'qr',
-            data: assetId
+            data: assetId,
           });
           //console.log('data', data);
 
           this.router.navigate(['asset-detail', { data }]);
-
         }
       });
 
@@ -2688,7 +2872,6 @@ export class HomePage implements OnInit {
     }
   }
   async openScan() {
-
     const stat = await this.checkStatus();
     //console.log('cek status nfc', stat)
     if (stat == 'NO_NFC') {
@@ -2706,7 +2889,6 @@ export class HomePage implements OnInit {
       });
 
       confirm.present();
-
     } else {
       const permission = await BarcodeScanner.checkPermission({ force: true });
       if (permission.granted) {
@@ -2765,7 +2947,6 @@ export class HomePage implements OnInit {
           BarcodeScanner.stopScan();
         });
       }
-
     }
   }
   async checkStatus() {
@@ -2776,8 +2957,9 @@ export class HomePage implements OnInit {
         this.nfcStatus = error;
       }
     }
-
     return this.nfcStatus;
   }
 
+    return this.nfcStatus;
+  }
 }
