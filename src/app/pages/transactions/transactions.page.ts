@@ -51,6 +51,8 @@ export class TransactionsPage {
   sourceSchedules: any[];
   sourceSchedulesSudah: any[];
   sourceSchedulesBelum: any[];
+
+  schedulesUnuploaded:any[];
   private syncJob: {
     counter: number;
     order: RequestOrder;
@@ -90,6 +92,9 @@ export class TransactionsPage {
     this.sourceSchedules = [];
     this.sourceSchedulesSudah = [];
     this.sourceSchedulesBelum = [];
+
+    this.schedulesUnuploaded = [];
+
     this.syncJob = {
       counter: 0,
       order: {},
@@ -1055,8 +1060,118 @@ console.log('mark2', uploaded);
           return data;
         })
         .filter(schedule => schedule.isUploaded || schedule.isUnuploaded || schedule.hasRecordHold);
+       //.filter(schedule => schedule.isUnuploaded);
 
         console.log('cek semua', this.sourceSchedules);
+
+        this.schedulesUnuploaded = schedules.map((schedule) => {
+          const tagIds = schedule?.tagId?.length
+            ? schedule?.tagId?.split?.(',')
+            : [];
+
+          const tagNumber = schedule?.tagNumber;
+          const data = {
+            scheduleTrxId: schedule.scheduleTrxId,
+            assetId: schedule.assetId,
+            assetNumber: schedule.assetNumber,
+            assetStatusId: schedule.assetStatusId,
+            assetStatusName: schedule.assetStatusName,
+            assetTags: assetTags
+              .filter(assetTag => assetTag.assetId === schedule.assetId),
+            shift: null,
+            scheduleType: 'Manual',
+            scheduleFrom: moment(schedule.scheduleFrom)
+              .format('D MMMM YYYY HH:mm'),
+            scheduleTo: moment(schedule.scheduleTo)
+              .format('D MMMM YYYY HH:mm'),
+            uploadedOn: schedule.syncAt != null
+              ? moment(schedule.syncAt).format('D MMMM YYYY HH:mm')
+              : '-',
+            scannedEnd: schedule.scannedEnd,
+            tags: zip(tagIds, tagNumber).map(([id, name]) => ({ id, name })),
+            isUploaded: false,
+            isUnuploaded: false,
+            hasPreview: false,
+            hasRecordHold: false,
+            abbreviation: schedule.abbreviation,
+            adviceDate: schedule.adviceDate,
+            approvedAt: schedule.approvedAt,
+            approvedBy: schedule.approvedBy,
+            approvedNotes: schedule.approvedNotes,
+            condition: schedule.condition,
+            capacityValue: schedule.capacityValue,
+            unitCapacity: schedule.unitCapacity,
+            supplyDate: moment(schedule.supplyDate).format('D MMMM YYYY'),
+            reportPhoto: schedule.reportPhoto,
+            scannedAccuration: schedule.scannedAccuration,
+            scannedAt: schedule.scannedAt,
+            scannedBy: schedule.scannedBy,
+            scannedNotes: schedule.scannedNotes,
+            scannedWith: schedule.scannedWith,
+            schDays: schedule.schDays,
+            schFrequency: schedule.schFrequency,
+            schManual: schedule.schManual,
+            schType: schedule.schType,
+            schWeekDays: schedule.schWeekDays,
+            schWeeks: schedule.schWeeks,
+            tagId: schedule.tagId,
+            photo: schedule.photo,
+            unit: schedule.unit,
+            unitId: schedule.unitId,
+            area: schedule.area,
+            areaId: schedule.areaId,
+            latitude: schedule.latitude,
+            longitude: schedule.longitude,
+            created_at: schedule.created_at,
+            deleted_at: schedule.deleted_at,
+            date: schedule.schedule,
+            assetCategoryId: schedule.assetCategoryId,
+            assetCategoryName: schedule.assetCategoryName
+          };
+
+
+          if (!schedule.scheduleManual) {
+            let shiftFormat = 'HH:mm';
+
+            if (schedule.schType?.toLowerCase() === 'weekly') {
+              shiftFormat = '[W]-w';
+            } else if (schedule.schType?.toLowerCase() === 'monthly') {
+              shiftFormat = 'MMMM';
+            }
+
+            data.shift = moment(schedule.scheduleFrom).format(shiftFormat);
+            data.scheduleType = 'Automatic';
+          }
+
+          if (schedule.syncAt != null) { // Uploaded
+            data.isUploaded = true;
+            data.hasPreview = uploadedRecords.includes(schedule.scheduleTrxId);
+            data.scannedEnd = moment(schedule.scannedEnd, 'YYYY-MM-DD HH:mm:ss')
+              .format('D MMMM YYYY HH:mm');
+          } else if (schedule.scheduleTrxId in unuploadedRecords) { // Unuploaded
+            data.isUnuploaded = true;
+            data.hasPreview = true;
+            const scannedEnd = unuploadedRecords[schedule.scheduleTrxId];
+
+            if (scannedEnd) {
+              data.scannedEnd = moment(scannedEnd, 'YYYY-MM-DD HH:mm:ss')
+                .format('D MMMM YYYY HH:mm');
+            }
+          } else if (holdedRecords.includes(schedule.assetId)) { // Holded
+            const start = new Date(schedule.scheduleFrom).getTime();
+            const end = new Date(schedule.scheduleTo).getTime();
+            data.hasRecordHold = moment(now).isBetween(start, end);
+          }
+
+          if (!data.scannedEnd) {
+            data.scannedEnd = '-';
+          }
+
+          return data;
+        })
+        .filter(schedule => schedule.isUnuploaded);
+
+        console.log('schedule unuploaded' , this.schedulesUnuploaded);
         
       this.dataSudah = [];
   this.dataBelum=this.sourceSchedules;
@@ -1070,14 +1185,18 @@ console.log('mark2', uploaded);
   console.log('dataSudah',this.dataSudah);
   console.log('dataBelum',this.dataBelum);
 
-  this.jumlahUnuploaded=this.dataSudah;
+  //this.jumlahUnuploaded=this.dataSudah;
+  this.jumlahUnuploaded=this.schedulesUnuploaded
   this.jumlahUploaded=this.dataBelum;
 
   console.log('jumlah Unuploaded' , this.jumlahUnuploaded);
   console.log('jumlah Uploaded' , this.jumlahUploaded);
   
   
+  
   }
+
+
 
   private async getUploadedRecords(scheduleTrxIds: string[]) {
     const records: string[] = [];

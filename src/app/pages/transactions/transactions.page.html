@@ -11,8 +11,18 @@
   <ion-toolbar class="dark:ion-base-gray-800" color="primary">
     <ion-segment class="W-11/12 bg-primary" [value]="segment" (ionChange)="onSegmentChanged($event)">
       <!-- <ion-segment-button class="font-bold uppercase expanded" value="holded">Holded</ion-segment-button> -->
-      <ion-segment-button *ngIf="dataSudah" class="font-bold uppercase expanded" value="unuploaded">Belum Di Upload {{dataSudah}}</ion-segment-button>
-      <ion-segment-button *ngIf="dataBelum" class="font-bold uppercase expanded" value="uploaded">Sudah Di Upload {{dataBelum}}</ion-segment-button>
+      <ion-segment-button  *ngIf="jumlahUnuploaded" class="font-bold capitalize" value="unuploaded">
+        <div class="bg-transparent">
+          <ion-label class="tracking-normal">Belum Laporan </ion-label>
+          <ion-badge color="danger" class="align-middle">{{jumlahUnuploaded.length}}</ion-badge>
+        </div>
+      </ion-segment-button>
+      <ion-segment-button  *ngIf="jumlahUploaded" class="font-bold capitalize" value="uploaded">
+        <div class="bg-transparent">
+          <ion-label class="tracking-normal">Sudah Laporan </ion-label>
+          <ion-badge color="success" class="align-middle">{{jumlahUploaded.length}}</ion-badge>
+        </div>
+      </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
 </ion-header>
