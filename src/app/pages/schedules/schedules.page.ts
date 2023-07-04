@@ -90,6 +90,8 @@ export class SchedulesPage implements OnInit {
     this.shared.onUploadRecordsCompleted = () =>
       this.getManualSchedules();
     this.getKategori();
+
+
   }
 
   ionViewWillEnter() {
@@ -103,7 +105,7 @@ export class SchedulesPage implements OnInit {
   }
 
   ionViewWillLeave() {
-
+    
   }
 
   doRefresh(e: any) {
@@ -266,6 +268,7 @@ export class SchedulesPage implements OnInit {
         'schedule',
         {
           column: [
+            'idschedule',
             'scheduleTrxId',
             'abbreviation',
             'adviceDate',
@@ -331,6 +334,7 @@ export class SchedulesPage implements OnInit {
 
       for (const schedule of schedules) {
         const data = {
+          idschedule:schedule.idschedule,
           scheduleTrxId: schedule.scheduleTrxId,
           abbreviation: schedule.abbreviation,
           approvedAt: schedule.approvedAt,
