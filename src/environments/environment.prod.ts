@@ -83,6 +83,21 @@ export const environment = {
     },
     get apar() {
       return this.base + '/api/asset/index';
+    },
+    get updateLocation() {
+      return this.base + '/api/tag/updateDetailLocation';
+    },
+    get formAssetCategory() {
+      return this.base + '/api/assetform/assetCategory';
+    },
+    get formType() {
+      return this.base + '/api/type/getDataByForm';
+    },
+    get uploadFormType() {
+      return this.base + '/api/asset/updateAssetType';
+    },
+    get schedulesShift() {
+      return this.base + `/api/schedule/getTeamSchedule`;
     }
   },
   values: {

@@ -159,7 +159,7 @@ ion-segment {
         --color-checked: #ffffff;
         --background-checked: #4f50c5;
         --border-color: none !important;
-        --border-radius: 0;
+        --border-radius: 99px;
         --border-style: none;
         --indicator-color: none;
         --indicator-box-shadow: none;
@@ -201,7 +201,16 @@ ion-accordion-group {
     ion-accordion {
         .ion-accordion-toggle-icon {
             font-size: 30px;
-            color: gray;
+            color: white;
         }
     }
 }
+
+ion-loading.custom-loader {
+    .loading-wrapper.sc-ion-loading-ios {
+        background: transparent !important;
+    }
+}
+
+
+

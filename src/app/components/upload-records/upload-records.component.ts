@@ -371,6 +371,8 @@ console.log('all',record.requests[index].data);
         const uploaded = record.requests.filter((request: any) => request.status === 'success').length;
         record.decimal = record.requests.length ? uploaded / record.requests.length : 0;
         record.percentage = Math.round(record.decimal * 100);
+        console.log('sukses');
+        
       }
     });
   }

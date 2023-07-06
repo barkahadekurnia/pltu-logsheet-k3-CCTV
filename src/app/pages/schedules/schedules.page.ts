@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, OnInit } from '@angular/core';
+
 import { Platform, NavController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
 
+import { chain, uniq, uniqBy } from 'lodash';
+import * as moment from 'moment';
+
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-
-import { chain, cond, groupBy, intersection, uniq, uniqBy, zip } from 'lodash';
-
-import * as moment from 'moment';
-import { Router } from '@angular/router';
+import { HttpService } from 'src/app/services/http/http.service';
 
 @Component({
   selector: 'app-schedules',
@@ -49,6 +49,11 @@ export class SchedulesPage implements OnInit {
   selectedDate: any;
   segment: 'automatic' | 'manual';
   datakategori: any[];
+  dataShift:any;
+  usersData:any;
+
+  //modal barkah
+  isModalShiftOpen!: boolean;
 
   constructor(
     private platform: Platform,
@@ -56,7 +61,7 @@ export class SchedulesPage implements OnInit {
     public shared: SharedService,
     private utils: UtilsService,
     private navCtrl: NavController,
-    private router: Router,
+    private http: HttpService,
   ) {
     this.calendar = {
       date: null,
@@ -86,12 +91,16 @@ export class SchedulesPage implements OnInit {
     this.selectedDate = {};
     this.segment = 'manual';
     // this.shared.setBackButtonVisible = true;
+
+    this.isModalShiftOpen = false;
   }
 
   ngOnInit() {
     this.shared.onUploadRecordsCompleted = () =>
       this.getManualSchedules();
     this.getKategori();
+
+
   }
 
   ionViewWillEnter() {
@@ -105,7 +114,7 @@ export class SchedulesPage implements OnInit {
   }
 
   ionViewWillLeave() {
-
+    
   }
 
   doRefresh(e: any) {
@@ -126,9 +135,13 @@ export class SchedulesPage implements OnInit {
   selectDate(item: any) {
     this.selectedDate.selected = false;
 
+    console.log('selectDate', item);
+
+    this.scheduleShift(item);
+
     this.selectedDate = item;
     this.selectedDate.selected = true;
-    console.log('this.selectedDate ',this.selectedDate);
+    console.log('this.selectedDate ', this.selectedDate);
 
     this.calendar.date = new Date(
       this.calendar.date.getFullYear(),
@@ -136,44 +149,143 @@ export class SchedulesPage implements OnInit {
       this.selectedDate.date
     );
 
-    let schdata1 = this.selectedDate.schedules;
+    const schdata1 = this.selectedDate.schedules;
 
     // Group the elements of Array based on `color` property
     // .groupBy("color")
-    const grup = uniqBy(schdata1, "areaId");
-    console.log('grup ',grup);
+    const grup = uniqBy(schdata1, 'areaId');
+    console.log('grup ', grup);
     this.selectedDate.lokasi = grup;
-    let filteredSchedule = [];
-    let isigrup = [];
-    let isifilter = [];
-    console.log('cek per tgl :', schdata1)
+    const filteredSchedule = [];
+    const isigrup = [];
+    const isifilter = [];
+    console.log('cek per tgl :', schdata1);
 
-    grup.forEach((values) =>{
+
+    grup.forEach((values) => {
       isigrup.push(values);
-    })
+    });
     isigrup.forEach((b, ind) => {
-      let schdatalokasi = schdata1.filter((v) => v.area == b.area);
-      this.datakategori.forEach((value,i) => {
-        let scanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded ==  true);
-        let unscanned = schdatalokasi.filter((f) => f.assetCategoryId == value.assetCategoryId && f.isUploaded == false);
+      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit);
+      this.datakategori.forEach((value, i) => {
+        const scanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === true);
+        const unscanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === false);
         const data = {
           countScanned: scanned.length,
-          scanned: scanned,
+          scanned,
           countUnscanned: unscanned.length,
-          unscanned: unscanned,
+          unscanned,
           index: ind
-        }
+        };
         filteredSchedule.push(data);
       });
-    })
+    });
 
     this.countsc = chain(filteredSchedule).groupBy('index').map(res => res).value();
     console.log(chain(this.countsc).groupBy('index').map(res => res).value());
 
     console.log('isigr', isigrup);
     console.log('countsc', this.countsc);
+
   }
 
+  //barkah maintance add shift schedule
+  async scheduleShift(item:any) {
+    console.log('isi dari schedule shift', item);
+
+    //console.log('schedule id di schedule shift', item.schedules[0].idschedule);
+
+    console.log('yuhu data usere kie', this.shared.user);
+    this.usersData=this.shared.user
+
+    if(item.schedules.length > 0) {
+      console.log('schedule ada mari bekerja');
+
+      const idScheduleShift = item.schedules[0].idschedule;
+      console.log('schedule id di schedule shift', idScheduleShift);
+
+      const loader = await this.utils.presentLoader();
+      
+      this.http.getSchedulesShift(idScheduleShift)
+      .then((result) => {
+        if (result) {
+          console.log('result data',result);
+          console.log('length data',result.data.data.length);
+          this.dataShift= result.data.data
+
+          console.log('data shift' , this.dataShift);
+          console.log('cek data params asets data' , this.dataShift[0].detailLocationData[0].assetData);
+          
+          // this.dataShift.detailLocationData.forEach(namaUnit);
+
+          //  const panjanglokasiShift = this.dataShift.detailLocationData.length;
+          //  const lokasiShift = this.dataShift.detailLocationData;
+          // const titipLokasi = []
+          //  for(let i= 0 ; i < panjanglokasiShift; i++) {
+          //   if(titipLokasi[0] !== lokasiShift[i].locationUnitNama)
+          //   {
+          //   titipLokasi.push(lokasiShift[i].locationUnitNama)
+          //   }
+          // }
+
+          // console.log('ini lokasi unit',titipLokasi);
+          
+
+          // function namaUnit(unit){
+          //   let unitShift = []
+          //   unitShift.push(unit)
+          //   if(unitShift[0] === unit) {
+          //     unitShift.push(unit)
+          //   }
+          //   console.log('unitshift' , unitShift);
+            
+          // }
+
+
+          console.log('ini coba di cek' , this.dataShift[0].teamData[this.dataShift[0].groupNameData[0].operatorGroupName][0].operatorUserNama);
+          console.log('ini coba di cek nama yser' , this.dataShift[0].teamData[this.dataShift[0].groupNameData[0].operatorGroupName][1].operatorUserNama);
+          
+          
+        }
+        loader.dismiss()
+      })
+      .catch(err => console.log(err));
+    }
+    else {
+      console.log('schedule belum ada, silahkan tanyakan pada admin')
+    }
+  }
+
+  //modal barkah seperangkat alat sholat
+  setModalShiftOpen(isOpen: boolean) {
+    this.isModalShiftOpen = isOpen;
+    console.log('setModalShiftOpen');
+  }
+
+
+  showNextMonth(item?: any) {
+    let date = item?.date;
+
+    if (date == null) {
+      const maxDate = new Date(
+        this.calendar.date.getFullYear(),
+        this.calendar.date.getMonth() + 2,
+        0
+      ).getDate();
+
+      date = this.calendar.date.getDate() > maxDate
+        ? maxDate
+        : this.calendar.date.getDate();
+    }
+
+    this.showCalendar(
+      new Date(
+        this.calendar.date.getFullYear(),
+        this.calendar.date.getMonth() + 1,
+        date
+      )
+    );
+  }
   showLastMonth(item?: any) {
     let date = item?.date;
 
@@ -197,6 +309,7 @@ export class SchedulesPage implements OnInit {
       )
     );
   }
+
   private async getKategori() {
     try {
       const result = await this.database.select('category', {
@@ -231,30 +344,6 @@ export class SchedulesPage implements OnInit {
     } finally {
       this.loading = false;
     }
-
-  }
-  showNextMonth(item?: any) {
-    let date = item?.date;
-
-    if (date == null) {
-      const maxDate = new Date(
-        this.calendar.date.getFullYear(),
-        this.calendar.date.getMonth() + 2,
-        0
-      ).getDate();
-
-      date = this.calendar.date.getDate() > maxDate
-        ? maxDate
-        : this.calendar.date.getDate();
-    }
-
-    this.showCalendar(
-      new Date(
-        this.calendar.date.getFullYear(),
-        this.calendar.date.getMonth() + 1,
-        date
-      )
-    );
   }
 
   private async getManualSchedules() {
@@ -265,6 +354,7 @@ export class SchedulesPage implements OnInit {
         'schedule',
         {
           column: [
+            'idschedule',
             'scheduleTrxId',
             'abbreviation',
             'adviceDate',
@@ -278,6 +368,7 @@ export class SchedulesPage implements OnInit {
             'condition',
             'merk',
             'capacityValue',
+            'detailLocation',
             'unitCapacity',
             'supplyDate',
             'reportPhoto',
@@ -318,7 +409,7 @@ export class SchedulesPage implements OnInit {
         }
       );
 
-      const schedules = this.database.parseResult(result)
+      const schedules = this.database.parseResult(result);
       const assetIds = uniq(schedules.map(schedule => schedule.assetId));
       const assetTags = await this.getAssetTags(assetIds);
       const holdedRecords = await this.getHoldedRecords(assetIds);
@@ -329,6 +420,7 @@ export class SchedulesPage implements OnInit {
 
       for (const schedule of schedules) {
         const data = {
+          idschedule:schedule.idschedule,
           scheduleTrxId: schedule.scheduleTrxId,
           abbreviation: schedule.abbreviation,
           approvedAt: schedule.approvedAt,
@@ -343,6 +435,7 @@ export class SchedulesPage implements OnInit {
           area: schedule.area,
           latitude: schedule.latitude,
           longitude: schedule.longitude,
+          detailLocation: schedule.detailLocation,
           tagNumber: schedule.tagNumber,
           scannedAt: schedule.scannedAt,
           scannedBy: schedule.scannedBy,
@@ -419,6 +512,7 @@ export class SchedulesPage implements OnInit {
 
       this.showCalendar(this.calendar.date);
       this.loading = false;
+      console.log('schedules', this.schedules);
     }
   }
 
@@ -503,6 +597,9 @@ export class SchedulesPage implements OnInit {
 
       }
 
+      console.log('daysInThisMonth', this.calendar.daysInThisMonth);
+
+
       for (let i = 1; i <= 6 - lastDayOnThisMonth; i++) {
         this.calendar.daysInNextMonth.push({
           date: i,
@@ -518,8 +615,9 @@ export class SchedulesPage implements OnInit {
           selected: false
         });
       }
-      let datein = moment().format('DD');
-      let idx = parseInt(datein) - 1;
+      const datein = moment().format('DD');
+      // eslint-disable-next-line radix
+      const idx = parseInt(datein) - 1;
       this.selectDate(this.calendar?.daysInThisMonth[idx]);
     } catch (error) {
       console.error(error);
