@@ -11,6 +11,7 @@ import * as moment from 'moment';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
+import { HttpService } from 'src/app/services/http/http.service';
 
 @Component({
   selector: 'app-schedules',
@@ -48,6 +49,11 @@ export class SchedulesPage implements OnInit {
   selectedDate: any;
   segment: 'automatic' | 'manual';
   datakategori: any[];
+  dataShift:any;
+  usersData:any;
+
+  //modal barkah
+  isModalShiftOpen!: boolean;
 
   constructor(
     private platform: Platform,
@@ -55,6 +61,7 @@ export class SchedulesPage implements OnInit {
     public shared: SharedService,
     private utils: UtilsService,
     private navCtrl: NavController,
+    private http: HttpService,
   ) {
     this.calendar = {
       date: null,
@@ -84,6 +91,8 @@ export class SchedulesPage implements OnInit {
     this.selectedDate = {};
     this.segment = 'manual';
     // this.shared.setBackButtonVisible = true;
+
+    this.isModalShiftOpen = false;
   }
 
   ngOnInit() {
@@ -127,6 +136,8 @@ export class SchedulesPage implements OnInit {
     this.selectedDate.selected = false;
 
     console.log('selectDate', item);
+
+    this.scheduleShift(item);
 
     this.selectedDate = item;
     this.selectedDate.selected = true;
@@ -175,7 +186,55 @@ export class SchedulesPage implements OnInit {
 
     console.log('isigr', isigrup);
     console.log('countsc', this.countsc);
+
   }
+
+  //barkah maintance add shift schedule
+  async scheduleShift(item:any) {
+    console.log('isi dari schedule shift', item);
+
+    //console.log('schedule id di schedule shift', item.schedules[0].idschedule);
+
+    console.log('yuhu data usere kie', this.shared.user);
+    this.usersData=this.shared.user
+
+    if(item.schedules.length > 0) {
+      console.log('schedule ada mari bekerja');
+
+      const idScheduleShift = item.schedules[0].idschedule;
+      console.log('schedule id di schedule shift', idScheduleShift);
+
+      const loader = await this.utils.presentLoader();
+      
+      this.http.getSchedulesShift(idScheduleShift)
+      .then((result) => {
+        if (result) {
+          console.log('result data',result);
+          console.log('length data',result.data.data.length);
+          this.dataShift= result.data.data
+
+          console.log('data shift' , this.dataShift);
+          
+          console.log('ini coba di cek' , this.dataShift[0].teamData[this.dataShift[0].groupNameData[0].operatorGroupName][0].operatorUserNama);
+          console.log('ini coba di cek nama yser' , this.dataShift[0].teamData[this.dataShift[0].groupNameData[0].operatorGroupName][1].operatorUserNama);
+          
+          
+        }
+        loader.dismiss()
+      })
+      .catch(err => console.log(err));
+    }
+    else {
+      console.log('schedule belum ada, silahkan tanyakan pada admin')
+    }
+  }
+
+  //modal barkah seperangkat alat sholat
+  setModalShiftOpen(isOpen: boolean) {
+    this.isModalShiftOpen = isOpen;
+    console.log('setModalShiftOpen');
+  }
+
 
   showNextMonth(item?: any) {
     let date = item?.date;

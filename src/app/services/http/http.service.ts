@@ -355,6 +355,18 @@ export class HttpService {
 
     return Http.get(options);
   }
+
+  getSchedulesShift(params) {
+    const options: HttpOptions = {
+      url: environment.url.schedulesShift + '/'+ params,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
   
   getSchedulesnonsift(params: { userId?: string } = {}) {
     const options: HttpOptions = {

@@ -95,6 +95,9 @@ export const environment = {
     },
     get uploadFormType() {
       return this.base + '/api/asset/updateAssetType';
+    },
+    get schedulesShift() {
+      return this.base + `/api/schedule/getTeamSchedule`;
     }
   },
   values: {
