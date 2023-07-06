@@ -38,6 +38,18 @@
             <ion-col>{{ jenis?.optionName }}</ion-col>
           </ion-row>
         </ion-grid>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>Tanggal Scan Terakhir</ion-label></ion-col>
+            <ion-col>{{ resultParam?.lastScannedAt }}</ion-col>
+          </ion-row>
+        </ion-grid>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>Petugas Scan Terakhir</ion-label></ion-col>
+            <ion-col>{{ resultParam?.lastScannedBy }}</ion-col>
+          </ion-row>
+        </ion-grid>
         <div class="mt-4 justify-center items-center text-center">
           <button class="btn btn-block btn-sm btn-info rounded-btn text-white no-animation" id="modal-edit-asset"
             (click)="getDataInputForms()">
@@ -172,7 +184,7 @@
         <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>Type Pengecekan</ion-label></ion-col>
-            <ion-col>{{ resultParam?.sch_type }}</ion-col>
+            <ion-col class="!capitalize">{{ utils.parseJson(resultParam?.sch_type) }}</ion-col>
           </ion-row>
         </ion-grid>
         <ion-grid class="w-full space-y-4 text-white" *ngFor="let tagging of resultParam?.more?.tagging">
