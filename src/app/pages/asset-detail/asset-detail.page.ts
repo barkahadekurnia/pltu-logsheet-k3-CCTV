@@ -69,7 +69,7 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     private platform: Platform,
     private alertCtrl: AlertController,
     private nfc: NfcService,
-    private utils: UtilsService,
+    public utils: UtilsService,
     private nfc1: NFC,
     private menuCtrl: MenuController,
     private http: HttpService
@@ -224,6 +224,7 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       const bodyResponse = response.data?.data;
 
       this.resultParam = bodyResponse;
+      console.log(this.resultParam);
     } catch (err) {
       console.error(err);
     }

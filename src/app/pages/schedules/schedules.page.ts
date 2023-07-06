@@ -153,7 +153,7 @@ export class SchedulesPage implements OnInit {
       isigrup.push(values);
     });
     isigrup.forEach((b, ind) => {
-      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit);
+      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit && v.scheduleId === b.scheduleId);
       this.datakategori.forEach((value, i) => {
         const scanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === true);
         const unscanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === false);
@@ -354,6 +354,7 @@ export class SchedulesPage implements OnInit {
           scannedWith: schedule.scannedWith,
           tagId: schedule.tagId,
           unit: schedule.unit,
+          unitId: schedule.unitId,
           assetStatusId: schedule.assetStatusId,
           assetStatusName: schedule.assetStatusName,
           assetTags: assetTags.filter(assetTag => assetTag.assetId === schedule.assetId),

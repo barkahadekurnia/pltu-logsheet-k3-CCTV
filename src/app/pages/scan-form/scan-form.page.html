@@ -18,7 +18,7 @@
 
 <ion-content>
   <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
-  <app-screen-view *ngIf="!loading && !asset.assetId && resultParam?.length <= 0" type="no-data"
+  <app-screen-view *ngIf="!loading && !asset.assetId && !resultParam?.length" type="no-data"
     message="APA tidak dalam schedule"></app-screen-view>
 
   <app-screen-view *ngIf="!loading && asset.assetId && !schedule.scheduleTrxId && resultParam?.length <= 0"
@@ -27,7 +27,7 @@
   <app-screen-view *ngIf="!loading && asset.assetId && schedule.scheduleTrxId  && resultParam?.length <= 0"
     type="no-data" message="Empty Data" description="No parameters need to be scanned"></app-screen-view>
 
-  <div *ngIf="!loading && asset.assetId" class="w-full min-h-full p-4 bg-white dark:bg-gray-900">
+  <div *ngIf="!loading && asset.assetId && resultParam?.length" class="w-full min-h-full p-4 bg-white dark:bg-gray-900">
 
     <ion-grid>
       <ion-row class="mb-2 justify-center">

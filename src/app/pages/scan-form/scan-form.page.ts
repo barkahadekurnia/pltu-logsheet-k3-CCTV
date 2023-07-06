@@ -1,10 +1,8 @@
-import { SchType } from './../../services/shared/shared.service';
-import { AttachmentSettings } from 'src/app/services/shared/shared.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, ViewChild, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActionSheetOptions } from '@ionic/core';
 
+import { ActionSheetOptions } from '@ionic/core';
 import {
   Platform,
   IonContent,
@@ -12,21 +10,23 @@ import {
   AlertController,
   LoadingController,
   MenuController,
-  IonSlides
+  IonSlides,
+  NavController
 } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
-import { LocalNotificationSchema } from '@capacitor/local-notifications';
+
+import { chain, groupBy, toLower, uniq } from 'lodash';
+import Viewer from 'viewerjs';
+import * as moment from 'moment';
+
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { MediaService } from 'src/app/services/media/media.service';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-import { chain, groupBy, toLower, zip } from 'lodash';
-import Viewer from 'viewerjs';
-import * as moment from 'moment';
-import { Directory } from '@capacitor/filesystem';
-import write_blob from 'capacitor-blob-writer';
+import { Asset } from 'src/app/interfaces/asset';
+import { Parameter } from 'src/app/interfaces/parameter';
 
 @Component({
   selector: 'app-scan-form',
@@ -34,7 +34,6 @@ import write_blob from 'capacitor-blob-writer';
   styleUrls: ['./scan-form.page.scss'],
 })
 export class ScanFormPage implements OnInit {
-  // @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild(IonContent, { static: true }) ionContent: IonContent;
   @ViewChild(IonSlides, { static: false }) ionSlides: IonSlides;
 
@@ -50,88 +49,8 @@ export class ScanFormPage implements OnInit {
   resultParam = [];
   attach = [];
   sch = [];
-  asset: {
-    scheduleTrxId: string;
-    abbreviation: string;
-    adviceDate: string;
-    approvedAt: string;
-    approvedBy: string;
-    approvedNotes: string;
-    assetId: string;
-    photo: string;
-    offlinePhoto: string;
-    assetNumber: string;
-    assetStatusId: string;
-    assetStatusName: string;
-    condition: string;
-    merk: string;
-    capacityValue: string;
-    detailLocation: string;
-    unitCapacity: string;
-    supplyDate: string;
-    reportPhoto: string;
-    scannedAccuration: string;
-    scannedAt: string;
-    scannedBy: string;
-    scannedEnd: string;
-    scannedNotes: string;
-    scannedWith: string;
-    schDays: string;
-    schFrequency: string;
-    schManual: string;
-    schType: string;
-    schWeekDays: string;
-    schWeeks: string;
-    scheduleFrom: string;
-    scheduleTo: string;
-    syncAt: string;
-    tagId: string;
-    tagNumber: string;
-    unit: string;
-    unitId: string;
-    area: string;
-    areaId: string;
-    latitude: string;
-    longitude: string;
-    created_at: string;
-    deleted_at: string;
-    date: string;
-    assetCategoryId: string;
-    assetCategoryName: string;
-    assetForm: string;
-    idschedule: string;
-  };
-  param: {
-    assetId: string;
-    assetNumber: string;
-    description: string;
-    inputType: string;
-    max: string;
-    min: string;
-    normal: string;
-    abnormal: string;
-    option: string;
-    parameterId: string;
-    parameterName: string;
-    schType: string;
-    showOn: string;
-    sortId: string;
-    uom: string;
-    workInstruction: string;
-    tagId;
-    unit: string;
-    unitId: string;
-    area: string;
-    areaId: string;
-    created_at: string;
-    updated_at: string;
-    col: string;
-    isDeviation: string;
-    isExpanded: string;
-    reportType: string;
-    value: string;
-    attachment: any[];
-  };
+  asset: Asset;
+  param: Parameter;
   record: {
     scannedAt: string;
     scannedEnd: string;
@@ -173,7 +92,8 @@ export class ScanFormPage implements OnInit {
     private notification: NotificationService,
     private shared: SharedService,
     private utils: UtilsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private navCtrl: NavController,
   ) {
     this.isBeginning = true;
     this.isEnd = false;
@@ -227,7 +147,7 @@ export class ScanFormPage implements OnInit {
       assetCategoryId: '',
       assetCategoryName: '',
       assetForm: '',
-      idschedule: ''
+      idschedule: '',
     };
 
     this.record = {
@@ -315,7 +235,7 @@ export class ScanFormPage implements OnInit {
 
   async onNextButtonTouched() {
     console.log(this.resultParam);
-    
+
     const index = await this.ionSlides.getActiveIndex();
 
     if (!this.isEnd) {
@@ -1015,7 +935,6 @@ export class ScanFormPage implements OnInit {
         const [astag] = this.database.parseResult(tagg);
         console.log('astag', astag);
         value = astag.assetId;
-
       }
 
       const resultAsset = await this.database.select('schedule', {
@@ -1035,8 +954,7 @@ export class ScanFormPage implements OnInit {
           query: `assetId=?`,
           params: [value]
         }
-      }
-      );
+      });
       const isiaray = { notes: '', attachments: [] };
       const params = this.database.parseResult(resultParameters);
 
@@ -1045,11 +963,22 @@ export class ScanFormPage implements OnInit {
         ...isiaray
       }));
 
+      this.asset.assetId = value;
       this.resultParam = ak;
       console.log('awal parameter :', this.resultParam);
       console.log('asset schedule :', asset);
       this.sch = assetarr;
-      console.log('sch >>>', this.sch);
+      // console.log('sch >>>', this.sch);
+
+      const arrTypeSchedules = [];
+      arrTypeSchedules.push(
+        ...uniq([
+          ...this.database.parseResult(resultParameters).map((item) => item.schType),
+          ...this.database.parseResult(resultAsset).map((item) => item.schType),
+        ])
+      );
+      console.log('arrTypeSchedules', arrTypeSchedules);
+
 
       if (asset) {
         console.log('css', this.shared.schtype.type);
@@ -1096,20 +1025,21 @@ export class ScanFormPage implements OnInit {
       //   }
       // });
       // const asset = this.database.parseResult(resultAsset);
-      console.log('value :', value);
-      console.log('cek jumlah jadwal :', asset);
+      // console.log('value :', value);
+      // console.log('cek jumlah jadwal :', asset);
+      // console.log('assetarr', assetarr);
 
-      if (assetarr.length > 1) {
-        const datatype = assetarr.map(k => ({
-          label: k.schType,
+      if (arrTypeSchedules?.length > 1) {
+        const dataSchType = arrTypeSchedules.map((item) => ({
+          label: this.utils.capitalizeFirstLetter(item),
           type: 'radio',
-          value: k.schType
+          value: item
         }));
         const alert = await this.utils.createCustomAlert({
           type: 'radio',
-          header: 'Type Scan',
+          header: 'Pilih Tipe Scan',
           backdropDismiss: false,
-          param: datatype,
+          param: dataSchType,
           buttons: [
             {
               text: 'Lanjutkan',
@@ -1119,14 +1049,11 @@ export class ScanFormPage implements OnInit {
                 alert.dismiss();
                 const resultParameters = await this.database.select('parameter', {
                   where: {
-
                     query: `assetId=? AND schType=?`,
                     // params: ["96b7597d-7b56-4f87-868f-e775e7908b21", "Monthly"]
                     params: [value, toLower(this.shared.schtype.type)]
                   }
-                }
-                );
-                console.log('cek param', resultParameters);
+                });
                 const isiaray = { notes: '', attachments: [] };
                 const params = this.database.parseResult(resultParameters);
                 console.log('cek param2', params);
@@ -1138,11 +1065,19 @@ export class ScanFormPage implements OnInit {
 
                 this.resultParam = chain(ak).groupBy('parameterGroup').map(res => res).value();
                 console.log(this.resultParam);
+                console.log(this.asset.assetId);
+
                 console.log(chain(ak).groupBy('parameterGroup').map(res => res).value());
 
                 const dataSlides = Object.keys(groupBy(ak, 'parameterGroup'));
                 dataSlides.push('Catatan & Lampiran');
                 this.buildSlides(dataSlides);
+              }
+            }, {
+              text: 'Batal',
+              handler: () => {
+                alert.dismiss();
+                this.navCtrl.pop();
               }
             }
           ],
@@ -1157,10 +1092,10 @@ export class ScanFormPage implements OnInit {
             params: [value, toLower(this.shared.schtype.type)]
           }
         });
-        console.log('cek param', resultParameters)
+        console.log('cek param', resultParameters);
         const isiaray = { notes: '', attachments: [] };
-        const params = this.database.parseResult(resultParameters)
-        console.log('cek param2', params)
+        const params = this.database.parseResult(resultParameters);
+        console.log('cek param2', params);
 
         const ak = params.map(attachment => ({
           ...attachment,
@@ -1196,7 +1131,7 @@ export class ScanFormPage implements OnInit {
       // console.log({ result: result });
 
       const now = this.utils.getTime();
-      const schedule = this.database.parseResult(result)
+      const schedule = this.database.parseResult(result);
       // .find(item => {
       //   const start = new Date(item.scheduleFrom).getTime();
       //   const end = new Date(item.scheduleTo).getTime();
@@ -1236,7 +1171,7 @@ export class ScanFormPage implements OnInit {
     }
   }
   showVal(val: any) {
-    console.log('data show:', val)
+    console.log('data show:', val);
   }
   private async getHoldAttachment() {
     try {

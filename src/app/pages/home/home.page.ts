@@ -665,7 +665,7 @@ export class HomePage implements OnInit {
           console.log('parameter1', parameters);
 
           let storeParameters = [];
-          // await this.database.emptyTable('parameter');
+          await this.database.emptyTable('parameter');
           // .then(() => this.database.insertbatch('parameter', val);
           storeParameters = this.utils.chunkArray(parameters, 250);
           storeParameters?.map?.(async (val) => {
@@ -1206,16 +1206,13 @@ export class HomePage implements OnInit {
     }
   }
 
-  private async getSchedules(
-    subscriber: Subscriber<any>,
-    loader: HTMLIonPopoverElement
-  ) {
+  private async getSchedules(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
     const shared = this.injector.get(SharedService);
     if (shared.user.group === 'ADMIN') {
       return this.http.requests({
         requests: [() => this.http.getSchedules()],
         onSuccess: async ([response]) => {
-          if (response.status >= 400) {
+          if (![200, 201].includes(response.status)) {
             throw response;
           }
 
@@ -1924,8 +1921,7 @@ export class HomePage implements OnInit {
                 assetIdSchedule.push({
                   assetId: dataschedule.assetId,
                   categoryId: dataschedule.assetCategoryId
-                }
-                )
+                });
               });
             // //console.log('assetIdSchedule', assetIdSchedule);
             const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
@@ -1935,7 +1931,9 @@ export class HomePage implements OnInit {
             this.getTypeScan(assetIdScheduleType1);
             // this.getParameterByAssetId(assetIdScheduleType);
             let splitAssetIdSchedule = [];
+            console.log(JSON.stringify(splitAssetIdSchedule));
             splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
+
             splitAssetIdSchedule?.map?.(async val => {
               const payload = { asset: JSON.stringify(val) };
               await this.getParameterByAssetId(payload);

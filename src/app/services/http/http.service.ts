@@ -333,7 +333,7 @@ export class HttpService {
       url: environment.url.parameters,
       headers: {
         Authorization: `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'multipart/form-data'
       },
       data,
       responseType: 'json'

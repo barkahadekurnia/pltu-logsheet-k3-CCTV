@@ -293,6 +293,10 @@ export class UtilsService {
     return chunks(arr, num);
   }
 
+  capitalizeFirstLetter(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1) || str;
+  }
+
   private async isCheated() {
     try {
       const shared = this.injector.get(SharedService);
