@@ -179,22 +179,21 @@
 
           <ion-row  *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center"> 
             <ion-accordion-group class="w-full" *ngFor="let dataShift of dataShift">
-              <ion-accordion  *ngIf="dataShift.teamData[dataShift.groupNameData[0].operatorGroupName][0].operatorUserNama === usersData.name"  value="first" class="rounded-xl mb-4" toggleIcon="caret-down-circle" >
+              <ion-accordion  *ngIf="dataShift.teamData[dataShift.groupNameData[0].operatorGroupName][1].operatorUserNama === usersData.name || 
+              dataShift.teamData[dataShift.groupNameData[0].operatorGroupName][0].operatorUserNama === usersData.name"  value="first" class="rounded-xl mb-4" toggleIcon="caret-down-circle" >
                 <ion-item slot="header" color="dark">
                   <section class=" py-4">
-                    <div class="flex mb-2 text-xs font-semibold">
+                    <div class="flex mb-3 text-xs font-semibold">
                       <label class="p-1 px-2 mr-2 bg-primary text-white rounded-full ">
                         {{dataShift.groupNameData[0].operatorGroupName}}
                       </label>
                       <label class="p-1 px-2 mr-2 bg-primary text-white rounded-full ">
                         {{dataShift.shift}}
                       </label>
-                    
                     </div>
-                    <div class="flex mb-2 text-xs font-semibold">
-                      
+                    <div class="flex mb-3 text-xs font-semibold">
                       <div *ngFor="let dataPetugas of dataShift.teamData[dataShift.groupNameData[0].operatorGroupName]">
-                        <label class="p-1 px-2 bg-primary text-white rounded-full ">
+                        <label class="p-1 px-2 mr-2 bg-lime-700 text-white rounded-full ">
                           {{dataPetugas.operatorUserNama}}
                         </label>
                       </div>
@@ -207,13 +206,6 @@
                         <ion-icon slot="icon-only" name="person-outline" class="mr-1"></ion-icon>
                         Daftar Area
                       </h4>
-                      <div class="flex justify-between">
-                        <div class="text-center mr-4" *ngFor="let namaOperator of dataShift.teamData[dataShift.groupNameData[0].operatorGroupName]">
-                          <ion-icon slot="icon-only"  name="person-circle-outline" class="mr-1 pt-1 text-[80px]" ></ion-icon>
-                          <p>{{namaOperator.operatorUserNama}}</p>
-                      
-                        </div>
-                      </div>                                                      
                       <!-- <div class="flex justify-between">
                         <div class="text-center mr-4" *ngFor="let namaOperator of dataShift.teamData[dataShift.groupNameData[0].operatorGroupName]">
                           <ion-icon slot="icon-only"  name="person-circle-outline" class="mr-1 pt-1 text-[80px]" ></ion-icon>
@@ -221,6 +213,16 @@
                       
                         </div>
                       </div>                                                       -->
+                      <div class="">
+                       <div class="mr-4">
+                         <p>- Unit 3</p>
+                         <p>- Unit 1 & 2</p>
+                        </div>
+                        <!-- <div class="mr-4" *ngFor="let namaUnit of dataShift.detailLocationData">
+                          <ion-icon slot="icon-only"  name="radio-button-on-sharp" class="mr-1 pt-1 text-[10px]" ></ion-icon>
+                          {{namaUnit.locationUnitNama}}                      
+                        </div> -->
+                      </div>                                                      
                     </div>                   
                   </section>
                   <!-- <button 
@@ -237,12 +239,19 @@
                   </h4>
               
                   <div class="text-sm mb-1.5 pl-2  font-semibold"
-                  *ngFor="let dataLocation of dataShift.detailLocationData">
-                    <div id="cardShift" class="bg-primary rounded-xl p-2 text-white ">
-                      <ion-icon slot="icon-only"  name="radio-button-on-sharp" class="mr-1 pt-1 text-[10px]" ></ion-icon>
+                  *ngFor="let dataLocation of dataShift.detailLocationData; index as idx;">
+                    <div 
+                    
+                    (click)="navPageAset('schedule-lokasi', dataLocation?.assetData, selectedDate, datakategori, countsc[idx])"
+                    id="cardShift" class="bg-primary rounded-xl p-2 text-white   flex justify-between">
+                      <div>
                         {{dataLocation.locationUnitNama}}
                         - {{dataLocation.locationLokasiDescription}}
                         ({{dataLocation.locationLokasiNama}})
+                      </div>
+                      <div class="align-middle">
+                        <ion-icon slot="icon-only"  name="chevron-forward-outline" class="mr-1 pt-1 text-[20px]" ></ion-icon>
+                      </div>
                     </div>
                   </div>
                   <!-- <data>
@@ -289,7 +298,7 @@
             </ng-template>
           </ion-modal>
     
-
+<!-- 
 
           <ion-row  *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center"> 
             <ion-accordion-group class="w-full">
@@ -333,9 +342,9 @@
               
               </ion-accordion>
             </ion-accordion-group>
-          </ion-row>
+          </ion-row> -->
 
-          <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full pt-3 justify-center items-center">
+          <!-- <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full pt-3 justify-center items-center">
             <div class="center" *ngFor="let kat of selectedDate?.lokasi; index as idx;">
               <ul (click)="navPageAset('schedule-lokasi', kat, selectedDate, datakategori, countsc[idx])">
                 <li>
@@ -353,7 +362,7 @@
                 </li>
               </ul>
             </div>
-          </ion-row>
+          </ion-row> -->
 
           <ion-row *ngIf="!selectedDate?.schedules?.length">
             <ion-col size="12">
