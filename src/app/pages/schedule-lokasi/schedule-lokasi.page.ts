@@ -90,6 +90,7 @@ export class ScheduleLokasiPage implements OnInit {
     unit: string;
   };
 
+ // params:any;
 
   listDataScan: {
     countScanned: number,
@@ -99,6 +100,7 @@ export class ScheduleLokasiPage implements OnInit {
   };
   filteredData: any[];
   sourceData: any[];
+
   constructor(
     private platform: Platform,
     private database: DatabaseService,
@@ -149,6 +151,9 @@ export class ScheduleLokasiPage implements OnInit {
     this.sourceData = [];
     this.loaded = 12;
 
+
+    console.log('this.params luar',this.params)
+
     if (router.getCurrentNavigation().extras.state) {
       const navValues = this.router.getCurrentNavigation().extras.state;
       console.log('navValues ',navValues)
@@ -161,8 +166,9 @@ export class ScheduleLokasiPage implements OnInit {
       // console.log('navValues 1 ',this.sourceAssets )
       // console.log('navValues 2 ',this.datakategori )
 
-      // this.params = navValues?.params;
-      // console.log('this.params ',this.params)
+    // this.params = navValues?.params;
+      console.log('this.params ',this.params)
+
 
       // this.listDataScan = navValues?.listDataScan;
       // console.log('this.listDataScan ',this.listDataScan)
