@@ -190,8 +190,22 @@ export class SchedulesPage implements OnInit {
     console.log('countsc', this.countsc);
 
   }
-
+  
   //barkah maintance add shift schedule
+  lowerCaseLetter(string) {
+    let lower = string.toLowerCase() 
+    return lower
+  }
+  lowerCaseLetterUnit(string) {
+    let split = string.split(' ')
+
+    let depan = split[0].toLowerCase() 
+    let belakang = split[1].toUpperCase() 
+
+    let join = depan + ' ' + belakang
+    return join
+  }
+
   async scheduleShift(item:any) {
     this.dataLokasiUnit = []
     console.log('isi dari schedule shift', item);
@@ -216,6 +230,8 @@ export class SchedulesPage implements OnInit {
           console.log('length data',result.data.data.length);
           this.dataShift= result.data.data
 
+          console.log('dataShift', this.dataShift);
+          
 
           this.dataShift.forEach(elem => {
             console.log('data shift eleeeem',elem);
@@ -745,11 +761,13 @@ export class SchedulesPage implements OnInit {
   navPage(path, params, listDataScan) {
     this.navCtrl.navigateForward(path, { state: { params, listDataScan } });
   }
+
+
   navPageAset(path, params, listDataScan, kategori, countsc) {
-    console.log('params klik', params)
-    console.log('listDataScan klik', listDataScan)
-    console.log('kategori klik', kategori)
-    console.log('countsc klik', countsc)
+    console.log('params klik', JSON.stringify(params))
+    console.log('listDataScan klik', JSON.stringify(listDataScan))
+    console.log('kategori klik', JSON.stringify(kategori))
+    console.log('countsc klik', JSON.stringify(countsc))
 
     this.navCtrl.navigateForward(path, { state: { params, listDataScan, kategori, countsc } });
   }

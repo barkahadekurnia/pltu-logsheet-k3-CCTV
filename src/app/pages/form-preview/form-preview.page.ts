@@ -406,7 +406,7 @@ export class FormPreviewPage {
             });
           });
         }
-
+        
         // let dataRes = [{
         //   records: data,
         //   attachments: attachments
@@ -418,6 +418,8 @@ export class FormPreviewPage {
         console.log('nite', this.datasc.record.scannedNotes);
 
         console.log('assetid', this.datasc.schedule[0].assetId);
+        console.log('trx id', this.datasc.asset.scheduleTrxId);
+        
 
         if (reco.length) {
           const parameterIds = reco.map(item => item.parameterId);

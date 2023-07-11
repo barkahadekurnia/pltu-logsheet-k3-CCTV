@@ -72,6 +72,9 @@ export class ScanFormPage implements OnInit {
   attachments: any[];
   loading: boolean;
   validated: boolean;
+  
+  allGood:boolean;
+  allGoodValue:any;
 
   private transitionData: {
     type?: string;
@@ -171,6 +174,8 @@ export class ScanFormPage implements OnInit {
     this.attachments = [];
     this.loading = true;
     this.validated = false;
+
+    this.allGood = true;
   }
 
   ngOnInit() {
@@ -749,7 +754,9 @@ export class ScanFormPage implements OnInit {
       dataSlides: this.slides,
       rawSchedule: this.resultParam
     });
+    console.log('this schedule' , this.schedule);
     console.log('data json :', JSON.parse(data));
+
     return this.router.navigate(['form-preview', { data }]);
   }
   async saveTemporary() {
@@ -1064,7 +1071,7 @@ export class ScanFormPage implements OnInit {
                 }));
 
                 this.resultParam = chain(ak).groupBy('parameterGroup').map(res => res).value();
-                console.log(this.resultParam);
+                console.log('this result params',this.resultParam);
                 console.log(this.asset.assetId);
 
                 console.log(chain(ak).groupBy('parameterGroup').map(res => res).value());
@@ -1430,7 +1437,7 @@ export class ScanFormPage implements OnInit {
   }
 
   private isDeviation(parameter: any) {
-    // console.log('cek deviasi ', parameter)
+     console.log('cek deviasi ', parameter)
     if (parameter.value == null || parameter.value === '') {
       return false;
     }
@@ -1465,12 +1472,45 @@ export class ScanFormPage implements OnInit {
         return strArray.includes(str);
       }
       // console.log('hasil', );
-      // console.log('abnormal', parameter.abnormal.split(","));
-      // console.log('value', parameter.value);
+        //option
+        //is deviation false = index 0
+        //is deviation true = index 1 
+       console.log('abnormal', parameter.abnormal.split(","));
+       console.log('value', parameter.value);
+       console.log('this.result.params' , this.resultParam);
       return searchStringInArray(parameter.value, parameter.abnormal.split(","));
     }
 
+   
+    
     return false;
+  }
+
+  //checklist smua yg default
+  async allCheck(){
+    console.log('hai mas barkah');
+
+    console.log('this result params', this.resultParam);
+
+
+    for(let i = 0 ; i < this.resultParam.length ; i ++ ) {
+
+      let checkValue = this.checkDeviation(this.resultParam[i])
+      .then( res => console.log(res));  
+
+      console.log(checkValue);
+      
+
+   
+
+
+      let saveValue = this.resultParam[i][0].option.split(',')
+      console.log('value di all check', saveValue);
+      
+      this.allGoodValue = saveValue[0]
+    }
+    //this.resultParam.value = this.resultParam.option[0]
+    
   }
 
   private async getPicture(parameter?: any, index?: any) {
