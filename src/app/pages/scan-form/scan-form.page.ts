@@ -73,8 +73,12 @@ export class ScanFormPage implements OnInit {
   loading: boolean;
   validated: boolean;
   
+  indexSlide:any;
   allGood:boolean;
   allGoodValue:any;
+  checked:boolean;
+  buttonChecked:boolean;
+
 
   private transitionData: {
     type?: string;
@@ -175,7 +179,10 @@ export class ScanFormPage implements OnInit {
     this.loading = true;
     this.validated = false;
 
+    this.indexSlide = 0;
     this.allGood = true;
+    this.checked = false;
+    this.buttonChecked = true;
   }
 
   ngOnInit() {
@@ -223,8 +230,10 @@ export class ScanFormPage implements OnInit {
   }
 
   async onSlidesChanged() {
-    const index = await this.ionSlides.getActiveIndex();
-    this.currentSlide = this.slides[index];
+    this.indexSlide = await this.ionSlides.getActiveIndex();
+    console.log('sekarang slide index ke' ,this.indexSlide);
+    //this.checked = false;
+    this.currentSlide = this.slides[this.indexSlide];
     this.isBeginning = await this.ionSlides.isBeginning();
     this.isEnd = await this.ionSlides.isEnd();
   }
@@ -268,7 +277,10 @@ export class ScanFormPage implements OnInit {
     }
 
     if (this.isEnd && this.currentSlide.includes('Catatan & Lampiran')) {
+      this.buttonChecked = false;
       this.preview();
+    } else {
+      this.buttonChecked = true;
     }
   }
   //leave page
@@ -1271,6 +1283,9 @@ export class ScanFormPage implements OnInit {
   }
 
   private setDataAsset(asset: any) {
+    console.log('asset set data aset' , asset);
+    
+
     const tagIds: string[] = asset?.tagId?.length
       ? asset?.tagId?.split?.(',')
       : [];
@@ -1481,12 +1496,28 @@ export class ScanFormPage implements OnInit {
       return searchStringInArray(parameter.value, parameter.abnormal.split(","));
     }
 
-   
-    
     return false;
   }
 
   //checklist smua yg default
+
+  checkedValue(): void {
+  	this.checked = !this.checked;
+  	console.log("checked: " + this.checked);//it is working !!
+    //when checked true do set value and deviation
+    if(this.checked) {
+      console.log('ini checked bang')
+      this.resultParam[this.indexSlide].map( item => 
+        console.log('result params map', item),
+      )
+
+      console.log('sekarang berada di slide nomor' , this.indexSlide)
+    } else {
+      console.log('checked value niki unchecked');
+      
+    }
+  }
+  
   async allCheck(){
     console.log('hai mas barkah');
 
@@ -1499,10 +1530,6 @@ export class ScanFormPage implements OnInit {
       .then( res => console.log(res));  
 
       console.log(checkValue);
-      
-
-   
-
 
       let saveValue = this.resultParam[i][0].option.split(',')
       console.log('value di all check', saveValue);
@@ -1749,5 +1776,7 @@ export class ScanFormPage implements OnInit {
 
     confirm.present();
   }
+
+  
 
 }
