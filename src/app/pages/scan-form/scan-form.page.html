@@ -72,6 +72,8 @@
                       <ion-label class="pt-2">Semua Baik</ion-label>
                       <ion-checkbox slot="start" [checked]="checked[i]"  mode="ios" (ionChange)="checkedValue()"></ion-checkbox>
                     </ion-item>
+
+                    
                     <ion-col *ngFor="let parameter of resultParam[i]; let idxx = index" size="12" sizeSm="6">
                       <div class="w-full bg-white dark:bg-gray-800 border overflow-hidden" [ngClass]="[
                             parameter.isDeviation ? 'border-error'

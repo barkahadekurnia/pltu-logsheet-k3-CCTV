@@ -690,6 +690,7 @@ export class ScanFormPage implements OnInit {
   //     return this.router.navigate(['form-preview', { data }]);
   //   }
 
+  
 
   async preview() {
     // const emptyParameter = this.resultParam
@@ -713,9 +714,11 @@ export class ScanFormPage implements OnInit {
     //   return this.ionContent.scrollToTop(2000);
 
     // }
-    console.log('sch', this.sch);
+    console.log('this.shared',this.shared);
+    
+    console.log('sch duwur', this.sch);
     this.sch = this.sch.filter(sch => sch.schType === this.shared.schtype.type);
-    console.log('sch', this.sch);
+    console.log('sch ngisor', this.sch);
     console.log('type', this.shared.schtype.type);
     moment.locale('id');
     const now = this.utils.getTime();
@@ -723,6 +726,9 @@ export class ScanFormPage implements OnInit {
     this.record.scannedAt = moment(current).format('YYYY-MM-DD HH:mm:ss');
     this.validated = true;
     const attdata = [];
+
+    console.log('this sch',this.sch);
+    
     this.schedule.scheduleTrxId = this.sch[0]?.scheduleTrxId;
     this.schedule.scheduleTo = this.sch[0]?.scheduleTo;
     this.schedule.schType = this.sch[0]?.schType;
