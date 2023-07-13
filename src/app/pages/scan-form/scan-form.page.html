@@ -52,30 +52,26 @@
             </h6>
           </div>
         </ion-col>
-        <ion-col size="12" *ngIf="!isEnd">
-          <ion-item lines="none">
+        <!-- <ion-col size="12" >
+          <ion-item lines="none" *ngIf="!isEnd">
             <ion-label class="pt-2">Semua Baik</ion-label>
             <ion-checkbox slot="start" [checked]="checked" mode="ios" (ionChange)="checkedValue()"></ion-checkbox>
           </ion-item>
-        </ion-col>
-
-        <!-- <ion-col size="12">
-          <ion-item lines="none">
-            <ion-label slot="end" class="pt-2">Semua Baik</ion-label>
-            <ion-checkbox slot="end" mode="ios" (ionChange)="checkedValue()"></ion-checkbox>
-          </ion-item>
         </ion-col> -->
-            
       </ion-row>
       <ion-row class="justify-center">
+        
         <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6" *ngIf="resultParam.length > 0">
-
           <ion-slides class="h-full" [options]="slidesOpts" (ionSlideDidChange)="onSlidesDidChange()"
             (ionSlideWillChange)="onSlidesChanged()">
             <ng-container *ngFor="let slide of slides; index as i">
               <ion-slide>
                 <div class="w-full text-left">
                   <ion-row *ngIf="!isEnd">
+                    <ion-item *ngIf="!isEnd" lines="none">
+                      <ion-label class="pt-2">Semua Baik</ion-label>
+                      <ion-checkbox slot="start" [checked]="checked[i]"  mode="ios" (ionChange)="checkedValue()"></ion-checkbox>
+                    </ion-item>
                     <ion-col *ngFor="let parameter of resultParam[i]; let idxx = index" size="12" sizeSm="6">
                       <div class="w-full bg-white dark:bg-gray-800 border overflow-hidden" [ngClass]="[
                             parameter.isDeviation ? 'border-error'

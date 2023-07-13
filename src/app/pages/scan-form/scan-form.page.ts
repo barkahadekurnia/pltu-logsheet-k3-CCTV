@@ -76,7 +76,7 @@ export class ScanFormPage implements OnInit {
   indexSlide:any;
   allGood:boolean;
   allGoodValue:any;
-  checked:boolean;
+  checked:boolean[] = [];
   buttonChecked:boolean;
 
 
@@ -181,7 +181,6 @@ export class ScanFormPage implements OnInit {
 
     this.indexSlide = 0;
     this.allGood = true;
-    this.checked = false;
     this.buttonChecked = true;
   }
 
@@ -249,7 +248,8 @@ export class ScanFormPage implements OnInit {
 
   async onNextButtonTouched() {
     console.log(this.resultParam);
-
+    
+  
     const index = await this.ionSlides.getActiveIndex();
 
     if (!this.isEnd) {
@@ -1500,22 +1500,39 @@ export class ScanFormPage implements OnInit {
   }
 
   //checklist smua yg default
-
   checkedValue(): void {
-  	this.checked = !this.checked;
-  	console.log("checked: " + this.checked);//it is working !!
+  	this.checked[this.indexSlide] = !this.checked[this.indexSlide];
+  	console.log("checked: " + this.checked[this.indexSlide]);//it is working !!
     //when checked true do set value and deviation
-    if(this.checked) {
+    if(this.checked[this.indexSlide]) {
       console.log('ini checked bang')
       this.resultParam[this.indexSlide].map( item => 
-        console.log('result params map', item),
+       {
+        if(item.inputType === 'select') {
+          item.value = item.option.split(',')[0]; //diisi dengan index 0 (kiri samping koma)
+        } else {
+          item.value = ''
+        }   
+        console.log('result params map true', item)    
+       }
       )
-
       console.log('sekarang berada di slide nomor' , this.indexSlide)
-    } else {
-      console.log('checked value niki unchecked');
-      
+    } else { //when checked =false / unchecked (pd bae kie) hapus inputan 
+      console.log('checked value niki unchecked',this.resultParam); 
+      this.resultParam[this.indexSlide].map( item => 
+        {
+         if(item.inputType === 'select') {
+           item.value = ''; //diisi dengan index 0 (kiri samping koma)
+         } else {
+           item.value = ''
+         }   
+         console.log('result params map false', item)    
+        }
+       )
+       console.log('sekarang berada di slide nomor' , this.indexSlide)  
     }
+   //this.checked[this.indexSlide]=false
+   
   }
   
   async allCheck(){
