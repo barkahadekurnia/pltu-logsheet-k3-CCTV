@@ -5,12 +5,13 @@ import { Platform, NavController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
 
-import { chain, uniq, uniqBy } from 'lodash';
+import { chain, uniq, uniqBy, groupBy } from 'lodash';
 import * as moment from 'moment';
 
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
+import { HttpService } from 'src/app/services/http/http.service';
 
 @Component({
   selector: 'app-schedules',
@@ -48,6 +49,13 @@ export class SchedulesPage implements OnInit {
   selectedDate: any;
   segment: 'automatic' | 'manual';
   datakategori: any[];
+  //barkah
+  dataShift:any;
+  usersData:any;
+  dataLokasiUnit:any = [];
+
+  //modal barkah
+  isModalShiftOpen!: boolean;
 
   constructor(
     private platform: Platform,
@@ -55,6 +63,7 @@ export class SchedulesPage implements OnInit {
     public shared: SharedService,
     private utils: UtilsService,
     private navCtrl: NavController,
+    private http: HttpService,
   ) {
     this.calendar = {
       date: null,
@@ -84,12 +93,16 @@ export class SchedulesPage implements OnInit {
     this.selectedDate = {};
     this.segment = 'manual';
     // this.shared.setBackButtonVisible = true;
+
+    this.isModalShiftOpen = false;
   }
 
   ngOnInit() {
     this.shared.onUploadRecordsCompleted = () =>
       this.getManualSchedules();
     this.getKategori();
+
+
   }
 
   ionViewWillEnter() {
@@ -103,7 +116,7 @@ export class SchedulesPage implements OnInit {
   }
 
   ionViewWillLeave() {
-
+    
   }
 
   doRefresh(e: any) {
@@ -125,6 +138,8 @@ export class SchedulesPage implements OnInit {
     this.selectedDate.selected = false;
 
     console.log('selectDate', item);
+
+    this.scheduleShift(item);
 
     this.selectedDate = item;
     this.selectedDate.selected = true;
@@ -153,7 +168,7 @@ export class SchedulesPage implements OnInit {
       isigrup.push(values);
     });
     isigrup.forEach((b, ind) => {
-      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit);
+      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit && v.scheduleId === b.scheduleId);
       this.datakategori.forEach((value, i) => {
         const scanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === true);
         const unscanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === false);
@@ -173,7 +188,85 @@ export class SchedulesPage implements OnInit {
 
     console.log('isigr', isigrup);
     console.log('countsc', this.countsc);
+
   }
+  
+  //barkah maintance add shift schedule
+  lowerCaseLetter(string) {
+    let lower = string.toLowerCase() 
+    return lower
+  }
+  lowerCaseLetterUnit(string) {
+    let split = string.split(' ')
+
+    let depan = split[0].toLowerCase() 
+    let belakang = split[1].toUpperCase() 
+
+    let join = depan + ' ' + belakang
+    return join
+  }
+
+  async scheduleShift(item:any) {
+    this.dataLokasiUnit = []
+    console.log('isi dari schedule shift', item);
+
+    //console.log('schedule id di schedule shift', item.schedules[0].idschedule);
+
+    console.log('yuhu data usere kie', this.shared.user);
+    this.usersData=this.shared.user
+
+    if(item.schedules.length > 0) {
+      console.log('schedule ada mari bekerja');
+
+      const idScheduleShift = item.schedules[0].idschedule;
+      console.log('schedule id di schedule shift', idScheduleShift);
+
+      const loader = await this.utils.presentLoader();
+      
+      this.http.getSchedulesShift(idScheduleShift)
+      .then((result) => {
+        if (result) {
+          console.log('result data',result);
+          console.log('length data',result.data.data.length);
+          this.dataShift= result.data.data
+
+          console.log('dataShift', this.dataShift);
+          
+
+          this.dataShift.forEach(elem => {
+            console.log('data shift eleeeem',elem);
+
+            for(let i = 0 ; i < elem.detailLocationData.length ; i++ ){
+              //console.log('SUBHANALLAH');
+              
+              let dataUnit = elem.detailLocationData[i]
+
+              //console.log('ASTAGFIRULLAH',dataUnit.locationUnitNama );
+              if( this.dataLokasiUnit.includes(dataUnit.locationUnitNama) === false ){
+
+                this.dataLokasiUnit.push(dataUnit.locationUnitNama)
+              }
+            }
+          });
+          
+          console.log('this.datalocation unit' , this.dataLokasiUnit);
+              
+        }
+        loader.dismiss()
+      })
+      .catch(err => console.log(err));
+    }
+    else {
+      console.log('schedule belum ada, silahkan tanyakan pada admin')
+    }
+  }
+
+  //modal barkah seperangkat alat sholat
+  setModalShiftOpen(isOpen: boolean) {
+    this.isModalShiftOpen = isOpen;
+    console.log('setModalShiftOpen');
+  }
+
 
   showNextMonth(item?: any) {
     let date = item?.date;
@@ -266,6 +359,7 @@ export class SchedulesPage implements OnInit {
         'schedule',
         {
           column: [
+            'idschedule',
             'scheduleTrxId',
             'abbreviation',
             'adviceDate',
@@ -331,6 +425,7 @@ export class SchedulesPage implements OnInit {
 
       for (const schedule of schedules) {
         const data = {
+          idschedule:schedule.idschedule,
           scheduleTrxId: schedule.scheduleTrxId,
           abbreviation: schedule.abbreviation,
           approvedAt: schedule.approvedAt,
@@ -354,6 +449,7 @@ export class SchedulesPage implements OnInit {
           scannedWith: schedule.scannedWith,
           tagId: schedule.tagId,
           unit: schedule.unit,
+          unitId: schedule.unitId,
           assetStatusId: schedule.assetStatusId,
           assetStatusName: schedule.assetStatusName,
           assetTags: assetTags.filter(assetTag => assetTag.assetId === schedule.assetId),
@@ -665,11 +761,13 @@ export class SchedulesPage implements OnInit {
   navPage(path, params, listDataScan) {
     this.navCtrl.navigateForward(path, { state: { params, listDataScan } });
   }
+
+
   navPageAset(path, params, listDataScan, kategori, countsc) {
-    console.log('params klik', params)
-    console.log('listDataScan klik', listDataScan)
-    console.log('kategori klik', kategori)
-    console.log('countsc klik', countsc)
+    console.log('params klik', JSON.stringify(params))
+    console.log('listDataScan klik', JSON.stringify(listDataScan))
+    console.log('kategori klik', JSON.stringify(kategori))
+    console.log('countsc klik', JSON.stringify(countsc))
 
     this.navCtrl.navigateForward(path, { state: { params, listDataScan, kategori, countsc } });
   }

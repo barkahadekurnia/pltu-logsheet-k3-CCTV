@@ -177,12 +177,159 @@
             </ion-col>
           </ion-row>
 
-          <ion-row *ngIf="!selectedDate?.schedules?.length">
-            <ion-col size="12">
-              <app-screen-view className="space-y-0 pt-0" type="no-data" message="Tidak ada jadwal hari ini">
-              </app-screen-view>
-            </ion-col>
+          <ion-row  *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center"> 
+            <ion-accordion-group class="w-full" *ngFor="let dataShift of dataShift">
+              <ion-accordion  *ngIf="dataShift.teamData[dataShift.groupNameData[0].operatorGroupName][1].operatorUserNama === usersData.name || 
+              dataShift.teamData[dataShift.groupNameData[0].operatorGroupName][0].operatorUserNama === usersData.name || usersData.group === 'ADMIN' "  value="first" class="rounded-xl mb-4" toggleIcon="caret-down-circle" >
+                <ion-item slot="header" color="dark">
+                  <section class=" py-4">
+                    <div class="flex mb-3 text-xs font-semibold">
+                      <label class="p-1 px-2 mr-2 bg-primary text-white rounded-full ">
+                        {{dataShift.groupNameData[0].operatorGroupName}}
+                      </label>
+                      <label class="p-1 px-2 mr-2 bg-primary text-white rounded-full ">
+                        {{dataShift.shift}}
+                      </label>
+                    </div>
+                    <div class="flex content-start mb-3 text-xs font-semibold">
+                      <div *ngFor="let dataPetugas of dataShift.teamData[dataShift.groupNameData[0].operatorGroupName]">
+                        <label class="p-1 px-2 mr-2 mb-2 bg-lime-700 text-white rounded-full capitalize">
+                          <ion-icon slot="icon-only" name="person-outline" class="mr-1"></ion-icon> {{lowerCaseLetter(dataPetugas.operatorUserNama)}}
+                        </label>
+                      </div>
+                      <!-- <label *ngIf="usersData" class="p-1 px-2 bg-primary text-white rounded-full ">
+                        {{usersData.name}}
+                      </label> -->
+                    </div>
+                    <div class="text-sm text-white">
+                      <h4 class="font-semibold mb-2">
+                        <!-- <ion-icon slot="icon-only" name="location-outline" class="mr-1"></ion-icon> -->
+                        Daftar Area
+                      </h4>
+                      <!-- <div class="flex justify-between">
+                        <div class="text-center mr-4" *ngFor="let namaOperator of dataShift.teamData[dataShift.groupNameData[0].operatorGroupName]">
+                          <ion-icon slot="icon-only"  name="person-circle-outline" class="mr-1 pt-1 text-[80px]" ></ion-icon>
+                          <p>{{namaOperator.operatorUserNama}}</p>
+                        </div>
+                      </div>                                                       -->
+                      <div *ngFor="let unit of dataLokasiUnit"  class="">
+                          <div class="capitalize text-sm mr-2 mb-2">
+                            - {{lowerCaseLetterUnit(unit)}}
+                          </div>
+                      </div>                                                      
+                    </div>                   
+                  </section>
+                </ion-item>
+                <div 
+                class=" ion-padding border-2 border-gray-300 rounded-b-xl" slot="content">
+                <div class=" text-black">
+                  <h4 class="text-md font-semibold mb-2">
+                    <ion-icon slot="icon-only" size="40px" name="location-outline" class="mr-1 pt-1 "></ion-icon>
+                    Daftar Lokasi
+                  </h4>
+              
+                  <div class="text-sm mb-1.5 pl-2  font-semibold"
+                  *ngFor="let dataLocation of dataShift.detailLocationData; index as idx;">
+                    <div 
+                    
+                    (click)="navPageAset('schedule-lokasi', dataLocation?.assetData, selectedDate, datakategori, countsc[idx])"
+                    id="cardShift" class="bg-primary rounded-xl p-2 text-white   flex justify-between">
+                      <div>
+                        {{dataLocation.locationUnitNama}}
+                        - {{dataLocation.locationLokasiDescription}}
+                        ({{dataLocation.locationLokasiNama}})
+                      </div>
+                      <div class="align-middle">
+                        <ion-icon slot="icon-only"  name="chevron-forward-outline" class="mr-1 pt-1 text-[20px]" ></ion-icon>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- <data>
+                    <div class="text-sm mb-1 pl-1.5  font-semibold"
+                    *ngFor="let dataLocation of dataShift.detailLocationData">
+                    <ion-icon slot="icon-only"  name="radio-button-on-sharp" class="mr-1 pt-1 text-[10px]" ></ion-icon>
+                      {{dataLocation.locationUnitNama}}
+                      - {{dataLocation.locationLokasiDescription}}
+                      ({{dataLocation.locationLokasiNama}})
+                    </div>
+                  </data>
+                  -->
+                </div>
+
+                </div>
+              
+              </ion-accordion>
+            </ion-accordion-group>
           </ion-row>
+
+          <ion-modal [isOpen]="isModalShiftOpen">
+            <ng-template>
+              <ion-header>
+                <ion-toolbar color="primarylight">
+                  <ion-buttons slot="end">
+                    <ion-button (click)="setModalShiftOpen(false)">
+                      <ion-icon slot="start" name="close"></ion-icon>
+                    </ion-button>
+                  </ion-buttons>
+                  <ion-title>News</ion-title>
+                </ion-toolbar>
+              </ion-header>
+              <ion-content>
+                <div class="p-4" *ngIf="">
+                  <div class=" text-xl font-bold mb-2">Launching Aplikasi Fire Fighter</div>
+                  <div class="text-sm mb-4"></div>
+    
+                  <section class="w-full">
+                    <img class=" object-cover border-2 rounded-xl border-graylight p-0 m-0 mb-4" alt="male photo" src="../../../assets/undraw_adjustments_re_gvct.svg" />
+                    <p class="text-justify">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sed maxime ut nesciunt ad quia a optio aspernatur ea blanditiis eum? Laborum nulla ipsum dicta quis neque quod atque ab et. Lorem ipsum dolor sit amet.  autem anim Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus fuga, maiores perferendis fugit reprehenderit iusto? Cum quibusdam laudantium enim quo nostrum odio sit labore corrupti. Nihil eius porro libero labore eum debitis dolore cupiditate consequuntur placeat, quisquam, hic at ea corporis facere doloribus sit architecto. Repellendus suscipit earum amet modi voluptatum, quisquam nam necessitatibus sit aperiam id inventore, ad numquam culpa laborum dolor esse qui officiis repudiandae ipsum aut maxime accusantium illum. Dolorum similique qui accusamus placeat assumenda, illum ea possimus accusantium vero repellat at sunt necessitatibus facere excepturi beatae, doloremque nesciunt voluptates incidunt natus nobis voluptatem recusandae. Temporibus, ipsum.</p>
+                  </section>
+                </div>
+              </ion-content>
+            </ng-template>
+          </ion-modal>
+    
+        <!-- /
+          <ion-row  *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center"> 
+            <ion-accordion-group class="w-full">
+              <ion-accordion value="first" class="rounded-xl" toggleIcon="caret-down-circle" >
+                <ion-item slot="header" color="dark">
+                  <div class="py-4 text-white">
+                    <div class="flex mb-2 text-xs font-semibold">
+                      <label class="p-1 px-2 mr-2 bg-primary text-white rounded-full ">
+                        Group A
+                      </label>
+                      <label class="p-1 px-2 bg-primary text-white rounded-full ">
+                        Pagi
+                      </label>
+                    </div>
+                    <div class="text-sm mb-1 font-semibold">
+                      <ion-icon slot="icon-only" name="location-outline" class="mr-1"></ion-icon>
+                      Unit 1 & 2
+                    </div>
+                    <div class="text-sm font-semibold">
+                      <h5 class="mb-1">Turbin House</h5>
+                      <h5>Air Compresor Room</h5>
+                    </div>
+                  </div>
+                </ion-item>
+                <div 
+                class=" ion-padding border-2 border-gray-300 rounded-b-xl" slot="content">
+                  <section class="flex justify-between">
+                    <div class="text-sm">
+                      <h4 class="font-semibold">Daftar User</h4>
+                      <p>- Eko Priyono</p>
+                      <p>- Hyuga</p>
+                    </div>
+                    </section>
+                  <button                   
+                  class="bg-primary text-white w-full rounded-lg mt-2 p-1">
+                    Detail Lokasi
+                  </button>
+                </div>
+              </ion-accordion>
+            </ion-accordion-group>
+          </ion-row> -->
+
           <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full pt-3 justify-center items-center">
             <div class="center" *ngFor="let kat of selectedDate?.lokasi; index as idx;">
               <ul (click)="navPageAset('schedule-lokasi', kat, selectedDate, datakategori, countsc[idx])">
@@ -192,16 +339,25 @@
                   </div>
 
                   <div class="text-group">
-
+                    
                   </div>
 
                   <div class="date-group">
                     <h5>{{kat.area}}</h5>
-                  </div>
+                  </div> 
                 </li>
               </ul>
             </div>
           </ion-row>
+
+          <ion-row *ngIf="!selectedDate?.schedules?.length">
+            <ion-col size="12">
+              <app-screen-view className="space-y-0 pt-0" type="no-data" message="Tidak ada jadwal hari ini">
+              </app-screen-view>
+            </ion-col>
+          </ion-row>
+
+
         </ion-col>
       </ion-row>
     </ion-grid>

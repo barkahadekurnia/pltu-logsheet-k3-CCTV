@@ -146,9 +146,9 @@ export class HomePage implements OnInit {
       unuploaded: 0,
       holded: 0,
       unscanned: 0,
-      laporan:0,
-      sudahtransaksi:0,
-      belumtransaksi:0,
+      laporan: 0,
+      sudahtransaksi: 0,
+      belumtransaksi: 0,
       sudahlaporan: 0,
       belumlaporan: 0,
     };
@@ -207,8 +207,8 @@ export class HomePage implements OnInit {
           difference > 18000000
             ? 'btn-error' // 5 hours
             : difference > 7200000
-            ? 'btn-warning' // 3 hours
-            : 'btn-success';
+              ? 'btn-warning' // 3 hours
+              : 'btn-success';
       } else {
         this.application.lastSync = null;
         this.application.bgSyncButton = 'btn-primary';
@@ -403,7 +403,7 @@ export class HomePage implements OnInit {
   //       console.log('responseLaporan', responseLaporan);
   //       this.jumlahlaporan = responseLaporan?.data?.data?.length
   //       console.log('jumlahLaporan',this.jumlahlaporan);
-        
+
   //       if (this.jumlahlaporan) {
   //         const filterdata = responseLaporan?.data?.data?.filter(
   //           (scan) => scan.reportDate == null
@@ -413,7 +413,7 @@ export class HomePage implements OnInit {
   //         count.belumlaporan = filterdata?.length;
   //         count.sudahlaporan = this.jumlahlaporan-count.laporan;
   //         console.log('belum laporan',count.sudahlaporan);
-          
+
   //         this.datalaporan = filterdata;
   //         console.log('dataLaporan',this.datalaporan)
   //       }
@@ -461,20 +461,22 @@ export class HomePage implements OnInit {
       // .filter(schedule => this.filterSchedule(schedule, now, dateInThisMonth, lastWeek));
 
       const unuploadedRecords = await this.getUnuploadedRecords();
-      // //console.log('8. belum upload', unuploadedRecords);
+      
+      console.log('8. belum upload', unuploadedRecords);
+
+      console.log('items of schedules' , schedules);
+      
 
       for (const item of schedules) {
         const assetIndex = assets.findIndex(
           (asset) => asset.assetId === item.assetId
         );
-        if (assetIndex >= 0 && item.scannedAt != null) {
+        if (assetIndex >= 0 && item.scannedAt !== null) {
           // Uploaded
           assets[assetIndex].schedule.uploaded++;
           count.uploaded++;
-        } else if (
-          assetIndex >= 0 &&
-          unuploadedRecords.includes(item.scheduleTrxId)
-        ) {
+        } else if (assetIndex >= 0 &&
+          unuploadedRecords.includes(item.scheduleTrxId)) {
           // Unuploaded
           assets[assetIndex].schedule.unuploaded++;
           count.unuploaded++;
@@ -514,8 +516,8 @@ export class HomePage implements OnInit {
           }
           console.log('responseLaporan', responseLaporan);
           this.jumlahlaporan = responseLaporan?.data?.data?.length
-          console.log('jumlahLaporan',this.jumlahlaporan);
-          
+          console.log('jumlahLaporan', this.jumlahlaporan);
+
           if (this.jumlahlaporan) {
             const filterdata = responseLaporan?.data?.data?.filter(
               (scan) => scan.reportDate == null
@@ -523,11 +525,11 @@ export class HomePage implements OnInit {
             console.log('filterdata', filterdata);
             count.laporan = filterdata?.length;
             count.belumlaporan = filterdata?.length;
-            count.sudahlaporan = this.jumlahlaporan-count.laporan;
-            console.log('belum laporan',count.sudahlaporan);
-            
+            count.sudahlaporan = this.jumlahlaporan - count.laporan;
+            console.log('belum laporan', count.sudahlaporan);
+
             this.datalaporan = filterdata;
-            console.log('dataLaporan',this.datalaporan)
+            console.log('dataLaporan', this.datalaporan)
           }
         },
         onError: (error) => console.error(error),
@@ -613,7 +615,7 @@ export class HomePage implements OnInit {
 
     return filePath;
   }
-  
+
   async showDetails(akun?: any) {
     await this.menuCtrl.enable(true, 'sidebar');
     return this.menuCtrl.open('sidebar');
@@ -665,7 +667,7 @@ export class HomePage implements OnInit {
           console.log('parameter1', parameters);
 
           let storeParameters = [];
-          // await this.database.emptyTable('parameter');
+          await this.database.emptyTable('parameter');
           // .then(() => this.database.insertbatch('parameter', val);
           storeParameters = this.utils.chunkArray(parameters, 250);
           storeParameters?.map?.(async (val) => {
@@ -712,6 +714,9 @@ export class HomePage implements OnInit {
         },
         groupBy: ['scheduleTrxId'],
       });
+
+      console.log('result di get unuploaded records ',result);
+      
 
       records.push(
         ...this.database
@@ -1085,7 +1090,7 @@ export class HomePage implements OnInit {
             uploadedAttachmentIds: [],
           };
         }
-      );
+        );
 
       subscriber.next({
         complexMessage: Object.values(this.syncJob.order),
@@ -1206,16 +1211,13 @@ export class HomePage implements OnInit {
     }
   }
 
-  private async getSchedules(
-    subscriber: Subscriber<any>,
-    loader: HTMLIonPopoverElement
-  ) {
+  private async getSchedules(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
     const shared = this.injector.get(SharedService);
     if (shared.user.group === 'ADMIN') {
       return this.http.requests({
         requests: [() => this.http.getSchedules()],
         onSuccess: async ([response]) => {
-          if (response.status >= 400) {
+          if (![200, 201].includes(response.status)) {
             throw response;
           }
 
@@ -1287,8 +1289,6 @@ export class HomePage implements OnInit {
 
             const assetIdSchedule = [];
             const assetIdType = [];
-
-            const assetiduniq = uniqBy(response?.data?.data, 'assetId');
 
             const assetiduniq = uniqBy(response?.data?.data, 'assetId');
 
@@ -1404,7 +1404,7 @@ export class HomePage implements OnInit {
                       const assetIdSchedule = [];
                       const assetIdType = [];
 
-                      const assetiduniq = uniqBy(response?.data?.data, "assetId");
+                      const assetiduniq = uniqBy(response?.data?.data, 'assetId');
 
                       assetiduniq?.map?.((dataschedule: any) => {
                         assetIdType.push(dataschedule.assetId);
@@ -1412,6 +1412,7 @@ export class HomePage implements OnInit {
                           assetId: dataschedule.assetId,
                           categoryId: dataschedule.assetCategoryId,
                         });
+                      });
                       // //console.log('assetIdSchedule', assetIdSchedule);
                       const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
                       const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
@@ -1492,8 +1493,7 @@ export class HomePage implements OnInit {
                       );
 
                       this.syncJob.order.schedules.status = 'success';
-                      this.syncJob.order.schedules.message =
-                        'Success mengambil data schedules';
+                      this.syncJob.order.schedules.message = 'Success mengambil data schedules';
                     } else {
                       this.shared.addLogActivity({
                         activity:
@@ -1610,6 +1610,7 @@ export class HomePage implements OnInit {
                           assetId: dataschedule.assetId,
                           categoryId: dataschedule.assetCategoryId,
                         });
+                      });
                       const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
                       const assetIdScheduleType1 = { asset: JSON.stringify(assetIdType) };
                       //console.log('assetIdSchedule', assetIdSchedule);
@@ -1839,7 +1840,7 @@ export class HomePage implements OnInit {
     const userId = { groupOperatorId: JSON.parse(userIdShift).data.operatorId };
     //console.log('status sift', JSON.parse(userIdShift).status)
     //console.log('status userId', userId)
-    if (JSON.parse(userIdShift).status == 1) {
+    if (JSON.parse(userIdShift).status === 1) {
       this.http.requests({
         requests: [() => this.http.getSchedules(userId)],
         onSuccess: async ([response]) => {
@@ -1849,7 +1850,7 @@ export class HomePage implements OnInit {
           //console.log('response data sift', response?.data?.data)
 
           if (response?.data?.data?.length) {
-            let notifications = [];
+            const notifications = [];
 
             const schedules = response?.data?.data?.map?.(
               (dataschedule: any) => {
@@ -1917,16 +1918,15 @@ export class HomePage implements OnInit {
             const assetIdSchedule = [];
             const assetIdType = [];
 
-            const assetiduniq = uniqBy(response?.data?.data, "assetId");
+            const assetiduniq = uniqBy(response?.data?.data, 'assetId');
 
             assetiduniq
               ?.map?.((dataschedule: any) => {
                 assetIdType.push(dataschedule.assetId)
                 assetIdSchedule.push({
-                  "assetId": dataschedule.assetId,
-                  "categoryId": dataschedule.assetCategoryId
-                }
-                )
+                  assetId: dataschedule.assetId,
+                  categoryId: dataschedule.assetCategoryId
+                });
               });
             // //console.log('assetIdSchedule', assetIdSchedule);
             const assetIdScheduleType = { asset: JSON.stringify(assetIdSchedule) };
@@ -1936,7 +1936,9 @@ export class HomePage implements OnInit {
             this.getTypeScan(assetIdScheduleType1);
             // this.getParameterByAssetId(assetIdScheduleType);
             let splitAssetIdSchedule = [];
+            console.log(JSON.stringify(splitAssetIdSchedule));
             splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
+
             splitAssetIdSchedule?.map?.(async val => {
               const payload = { asset: JSON.stringify(val) };
               await this.getParameterByAssetId(payload);
@@ -1966,7 +1968,7 @@ export class HomePage implements OnInit {
               'scheduleFrom'
             );
             const scheduleToGroupNotify = groupBy(notifications, 'scheduleTo');
-            let scheduledData = { ...scheduleFromGroupNotify, ...scheduleToGroupNotify };
+            const scheduledData = { ...scheduleFromGroupNotify, ...scheduleToGroupNotify };
             // //console.log('scheduledData', scheduledData);
 
             for (const [key, data] of Object.entries<any>(scheduledData)) {
@@ -2041,7 +2043,7 @@ export class HomePage implements OnInit {
   private async getSchedulesNonSift() {
     const shared = this.injector.get(SharedService);
     const userIdNonShift = JSON.stringify(shared.userdetail.nonshift);
-    if (JSON.parse(userIdNonShift).status == 1) {
+    if (JSON.parse(userIdNonShift).status === 1) {
       const usernonId = {
         userId: JSON.parse(userIdNonShift).data.operatorUserId,
       };
@@ -2254,7 +2256,7 @@ export class HomePage implements OnInit {
     const shared = this.injector.get(SharedService);
     const userIdManual = JSON.stringify(shared.userdetail.lk3);
 
-    if (JSON.parse(userIdManual).status == 1) {
+    if (JSON.parse(userIdManual).status === 1) {
       const usernonId = {
         userId: JSON.parse(userIdManual).data.operatorUserId,
       };
@@ -2527,7 +2529,7 @@ export class HomePage implements OnInit {
           },
         });
       },
-      onError: (error) => {},
+      onError: (error) => { },
     });
   }
   private async downloadCategory() {
@@ -2874,7 +2876,7 @@ export class HomePage implements OnInit {
   async openScan() {
     const stat = await this.checkStatus();
     //console.log('cek status nfc', stat)
-    if (stat == 'NO_NFC') {
+    if (stat === 'NO_NFC') {
 
       const confirm = await this.utils.createCustomAlert({
         type: 'error',
@@ -2957,9 +2959,6 @@ export class HomePage implements OnInit {
         this.nfcStatus = error;
       }
     }
-    return this.nfcStatus;
-  }
-
     return this.nfcStatus;
   }
 }

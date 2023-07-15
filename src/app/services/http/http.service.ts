@@ -253,6 +253,7 @@ export class HttpService {
 
     return Http.get(options);
   }
+
   getjadwaldate(params: { userId?: string; date?: string } = {}, categoryid) {
     // eslint-disable-next-line max-len
     //http://114.6.64.2:11241/api/logsheet_dev/api/schedule/getAssetByCategory/c3777b68-ba7e-11ec-adb0-a8ea9c4fb59f?userId=6596&date=2022-12-08
@@ -333,7 +334,7 @@ export class HttpService {
       url: environment.url.parameters,
       headers: {
         Authorization: `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'multipart/form-data'
       },
       data,
       responseType: 'json'
@@ -354,6 +355,19 @@ export class HttpService {
 
     return Http.get(options);
   }
+
+  getSchedulesShift(params) {
+    const options: HttpOptions = {
+      url: environment.url.schedulesShift + '/'+ params,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+
+    return Http.get(options);
+  }
+  
   getSchedulesnonsift(params: { userId?: string } = {}) {
     const options: HttpOptions = {
       url: environment.url.schedulesnonsift,
