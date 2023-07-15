@@ -13,6 +13,8 @@ import {
   NavController
 } from '@ionic/angular';
 
+import { Router } from '@angular/router';
+
 import { Capacitor } from '@capacitor/core';
 import { LocalNotificationSchema } from '@capacitor/local-notifications';
 import { DatabaseService } from 'src/app/services/database/database.service';
@@ -111,6 +113,7 @@ export class FormPreviewPage {
     private shared: SharedService,
     private utils: UtilsService,
     private navCtrl: NavController,
+    private routeCtrl: Router,
 
   ) {
     this.record = {
@@ -855,7 +858,8 @@ export class FormPreviewPage {
         }
 
         if (detail?.data?.type === 'upload') {
-          this.uploadRecords(data);
+          //this.uploadRecords(data);
+          this.routeCtrl.navigate(['transactions'])
         }
       });
     }
@@ -880,6 +884,25 @@ export class FormPreviewPage {
     this.navCtrl.navigateRoot('tabs');
   }
 
+  // private async uploadRecords(data: any) {
+  //   const id = uuid();
+  //   console.log('data upload', data);
+  //   // const popover = await this.popoverCtrl.create({
+  //   //   id,
+  //   //   component: UploadRecordsComponent,
+  //   //   cssClass: 'alert-popover center-popover',
+  //   //   backdropDismiss: false,
+  //   //   componentProps: {
+  //   //     id,
+  //   //     data
+  //   //   },
+  //   //   mode: 'ios',
+  //   // });
+
+  //   // popover.present();
+  // }
+
+
   private async uploadRecords(data: any) {
     const id = uuid();
     console.log(data);
@@ -893,10 +916,29 @@ export class FormPreviewPage {
         data
       },
       mode: 'ios',
+
     });
 
     popover.present();
   }
+
+  // private async uploadRecords(data: any) {
+  //   const id = uuid();
+  //   console.log(data);
+  //   const popover = await this.popoverCtrl.create({
+  //     id,
+  //     component: UploadRecordsComponent,
+  //     cssClass: 'alert-popover center-popover',
+  //     backdropDismiss: false,
+  //     componentProps: {
+  //       id,
+  //       data
+  //     },
+  //     mode: 'ios',
+  //   });
+
+  //   popover.present();
+  // }
 
   private setDataAsset(asset: any) {
     const tagIds: string[] = asset?.tagId?.length
