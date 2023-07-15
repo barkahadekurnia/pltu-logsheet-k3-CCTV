@@ -330,6 +330,8 @@ export class HttpService {
   // }
 
   getParameters(data: AssetIdToType) {
+    console.log(data);
+    
     const options: HttpOptions = {
       url: environment.url.parameters,
       headers: {

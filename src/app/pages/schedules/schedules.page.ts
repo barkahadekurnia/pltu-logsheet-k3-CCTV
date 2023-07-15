@@ -5,7 +5,7 @@ import { Platform, NavController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
 
-import { chain, uniq, uniqBy } from 'lodash';
+import { uniq, uniqBy } from 'lodash';
 import * as moment from 'moment';
 
 import { DatabaseService } from 'src/app/services/database/database.service';
@@ -20,7 +20,6 @@ import { HttpService } from 'src/app/services/http/http.service';
 })
 
 export class SchedulesPage implements OnInit {
-  countsc: any[];
   calendar: {
     date: Date;
     daysInLastMonth: any[];
@@ -29,31 +28,14 @@ export class SchedulesPage implements OnInit {
     title: string;
   };
 
-  count: {
-    uploaded: number;
-    unuploaded: number;
-    holded: number;
-    unscanned: number;
-  };
-
-  assets: any[];
-  filteredAssets: any[];
-  sourceAssets: any[];
+  assetCategory: any[];
   schedules: any[];
+  dataShiftPerDay: any[];
 
   isHeaderVisible: boolean;
-  loaded: number;
   loading: boolean;
-  isAssetsExpanded: boolean;
-  isFirstEnter: boolean;
   selectedDate: any;
-  segment: 'automatic' | 'manual';
-  datakategori: any[];
-  dataShift:any;
-  usersData:any;
-
-  //modal barkah
-  isModalShiftOpen!: boolean;
+  usersData: any;
 
   constructor(
     private platform: Platform,
@@ -71,57 +53,30 @@ export class SchedulesPage implements OnInit {
       title: '',
     };
 
-    this.count = {
-      uploaded: 0,
-      unuploaded: 0,
-      holded: 0,
-      unscanned: 0,
-    };
-
-    this.assets = [];
-    this.filteredAssets = [];
-    this.sourceAssets = [];
     this.schedules = [];
 
     this.isHeaderVisible = false;
-    this.loaded = 10;
     this.loading = true;
-    this.isAssetsExpanded = false;
-    this.isFirstEnter = true;
     this.selectedDate = {};
-    this.segment = 'manual';
-    // this.shared.setBackButtonVisible = true;
 
-    this.isModalShiftOpen = false;
+    this.usersData = this.shared.user;
   }
 
-  ngOnInit() {
-    this.shared.onUploadRecordsCompleted = () =>
-      this.getManualSchedules();
-    this.getKategori();
-
-
+  async ngOnInit() {
+    await this.platform.ready();
+    await this.getManualSchedules();
+    await this.getKategori();
   }
 
-  ionViewWillEnter() {
-    // if (this.router.url.includes('tabs')) {
-    //   this.shared.setBackButtonVisible = false;
-    // }
-    this.platform.ready().then(() => {
-      this.getManualSchedules();
+  async ionViewWillEnter() {
+    await this.platform.ready();
+    if (!this.assetCategory?.length) {
       this.getKategori();
-    });
-  }
-
-  ionViewWillLeave() {
-    
+    }
   }
 
   doRefresh(e: any) {
-    this.getManualSchedules().finally(() => e.target.complete());
     this.getKategori().finally(() => e.target.complete());
-    // this.selectDate(this.calendar?.daysInThisMonth)
-
   }
 
   async onScroll(e: any) {
@@ -135,13 +90,10 @@ export class SchedulesPage implements OnInit {
   selectDate(item: any) {
     this.selectedDate.selected = false;
 
-    console.log('selectDate', item);
-
     this.scheduleShift(item);
 
     this.selectedDate = item;
     this.selectedDate.selected = true;
-    console.log('this.selectedDate ', this.selectedDate);
 
     this.calendar.date = new Date(
       this.calendar.date.getFullYear(),
@@ -149,119 +101,37 @@ export class SchedulesPage implements OnInit {
       this.selectedDate.date
     );
 
-    const schdata1 = this.selectedDate.schedules;
-
-    // Group the elements of Array based on `color` property
-    // .groupBy("color")
-    const grup = uniqBy(schdata1, 'areaId');
-    console.log('grup ', grup);
-    this.selectedDate.lokasi = grup;
-    const filteredSchedule = [];
-    const isigrup = [];
-    const isifilter = [];
-    console.log('cek per tgl :', schdata1);
-
-
-    grup.forEach((values) => {
-      isigrup.push(values);
-    });
-    isigrup.forEach((b, ind) => {
-      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit && v.scheduleId === b.scheduleId);
-      this.datakategori.forEach((value, i) => {
-        const scanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === true);
-        const unscanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === false);
-        const data = {
-          countScanned: scanned.length,
-          scanned,
-          countUnscanned: unscanned.length,
-          unscanned,
-          index: ind
-        };
-        filteredSchedule.push(data);
-      });
-    });
-
-    this.countsc = chain(filteredSchedule).groupBy('index').map(res => res).value();
-    console.log(chain(this.countsc).groupBy('index').map(res => res).value());
-
-    console.log('isigr', isigrup);
-    console.log('countsc', this.countsc);
-
+    const dataSchedulePerDay = this.selectedDate.schedules;
+    const dataGroupByAreaId = uniqBy(dataSchedulePerDay, 'areaId');
+    this.selectedDate.lokasi = dataGroupByAreaId;
   }
 
   //barkah maintance add shift schedule
-  async scheduleShift(item:any) {
-    console.log('isi dari schedule shift', item);
-
-    //console.log('schedule id di schedule shift', item.schedules[0].idschedule);
-
-    console.log('yuhu data usere kie', this.shared.user);
-    this.usersData=this.shared.user
-
-    if(item.schedules.length > 0) {
-      console.log('schedule ada mari bekerja');
+  async scheduleShift(item: any) {
+    if (item.schedules.length > 0) {
+      const loader = await this.utils.presentLoader();
 
       const idScheduleShift = item.schedules[0].idschedule;
-      console.log('schedule id di schedule shift', idScheduleShift);
 
-      const loader = await this.utils.presentLoader();
-      
-      this.http.getSchedulesShift(idScheduleShift)
-      .then((result) => {
-        if (result) {
-          console.log('result data',result);
-          console.log('length data',result.data.data.length);
-          this.dataShift= result.data.data
+      try {
+        const response = await this.http.getSchedulesShift(idScheduleShift);
 
-          console.log('data shift' , this.dataShift);
-          console.log('cek data params asets data' , this.dataShift[0].detailLocationData[0].assetData);
-          
-          // this.dataShift.detailLocationData.forEach(namaUnit);
-
-          //  const panjanglokasiShift = this.dataShift.detailLocationData.length;
-          //  const lokasiShift = this.dataShift.detailLocationData;
-          // const titipLokasi = []
-          //  for(let i= 0 ; i < panjanglokasiShift; i++) {
-          //   if(titipLokasi[0] !== lokasiShift[i].locationUnitNama)
-          //   {
-          //   titipLokasi.push(lokasiShift[i].locationUnitNama)
-          //   }
-          // }
-
-          // console.log('ini lokasi unit',titipLokasi);
-          
-
-          // function namaUnit(unit){
-          //   let unitShift = []
-          //   unitShift.push(unit)
-          //   if(unitShift[0] === unit) {
-          //     unitShift.push(unit)
-          //   }
-          //   console.log('unitshift' , unitShift);
-            
-          // }
-
-
-          console.log('ini coba di cek' , this.dataShift[0].teamData[this.dataShift[0].groupNameData[0].operatorGroupName][0].operatorUserNama);
-          console.log('ini coba di cek nama yser' , this.dataShift[0].teamData[this.dataShift[0].groupNameData[0].operatorGroupName][1].operatorUserNama);
-          
-          
+        if (![200, 201].includes(response.status)) {
+          throw response;
         }
-        loader.dismiss()
-      })
-      .catch(err => console.log(err));
-    }
-    else {
-      console.log('schedule belum ada, silahkan tanyakan pada admin')
+
+        const bodyResponse = response.data?.data;
+        this.dataShiftPerDay = bodyResponse;
+        console.log('dataShiftPerDay', this.dataShiftPerDay);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        await loader.dismiss();
+      }
+    } else {
+      console.log('schedule belum ada, silahkan tanyakan pada admin');
     }
   }
-
-  //modal barkah seperangkat alat sholat
-  setModalShiftOpen(isOpen: boolean) {
-    this.isModalShiftOpen = isOpen;
-    console.log('setModalShiftOpen');
-  }
-
 
   showNextMonth(item?: any) {
     let date = item?.date;
@@ -286,6 +156,7 @@ export class SchedulesPage implements OnInit {
       )
     );
   }
+
   showLastMonth(item?: any) {
     let date = item?.date;
 
@@ -310,6 +181,15 @@ export class SchedulesPage implements OnInit {
     );
   }
 
+  viewAssetsCategory(routerPath: string, schedulePerDay: any[], assetCategory: any[]) {
+    this.navCtrl.navigateForward(routerPath, {
+      state: {
+        schedulePerDay,
+        assetCategory
+      }
+    });
+  }
+
   private async getKategori() {
     try {
       const result = await this.database.select('category', {
@@ -323,9 +203,8 @@ export class SchedulesPage implements OnInit {
         ]
       });
 
-
       const category = this.database.parseResult(result)
-        .map(kat => {
+        ?.map(kat => {
           const data = {
             assetCategoryId: kat?.assetCategoryId,
             assetCategoryName: kat?.assetCategoryName,
@@ -336,9 +215,9 @@ export class SchedulesPage implements OnInit {
           };
           return data;
         });
-      console.log('kategori', category);
-      this.datakategori = category;
 
+      this.assetCategory = category;
+      console.log('assetCategory', this.assetCategory);
     } catch (error) {
       console.error(error);
     } finally {
@@ -348,8 +227,9 @@ export class SchedulesPage implements OnInit {
 
   private async getManualSchedules() {
     this.schedules = [];
+    const now = this.utils.getTime();
+
     try {
-      this.schedules = [];
       const result = await this.database.select(
         'schedule',
         {
@@ -401,15 +281,11 @@ export class SchedulesPage implements OnInit {
             'assetCategoryId',
             'assetCategoryName'
           ],
-          // where: {
-          //   query: 'schedule.schManual=?',
-          //   params: [1],
-          // },
-          // groupBy: ['scheduleTrxId'],
         }
       );
 
       const schedules = this.database.parseResult(result);
+
       const assetIds = uniq(schedules.map(schedule => schedule.assetId));
       const assetTags = await this.getAssetTags(assetIds);
       const holdedRecords = await this.getHoldedRecords(assetIds);
@@ -420,7 +296,7 @@ export class SchedulesPage implements OnInit {
 
       for (const schedule of schedules) {
         const data = {
-          idschedule:schedule.idschedule,
+          idschedule: schedule.idschedule,
           scheduleTrxId: schedule.scheduleTrxId,
           abbreviation: schedule.abbreviation,
           approvedAt: schedule.approvedAt,
@@ -464,7 +340,6 @@ export class SchedulesPage implements OnInit {
           syncAt: schedule.syncAt
         };
 
-        const now = this.utils.getTime();
         const start = new Date(schedule.scheduleFrom).getTime();
         const end = new Date(schedule.scheduleTo).getTime();
         const isScheduleNow = moment(now).isBetween(start, end);
@@ -502,12 +377,10 @@ export class SchedulesPage implements OnInit {
 
         this.schedules.push(data);
       }
-
     } catch (error) {
       console.error(error);
     } finally {
       if (this.calendar.date == null) {
-        const now = this.utils.getTime();
         this.calendar.date = new Date(now);
       }
 
@@ -574,7 +447,7 @@ export class SchedulesPage implements OnInit {
 
         const schedulesPerDate = this.schedules
           .filter(schedule => schedule.adviceDate === label);
-        // console.log('schedulesPerDate', param);
+
         this.calendar.daysInThisMonth.push({
           date: i,
           label,
@@ -593,13 +466,9 @@ export class SchedulesPage implements OnInit {
           ),
           selected: false
         });
-
-        // this.selectDate(this.calendar?.daysInThisMonth)
-
       }
 
       console.log('daysInThisMonth', this.calendar.daysInThisMonth);
-
 
       for (let i = 1; i <= 6 - lastDayOnThisMonth; i++) {
         this.calendar.daysInNextMonth.push({
@@ -631,8 +500,6 @@ export class SchedulesPage implements OnInit {
       }
     }
   }
-
-
 
   private async getAssetTags(assetIds: string[]) {
     const assetTags: any[] = [];
@@ -751,18 +618,6 @@ export class SchedulesPage implements OnInit {
     }
 
     return unuploadedRecords;
-  }
-
-  navPage(path, params, listDataScan) {
-    this.navCtrl.navigateForward(path, { state: { params, listDataScan } });
-  }
-  navPageAset(path, params, listDataScan, kategori, countsc) {
-    console.log('params klik', params)
-    console.log('listDataScan klik', listDataScan)
-    console.log('kategori klik', kategori)
-    console.log('countsc klik', countsc)
-
-    this.navCtrl.navigateForward(path, { state: { params, listDataScan, kategori, countsc } });
   }
 
 }
