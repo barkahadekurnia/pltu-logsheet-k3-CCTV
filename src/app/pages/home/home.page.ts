@@ -630,7 +630,7 @@ export class HomePage implements OnInit {
           throw responseParameters;
         }
 
-        if (responseParameters?.data?.data?.length) {
+        if (responseParameters.data?.data?.length) {
           const parameters = [];
 
           for (const parameter of responseParameters?.data?.data) {
@@ -667,34 +667,11 @@ export class HomePage implements OnInit {
           console.log('parameter1', parameters);
 
           let storeParameters = [];
-          await this.database.emptyTable('parameter');
-          // .then(() => this.database.insertbatch('parameter', val);
           storeParameters = this.utils.chunkArray(parameters, 250);
           storeParameters?.map?.(async (val) => {
             await this.database.insert('parameter', val);
           });
           // //console.log('storeParameters', storeParameters);
-
-          // setTimeout(async () => {
-          //   const start = parameters.length;
-
-          //   if (start < parameters.length) {
-          //     let end = start + 900;
-
-          //     end = end > parameters.length
-          //       ? parameters.length
-          //       : end;
-
-          //     parameters.push(
-          //       ...parameters.slice(start, end)
-          //     );
-          //   }
-
-          //   console.log('parameter2', parameters);
-          //   await this.database.emptyTable('parameter')
-          //     .then(() => this.database.insertbatch('parameter', parameters));
-          // }, 500);
-          // //console.log('cek isi parameter', parameters);
         }
       },
       onError: error => console.error(error),
@@ -1305,7 +1282,8 @@ export class HomePage implements OnInit {
             //console.log('assetIdSchedule', assetIdSchedule);
 
             this.getTypeScan(assetIdScheduleType1);
-            // this.getParameterByAssetId(assetIdScheduleType);
+            await this.database.emptyTable('parameter');
+
             let splitAssetIdSchedule = [];
             splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
             splitAssetIdSchedule?.map?.(async val => {
@@ -1419,7 +1397,8 @@ export class HomePage implements OnInit {
                       //console.log('assetIdSchedule', assetIdSchedule);
 
                       this.getTypeScan(assetIdScheduleType1);
-                      // this.getParameterByAssetId(assetIdScheduleType);
+                      await this.database.emptyTable('parameter');
+
                       splitAssetIdSchedule = [];
                       splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
                       splitAssetIdSchedule?.map?.(async val => {
@@ -1616,7 +1595,8 @@ export class HomePage implements OnInit {
                       //console.log('assetIdSchedule', assetIdSchedule);
 
                       this.getTypeScan(assetIdScheduleType1);
-                      // this.getParameterByAssetId(assetIdScheduleType);
+                      await this.database.emptyTable('parameter');
+
                       splitAssetIdSchedule = [];
                       splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
                       splitAssetIdSchedule?.map?.(async val => {
@@ -1934,7 +1914,8 @@ export class HomePage implements OnInit {
             //console.log('assetIdSchedule', assetIdSchedule);
 
             this.getTypeScan(assetIdScheduleType1);
-            // this.getParameterByAssetId(assetIdScheduleType);
+            await this.database.emptyTable('parameter');
+
             let splitAssetIdSchedule = [];
             console.log(JSON.stringify(splitAssetIdSchedule));
             splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
@@ -2139,7 +2120,8 @@ export class HomePage implements OnInit {
             //console.log('assetIdSchedule', assetIdSchedule);
 
             this.getTypeScan(assetIdScheduleType1);
-            // this.getParameterByAssetId(assetIdScheduleType);
+            await this.database.emptyTable('parameter');
+
             let splitAssetIdSchedule = [];
             splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
             splitAssetIdSchedule?.map?.(async val => {
@@ -2352,7 +2334,8 @@ export class HomePage implements OnInit {
             //console.log('assetIdSchedule', assetIdSchedule);
 
             this.getTypeScan(assetIdScheduleType1);
-            // this.getParameterByAssetId(assetIdScheduleType);
+            await this.database.emptyTable('parameter');
+
             let splitAssetIdSchedule = [];
             splitAssetIdSchedule = this.utils.chunkArray(assetIdSchedule, 250);
             splitAssetIdSchedule?.map?.(async val => {
