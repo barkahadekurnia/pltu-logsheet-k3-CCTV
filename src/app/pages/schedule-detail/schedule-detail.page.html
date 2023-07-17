@@ -75,7 +75,7 @@
     <ion-accordion-group expand="inset" *ngIf="filteredData?.length">
       <ion-accordion [value]="item?.assetName" toggleIcon="chevron-down-circle" *ngFor="let item of filteredData">
         <ion-item slot="header" class="accordion">
-          <p class="text-base font-semibold">{{ item?.assetName }}</p>
+          <p class="text-base font-semibold">{{ item?.assetNumber }}</p>
         </ion-item>
         <div class="ion-no-padding" slot="content">
           <ion-row>
@@ -90,7 +90,7 @@
                   </ion-item>
                   <ion-item class="text-xs dark:ion-border-gray-600">
                     <ion-label>Nama</ion-label>
-                    <ion-input class="text-right" readonly [value]="item?.assetName"></ion-input>
+                    <ion-input class="text-right" readonly [value]="item?.assetNumber"></ion-input>
                   </ion-item>
                   <ion-item class="text-xs dark:ion-border-gray-600">
                     <ion-label>Kategori</ion-label>

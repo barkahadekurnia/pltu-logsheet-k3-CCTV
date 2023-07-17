@@ -442,7 +442,7 @@ export class HomePage implements OnInit {
       const marks = this.database.marks(assetIds.length).join(',');
 
       const result = await this.database.select('schedule', {
-        column: ['scheduleTrxId', 'assetId', 'scannedAt'],
+        column: ['scheduleTrxId', 'assetId', 'scannedAt', 'syncAt'],
         groupBy: ['scheduleTrxId'],
         where: {
           query: `assetId IN (${marks})`,
@@ -466,6 +466,16 @@ export class HomePage implements OnInit {
 
       console.log('items of schedules' , schedules);
       
+      //untuk menghitung data yg sudah transaksi / uploaded . pada bae
+      for(const x of schedules) {
+       // console.log('jumlah sebanyak x' , x.syncAt);
+        if(x.syncAt !== null) {
+          count.sudahtransaksi++
+        }
+      }
+
+      console.log('sudah transaksi',count.sudahtransaksi);
+      
 
       for (const item of schedules) {
         const assetIndex = assets.findIndex(
@@ -484,10 +494,13 @@ export class HomePage implements OnInit {
           // Unscanned
           assets[assetIndex].schedule.unscanned++;
           count.unscanned++;
-        } else {
+        } else if (assetIndex >= 0) {
           assets[assetIndex].schedule.unscanned++;
           count.laporan++;
-        }
+        } 
+
+
+
         // } else if (assetIndex >= 0 && assets[assetIndex].hasRecordHold) { // Holded | Unscanned
         //   const start = new Date(item.scheduleFrom).getTime();
         //   const end = new Date(item.scheduleTo).getTime();
@@ -499,9 +512,14 @@ export class HomePage implements OnInit {
         //   count.unscanned++;
         // }
       }
+      console.log('99. sudah transaksi',count.sudahtransaksi);
+      
       console.log('10. upload', count.uploaded);
       console.log('11. belum upload', count.unuploaded);
       console.log('12. belum scan', count.unscanned);
+      console.log('13. data schedules di home', schedules);
+      console.log('14. data assets di home', assets);
+      
 
       // count.assets = assets.length;
       this.count = count;
@@ -630,7 +648,7 @@ export class HomePage implements OnInit {
           throw responseParameters;
         }
 
-        if (responseParameters?.data?.data?.length) {
+        if (responseParameters.data?.data?.length) {
           const parameters = [];
 
           for (const parameter of responseParameters?.data?.data) {
@@ -674,27 +692,6 @@ export class HomePage implements OnInit {
             await this.database.insert('parameter', val);
           });
           // //console.log('storeParameters', storeParameters);
-
-          // setTimeout(async () => {
-          //   const start = parameters.length;
-
-          //   if (start < parameters.length) {
-          //     let end = start + 900;
-
-          //     end = end > parameters.length
-          //       ? parameters.length
-          //       : end;
-
-          //     parameters.push(
-          //       ...parameters.slice(start, end)
-          //     );
-          //   }
-
-          //   console.log('parameter2', parameters);
-          //   await this.database.emptyTable('parameter')
-          //     .then(() => this.database.insertbatch('parameter', parameters));
-          // }, 500);
-          // //console.log('cek isi parameter', parameters);
         }
       },
       onError: error => console.error(error),

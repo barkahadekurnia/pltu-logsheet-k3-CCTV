@@ -80,7 +80,7 @@ export class UtilsService {
       spinner: null,
       message: `<img src="assets/img/loader.gif" class="w-20 h-20" />`,
       cssClass: 'custom-loader',
-      backdropDismiss: true,
+      backdropDismiss: false,
       mode: 'ios',
     });
     await loader.present();

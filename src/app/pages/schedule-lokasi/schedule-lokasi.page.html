@@ -23,104 +23,77 @@
     <h4 class="text-2xl font-bold">Asset Scan</h4>
   </div>
 
-  <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
-
-  <!-- <app-screen-view *ngIf="!loading && !sourceAssets?.length" type="no-data"
-    message="Data Kosong" description="Synchronize untuk mendapatkan schedule">
-  </app-screen-view> -->
-  <div *ngIf="!loading" class="w-full min-h-full">
+  <div *ngIf="scheduleDetails || scheduleDetails !== undefined" class="w-full min-h-full">
     <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
-    <ion-grid class="w-full space-y-4">
-      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-        <ion-col><ion-label>Kode Lokasi</ion-label></ion-col>
-        <ion-col>{{ params?.tagNumber }}</ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-grid class="w-full space-y-4">
-      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-        <ion-col><ion-label>Tanggal</ion-label></ion-col>
-        <ion-col>{{ params?.adviceDate }}</ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-grid class="w-full space-y-4">
-      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-        <ion-col><ion-label>Unit</ion-label></ion-col>
-        <ion-col>{{ params?.unit }}</ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-grid class="w-full space-y-4">
-      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-        <ion-col><ion-label>Kode Lokasi</ion-label></ion-col>
-        <ion-col>{{ params?.area }}</ion-col>
-      </ion-row>
-    </ion-grid>
-  </div>
-  <!-- <div *ngIf="params" class="w-full min-h-full">
-    <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
-    <ion-grid class="w-full space-y-4">
-      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-        <ion-col><ion-label>Kode Lokasi</ion-label></ion-col>
-        <ion-col>{{ params?.tagNumber }}</ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-grid class="w-full space-y-4">
-      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-        <ion-col><ion-label>Tanggal</ion-label></ion-col>
-        <ion-col>{{ params?.adviceDate }}</ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-grid class="w-full space-y-4">
-      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-        <ion-col><ion-label>Unit</ion-label></ion-col>
-        <ion-col>{{ params?.unit }}</ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-grid class="w-full space-y-4">
-      <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-        <ion-col><ion-label>Kode Lokasi</ion-label></ion-col>
-        <ion-col>{{ params?.area }}</ion-col>
-      </ion-row>
-    </ion-grid>
-  </div> -->
+      <ion-grid class="w-full space-y-4">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Kode Lokasi</ion-label></ion-col>
+          <ion-col>{{ scheduleDetails?.tagNumber || '-' }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Tanggal</ion-label></ion-col>
+          <ion-col>{{ scheduleDetails?.date || '-' }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Unit</ion-label></ion-col>
+          <ion-col>{{ scheduleDetails?.unit || '-' }}</ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="w-full space-y-4">
+        <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+          <ion-col><ion-label>Kode Lokasi</ion-label></ion-col>
+          <ion-col>{{ scheduleDetails?.area || '-' }}</ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
 
-    <ion-grid class="w-full space-y-4">
+    <ion-grid class="w-full space-y-4" *ngIf="assetCategory?.length">
       <ion-row class="justify-center">
         <ion-col size="12" sizeLg="12">
-          <ion-row  class="w-full pt-3 justify-center items-center">
+          <ion-row class="w-full pt-3 justify-center items-center">
             <div class="relative min-h-screen pt-2 pb-12">
-              <!-- <div class="max-w-md mx-auto shadow-xl min-w-0"> -->
-                <!-- <ion-grid class="w-full ion-padding flex flex-col justify-center items-center space-y-4"> -->
-                  <ion-row class="w-full pt-3 justify-center items-center">
-                    <div *ngFor="let kat of datakategori; index as idx;">
-                    <ion-col size="6" sizeMd="6" sizeLg="6" *ngIf="countsc[idx].countScanned != 0 || countsc[idx].countUnscanned != 0">
-                      <div class="flex-none py-6 px-3 first:pl-6 last:pr-6"
-                        (click)="navPage('schedule-detail', kat, countsc[idx])">
-                        <div class="flex space-x-5 space-y-5 flex-wrap justify-center items-baseline">
-                          <button class="relative duration-300 py-2 px-4 text-blue-100 rounded"
-                            style="width: 120px">
-                            <img [src]="kat.urlOffline" alt="" width="80px" />
-                            <label style="width: 80px" class="text-xs"for="">{{kat.assetCategoryName}}
-                            </label>
-                            <span
-                              class="absolute px-2 py-1 text-xs font-bold rounded-full -top-3 -right-3 bg-success text-white">
-                              {{countsc[idx].countScanned}}
-                            </span>
-                            <span
-                              class="absolute px-2 py-1 text-xs font-bold rounded-full top-4 -right-3 bg-error text-white">
-                              {{countsc[idx].countUnscanned}}
-                            </span>
-                          </button>
-                        </div>
+              <ion-row class="w-full pt-3 justify-center items-center">
+                <div *ngFor="let asset of assetCategory; index as idx;">
+                  <ion-col size="6" sizeMd="6" sizeLg="6"
+                    *ngIf="schedulePerDay[idx]?.countScanned !== 0 || schedulePerDay[idx]?.countUnscanned !== 0">
+                    <div class="flex-none py-6 px-3 first:pl-6 last:pr-6"
+                      (click)="navPage('schedule-detail', asset, schedulePerDay[idx])">
+                      <div class="flex space-x-5 space-y-5 flex-wrap justify-center items-baseline">
+                        <button class="relative duration-300 py-2 px-4 text-blue-100 rounded" style="width: 120px">
+                          <img [src]="asset.urlOffline" alt="" width="80px" />
+                          <label style="width: 80px" class="text-xs" for="">
+                            {{asset.assetCategoryName}}
+                          </label>
+                          <span
+                            class="absolute px-2 py-1 text-xs font-bold rounded-full -top-3 -right-3 bg-success text-white">
+                            {{schedulePerDay[idx]?.countScanned}}
+                          </span>
+                          <span
+                            class="absolute px-2 py-1 text-xs font-bold rounded-full top-4 -right-3 bg-error text-white">
+                            {{schedulePerDay[idx]?.countUnscanned}}
+                          </span>
+                        </button>
                       </div>
-                    </ion-col>
-                  </div>
-                  </ion-row>
-                <!-- </ion-grid> -->
-              <!-- </div> -->
+                    </div>
+                  </ion-col>
+                </div>
+              </ion-row>
             </div>
           </ion-row>
         </ion-col>
       </ion-row>
     </ion-grid>
+
+    <div class="p-12 text-center" *ngIf="!assetCategory?.length">
+      <h4 class="text-gray-500">- Data asset tidak ditemukan -</h4>
+    </div>
   </div>
+
+  <app-screen-view type="no-data" message="Jadwal Kosong" description="Tidak ada jadwal scan pada lokasi ini"
+    *ngIf="!scheduleDetails || scheduleDetails === undefined">
+  </app-screen-view>
 </ion-content>

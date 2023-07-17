@@ -418,8 +418,6 @@ console.log('mark2', uploaded);
     }
   }
 
-
-
   private async uploadRecordAttachments(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
     const recordAttachments = (await this.getUnuploadedData('recordAttachment'))
       .map((attachment) => ({
