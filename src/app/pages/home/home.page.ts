@@ -461,20 +461,22 @@ export class HomePage implements OnInit {
       // .filter(schedule => this.filterSchedule(schedule, now, dateInThisMonth, lastWeek));
 
       const unuploadedRecords = await this.getUnuploadedRecords();
-      // //console.log('8. belum upload', unuploadedRecords);
+      
+      console.log('8. belum upload', unuploadedRecords);
+
+      console.log('items of schedules' , schedules);
+      
 
       for (const item of schedules) {
         const assetIndex = assets.findIndex(
           (asset) => asset.assetId === item.assetId
         );
-        if (assetIndex >= 0 && item.scannedAt != null) {
+        if (assetIndex >= 0 && item.scannedAt !== null) {
           // Uploaded
           assets[assetIndex].schedule.uploaded++;
           count.uploaded++;
-        } else if (
-          assetIndex >= 0 &&
-          unuploadedRecords.includes(item.scheduleTrxId)
-        ) {
+        } else if (assetIndex >= 0 &&
+          unuploadedRecords.includes(item.scheduleTrxId)) {
           // Unuploaded
           assets[assetIndex].schedule.unuploaded++;
           count.unuploaded++;
@@ -689,6 +691,9 @@ export class HomePage implements OnInit {
         },
         groupBy: ['scheduleTrxId'],
       });
+
+      console.log('result di get unuploaded records ',result);
+      
 
       records.push(
         ...this.database

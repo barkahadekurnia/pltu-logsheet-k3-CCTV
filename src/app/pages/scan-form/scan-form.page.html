@@ -52,17 +52,28 @@
             </h6>
           </div>
         </ion-col>
+        <!-- <ion-col size="12" >
+          <ion-item lines="none" *ngIf="!isEnd">
+            <ion-label class="pt-2">Semua Baik</ion-label>
+            <ion-checkbox slot="start" [checked]="checked" mode="ios" (ionChange)="checkedValue()"></ion-checkbox>
+          </ion-item>
+        </ion-col> -->
       </ion-row>
-
       <ion-row class="justify-center">
+        
         <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6" *ngIf="resultParam.length > 0">
-
           <ion-slides class="h-full" [options]="slidesOpts" (ionSlideDidChange)="onSlidesDidChange()"
             (ionSlideWillChange)="onSlidesChanged()">
             <ng-container *ngFor="let slide of slides; index as i">
               <ion-slide>
                 <div class="w-full text-left">
                   <ion-row *ngIf="!isEnd">
+                    <ion-item *ngIf="!isEnd" lines="none">
+                      <ion-label class="pt-2">Semua Baik</ion-label>
+                      <ion-checkbox slot="start" [checked]="checked[i]"  mode="ios" (ionChange)="checkedValue()"></ion-checkbox>
+                    </ion-item>
+
+                    
                     <ion-col *ngFor="let parameter of resultParam[i]; let idxx = index" size="12" sizeSm="6">
                       <div class="w-full bg-white dark:bg-gray-800 border overflow-hidden" [ngClass]="[
                             parameter.isDeviation ? 'border-error'
@@ -78,7 +89,6 @@
                                 [name]="parameter.isExpanded ? 'chevron-down-outline' : 'chevron-forward-outline'">
                               </ion-icon>
                             </button>
-
                             <div class="flex-grow flex flex-col justify-start items-start">
                               <p class="text-sm font-medium" (click)="setFocus(parameter)">
                                 {{ parameter.parameterName }}
@@ -102,9 +112,22 @@
                             [multiple]="parameter.inputType === 'checkbox'" (ionChange)="checkDeviation(parameter)"
                             [(ngModel)]="parameter.value">
                             <ion-select-option *ngFor="let value of parameter.option.split(',')" [value]="value">
-                              {{ value }}
+                             {{ value }}
                             </ion-select-option>
                           </ion-select>
+
+                          <!-- <ion-select
+                            *ngIf="!parameter.isExpanded && (parameter.inputType === 'select' || parameter.inputType === 'checkbox' || parameter.inputType === 'radio')"
+                            class="ion-no-padding min-w-12 flex-grow text-sm text-right"
+                            [ngClass]="[parameter.parameterId]" interface="alert"
+                            [interfaceOptions]="{header: 'Pilih', mode: 'ios'}" placeholder="Pilih"
+                            [multiple]="parameter.inputType === 'checkbox'" (ionChange)="checkDeviation(parameter)"
+                            [(ngModel)]="parameter.value">
+                            <ion-select-option *ngFor="let value of parameter.option.split(',')" [value]="value">
+                              {{ value }}
+                            </ion-select-option>
+                          </ion-select> -->
+
                         </div>
 
                         <div *ngIf="parameter.isExpanded"
@@ -142,7 +165,7 @@
                                 placeholder="Pilih" [multiple]="parameter.inputType === 'checkbox'"
                                 (ionChange)="checkDeviation(parameter)" [(ngModel)]="parameter.value">
                                 <ion-select-option *ngFor="let value of parameter.option.split(',')" [value]="value">
-                                  {{ value }}
+                                  {{ value }} 
                                 </ion-select-option>
                               </ion-select>
                             </div>
@@ -152,7 +175,6 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">
                               Catatan (Opsional)
                             </p>
-
                             <ion-textarea class="ion-no-padding text-sm" rows="3" autoGrow="true"
                               placeholder="Masukan Catatan disini..." (ionChange)="notes(parameter)"
                               [(ngModel)]="parameter.notes">
@@ -182,20 +204,16 @@
                                   <ion-icon *ngIf="attachment.type.startsWith('video')"
                                     class="text-3xl text-primary-content" name="play-circle-outline"></ion-icon>
                                 </div>
-
                                 <ion-ripple-effect style="margin: 0 !important"></ion-ripple-effect>
                               </div>
-
                               <div
                                 class="relative inline-block mx-2 bg-primary rounded-xl ion-activatable ripple-parent overflow-hidden cursor-pointer"
                                 (click)="selectUpload(parameter, idxx)">
                                 <img class="absolute inset-x-0 bottom-0 z-0 w-full h-1/2 rounded-b-xl"
                                   src="assets/img/wave.png" alt="Wave" />
-
                                 <div class="relative w-16 h-16 z-10 flex justify-center items-center">
                                   <ion-icon class="text-3xl text-primary-content" name="add"></ion-icon>
                                 </div>
-
                                 <ion-ripple-effect style="margin: 0 !important"></ion-ripple-effect>
                               </div>
                             </div>

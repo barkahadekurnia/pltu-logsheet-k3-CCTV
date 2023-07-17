@@ -35,6 +35,7 @@ export class SchedulesPage implements OnInit {
   isHeaderVisible: boolean;
   loading: boolean;
   selectedDate: any;
+
   usersData: any;
 
   constructor(
@@ -105,7 +106,7 @@ export class SchedulesPage implements OnInit {
     const dataGroupByAreaId = uniqBy(dataSchedulePerDay, 'areaId');
     this.selectedDate.lokasi = dataGroupByAreaId;
   }
-
+  
   //barkah maintance add shift schedule
   async scheduleShift(item: any) {
     if (item.schedules.length > 0) {

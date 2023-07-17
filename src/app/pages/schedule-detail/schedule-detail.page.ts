@@ -69,6 +69,10 @@ export class ScheduleDetailPage implements OnInit {
     }
   }
 
+  openScanPage() {
+    return this.router.navigate(['rfid-scan']);
+  } 
+  
   onSegmentChanged(event: any) {
     this.segment = event.detail.value;
 

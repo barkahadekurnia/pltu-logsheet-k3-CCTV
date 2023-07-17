@@ -72,6 +72,13 @@ export class ScanFormPage implements OnInit {
   attachments: any[];
   loading: boolean;
   validated: boolean;
+  
+  indexSlide:any;
+  allGood:boolean;
+  allGoodValue:any;
+  checked:boolean[] = [];
+  buttonChecked:boolean;
+
 
   private transitionData: {
     type?: string;
@@ -171,6 +178,10 @@ export class ScanFormPage implements OnInit {
     this.attachments = [];
     this.loading = true;
     this.validated = false;
+
+    this.indexSlide = 0;
+    this.allGood = true;
+    this.buttonChecked = true;
   }
 
   ngOnInit() {
@@ -218,8 +229,10 @@ export class ScanFormPage implements OnInit {
   }
 
   async onSlidesChanged() {
-    const index = await this.ionSlides.getActiveIndex();
-    this.currentSlide = this.slides[index];
+    this.indexSlide = await this.ionSlides.getActiveIndex();
+    console.log('sekarang slide index ke' ,this.indexSlide);
+    //this.checked = false;
+    this.currentSlide = this.slides[this.indexSlide];
     this.isBeginning = await this.ionSlides.isBeginning();
     this.isEnd = await this.ionSlides.isEnd();
   }
@@ -235,7 +248,8 @@ export class ScanFormPage implements OnInit {
 
   async onNextButtonTouched() {
     console.log(this.resultParam);
-
+    
+  
     const index = await this.ionSlides.getActiveIndex();
 
     if (!this.isEnd) {
@@ -263,7 +277,10 @@ export class ScanFormPage implements OnInit {
     }
 
     if (this.isEnd && this.currentSlide.includes('Catatan & Lampiran')) {
+      this.buttonChecked = false;
       this.preview();
+    } else {
+      this.buttonChecked = true;
     }
   }
   //leave page
@@ -673,6 +690,7 @@ export class ScanFormPage implements OnInit {
   //     return this.router.navigate(['form-preview', { data }]);
   //   }
 
+  
 
   async preview() {
     // const emptyParameter = this.resultParam
@@ -696,9 +714,11 @@ export class ScanFormPage implements OnInit {
     //   return this.ionContent.scrollToTop(2000);
 
     // }
-    console.log('sch', this.sch);
+    console.log('this.shared',this.shared);
+    
+    console.log('sch duwur', this.sch);
     this.sch = this.sch.filter(sch => sch.schType === this.shared.schtype.type);
-    console.log('sch', this.sch);
+    console.log('sch ngisor', this.sch);
     console.log('type', this.shared.schtype.type);
     moment.locale('id');
     const now = this.utils.getTime();
@@ -706,6 +726,9 @@ export class ScanFormPage implements OnInit {
     this.record.scannedAt = moment(current).format('YYYY-MM-DD HH:mm:ss');
     this.validated = true;
     const attdata = [];
+
+    console.log('this sch',this.sch);
+    
     this.schedule.scheduleTrxId = this.sch[0]?.scheduleTrxId;
     this.schedule.scheduleTo = this.sch[0]?.scheduleTo;
     this.schedule.schType = this.sch[0]?.schType;
@@ -749,7 +772,9 @@ export class ScanFormPage implements OnInit {
       dataSlides: this.slides,
       rawSchedule: this.resultParam
     });
+    console.log('this schedule' , this.schedule);
     console.log('data json :', JSON.parse(data));
+
     return this.router.navigate(['form-preview', { data }]);
   }
   async saveTemporary() {
@@ -1064,7 +1089,7 @@ export class ScanFormPage implements OnInit {
                 }));
 
                 this.resultParam = chain(ak).groupBy('parameterGroup').map(res => res).value();
-                console.log(this.resultParam);
+                console.log('this result params',this.resultParam);
                 console.log(this.asset.assetId);
 
                 console.log(chain(ak).groupBy('parameterGroup').map(res => res).value());
@@ -1264,6 +1289,9 @@ export class ScanFormPage implements OnInit {
   }
 
   private setDataAsset(asset: any) {
+    console.log('asset set data aset' , asset);
+    
+
     const tagIds: string[] = asset?.tagId?.length
       ? asset?.tagId?.split?.(',')
       : [];
@@ -1430,7 +1458,7 @@ export class ScanFormPage implements OnInit {
   }
 
   private isDeviation(parameter: any) {
-    // console.log('cek deviasi ', parameter)
+     console.log('cek deviasi ', parameter)
     if (parameter.value == null || parameter.value === '') {
       return false;
     }
@@ -1465,12 +1493,74 @@ export class ScanFormPage implements OnInit {
         return strArray.includes(str);
       }
       // console.log('hasil', );
-      // console.log('abnormal', parameter.abnormal.split(","));
-      // console.log('value', parameter.value);
+        //option
+        //is deviation false = index 0
+        //is deviation true = index 1 
+       console.log('abnormal', parameter.abnormal.split(","));
+       console.log('value', parameter.value);
+       console.log('this.result.params' , this.resultParam);
       return searchStringInArray(parameter.value, parameter.abnormal.split(","));
     }
 
     return false;
+  }
+
+  //checklist smua yg default
+  checkedValue(): void {
+  	this.checked[this.indexSlide] = !this.checked[this.indexSlide];
+  	console.log("checked: " + this.checked[this.indexSlide]);//it is working !!
+    //when checked true do set value and deviation
+    if(this.checked[this.indexSlide]) {
+      console.log('ini checked bang')
+      this.resultParam[this.indexSlide].map( item => 
+       {
+        if(item.inputType === 'select') {
+          item.value = item.option.split(',')[0]; //diisi dengan index 0 (kiri samping koma)
+        } else {
+          item.value = ''
+        }   
+        console.log('result params map true', item)    
+       }
+      )
+      console.log('sekarang berada di slide nomor' , this.indexSlide)
+    } else { //when checked =false / unchecked (pd bae kie) hapus inputan 
+      console.log('checked value niki unchecked',this.resultParam); 
+      this.resultParam[this.indexSlide].map( item => 
+        {
+         if(item.inputType === 'select') {
+           item.value = ''; //diisi dengan index 0 (kiri samping koma)
+         } else {
+           item.value = ''
+         }   
+         console.log('result params map false', item)    
+        }
+       )
+       console.log('sekarang berada di slide nomor' , this.indexSlide)  
+    }
+   //this.checked[this.indexSlide]=false
+   
+  }
+  
+  async allCheck(){
+    console.log('hai mas barkah');
+
+    console.log('this result params', this.resultParam);
+
+
+    for(let i = 0 ; i < this.resultParam.length ; i ++ ) {
+
+      let checkValue = this.checkDeviation(this.resultParam[i])
+      .then( res => console.log(res));  
+
+      console.log(checkValue);
+
+      let saveValue = this.resultParam[i][0].option.split(',')
+      console.log('value di all check', saveValue);
+      
+      this.allGoodValue = saveValue[0]
+    }
+    //this.resultParam.value = this.resultParam.option[0]
+    
   }
 
   private async getPicture(parameter?: any, index?: any) {
@@ -1709,5 +1799,7 @@ export class ScanFormPage implements OnInit {
 
     confirm.present();
   }
+
+  
 
 }
