@@ -1,4 +1,35 @@
-<ion-header class="ion-no-border dark:ion-toolbar-gray-800" mode="ios">
+<!-- <ion-header class="ion-no-border dark:ion-toolbar-gray-800" mode="ios">
+  <ion-toolbar class="ion-bg-white">
+    <ion-title class="text-base">{{ !loading && !shared.records.length ? 'Information' : 'Uploading' }}</ion-title>
+
+    <ion-buttons slot="end" mode="md">
+      <ion-button color="danger" (click)="dismissPopover()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="p-4 bg-white dark:bg-gray-800">
+    <div class="my-4 text-center">
+      <img *ngIf="uploadStatus==='success'" class="w-16 max-w-4/5 m-auto" src="assets/img/success.svg" alt="Success Image">
+      <img *ngIf="uploadStatus==='failed'" class="w-16 max-w-4/5 m-auto" src="assets/img/error.svg" alt="Error Image">
+    </div>
+
+    <div class="my-4" *ngIf="uploadStatus">
+      <h2 class="text-2xl text-center font-bold">{{uploadStatus}}</h2>
+
+      <p class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+        {{uploadStatus}} Unggah Data
+      </p>
+    </div>
+  </div>
+  </ion-content> -->
+
+
+
+<!-- <ion-header class="ion-no-border dark:ion-toolbar-gray-800" mode="ios">
   <ion-toolbar class="ion-bg-white">
     <ion-title class="text-base">{{ !loading && !shared.records.length ? 'Information' : 'Uploading' }}</ion-title>
 
@@ -81,4 +112,4 @@
       </p>
     </div>
   </div>
-</ion-content>
+</ion-content> -->

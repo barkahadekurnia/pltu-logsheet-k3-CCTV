@@ -1,4 +1,4 @@
-import { Parameter } from './parameter';
+import { CategoryParameters } from './category-parameters';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export interface AssetDetails {
@@ -8,15 +8,17 @@ export interface AssetDetails {
     expireDate: string;
     historyActive: string;
     id: string;
+    lastScannedAt?: string;
+    lastScannedBy?: string;
     more: AssetCategoryAndStatus;
     parameter: {
-        day: Parameter[];
-        lustrum: Parameter[];
-        monthly: Parameter[];
-        semester: Parameter[];
-        threeMonthly: Parameter[];
-        week: Parameter[];
-        yearly: Parameter[];
+        day: CategoryParameters[];
+        lustrum: CategoryParameters[];
+        monthly: CategoryParameters[];
+        semester: CategoryParameters[];
+        threeMonthly: CategoryParameters[];
+        week: CategoryParameters[];
+        yearly: CategoryParameters[];
     };
     photo: Photo[];
     qr: string;

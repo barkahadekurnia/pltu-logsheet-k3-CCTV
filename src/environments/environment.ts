@@ -5,6 +5,7 @@
 export const environment = {
   production: true,
   url: {
+    //base: 'http://114.6.64.2:11241/api/logsheet_dev',
     base: 'http://114.6.64.2:11241/api/logsheet_new',
     // base: 'http://192.168.4.99',
     // base: 'http://app.logsheet.digital',

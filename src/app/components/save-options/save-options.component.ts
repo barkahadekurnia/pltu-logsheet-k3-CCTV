@@ -27,8 +27,8 @@ export class SaveOptionsComponent {
       type: value,
       remember: this.remember
     };
-console.log('alert data',data)
-console.log('alert id',this.id)
+    console.log('alert data',data)
+    console.log('alert id',this.id)
     this.popoverCtrl.dismiss(data, undefined, this.id);
   }
 }

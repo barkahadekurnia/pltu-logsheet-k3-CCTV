@@ -5,7 +5,7 @@ import { Platform, NavController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
 
-import { chain, uniq, uniqBy } from 'lodash';
+import { chain, uniq, uniqBy, groupBy } from 'lodash';
 import * as moment from 'moment';
 
 import { DatabaseService } from 'src/app/services/database/database.service';
@@ -49,8 +49,10 @@ export class SchedulesPage implements OnInit {
   selectedDate: any;
   segment: 'automatic' | 'manual';
   datakategori: any[];
+  //barkah
   dataShift:any;
   usersData:any;
+  dataLokasiUnit:any = [];
 
   //modal barkah
   isModalShiftOpen!: boolean;
@@ -166,7 +168,7 @@ export class SchedulesPage implements OnInit {
       isigrup.push(values);
     });
     isigrup.forEach((b, ind) => {
-      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit);
+      const schdatalokasi = schdata1.filter((v) => v.area === b.area && v.unit === b.unit && v.scheduleId === b.scheduleId);
       this.datakategori.forEach((value, i) => {
         const scanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === true);
         const unscanned = schdatalokasi.filter((f) => f.assetCategoryId === value.assetCategoryId && f.isUploaded === false);
@@ -188,9 +190,24 @@ export class SchedulesPage implements OnInit {
     console.log('countsc', this.countsc);
 
   }
-
+  
   //barkah maintance add shift schedule
+  lowerCaseLetter(string) {
+    let lower = string.toLowerCase() 
+    return lower
+  }
+  lowerCaseLetterUnit(string) {
+    let split = string.split(' ')
+
+    let depan = split[0].toLowerCase() 
+    let belakang = split[1].toUpperCase() 
+
+    let join = depan + ' ' + belakang
+    return join
+  }
+
   async scheduleShift(item:any) {
+    this.dataLokasiUnit = []
     console.log('isi dari schedule shift', item);
 
     //console.log('schedule id di schedule shift', item.schedules[0].idschedule);
@@ -213,39 +230,27 @@ export class SchedulesPage implements OnInit {
           console.log('length data',result.data.data.length);
           this.dataShift= result.data.data
 
-          console.log('data shift' , this.dataShift);
-          console.log('cek data params asets data' , this.dataShift[0].detailLocationData[0].assetData);
-          
-          // this.dataShift.detailLocationData.forEach(namaUnit);
-
-          //  const panjanglokasiShift = this.dataShift.detailLocationData.length;
-          //  const lokasiShift = this.dataShift.detailLocationData;
-          // const titipLokasi = []
-          //  for(let i= 0 ; i < panjanglokasiShift; i++) {
-          //   if(titipLokasi[0] !== lokasiShift[i].locationUnitNama)
-          //   {
-          //   titipLokasi.push(lokasiShift[i].locationUnitNama)
-          //   }
-          // }
-
-          // console.log('ini lokasi unit',titipLokasi);
+          console.log('dataShift', this.dataShift);
           
 
-          // function namaUnit(unit){
-          //   let unitShift = []
-          //   unitShift.push(unit)
-          //   if(unitShift[0] === unit) {
-          //     unitShift.push(unit)
-          //   }
-          //   console.log('unitshift' , unitShift);
-            
-          // }
+          this.dataShift.forEach(elem => {
+            console.log('data shift eleeeem',elem);
 
+            for(let i = 0 ; i < elem.detailLocationData.length ; i++ ){
+              //console.log('SUBHANALLAH');
+              
+              let dataUnit = elem.detailLocationData[i]
 
-          console.log('ini coba di cek' , this.dataShift[0].teamData[this.dataShift[0].groupNameData[0].operatorGroupName][0].operatorUserNama);
-          console.log('ini coba di cek nama yser' , this.dataShift[0].teamData[this.dataShift[0].groupNameData[0].operatorGroupName][1].operatorUserNama);
+              //console.log('ASTAGFIRULLAH',dataUnit.locationUnitNama );
+              if( this.dataLokasiUnit.includes(dataUnit.locationUnitNama) === false ){
+
+                this.dataLokasiUnit.push(dataUnit.locationUnitNama)
+              }
+            }
+          });
           
-          
+          console.log('this.datalocation unit' , this.dataLokasiUnit);
+              
         }
         loader.dismiss()
       })
@@ -444,6 +449,7 @@ export class SchedulesPage implements OnInit {
           scannedWith: schedule.scannedWith,
           tagId: schedule.tagId,
           unit: schedule.unit,
+          unitId: schedule.unitId,
           assetStatusId: schedule.assetStatusId,
           assetStatusName: schedule.assetStatusName,
           assetTags: assetTags.filter(assetTag => assetTag.assetId === schedule.assetId),
@@ -755,11 +761,13 @@ export class SchedulesPage implements OnInit {
   navPage(path, params, listDataScan) {
     this.navCtrl.navigateForward(path, { state: { params, listDataScan } });
   }
+
+
   navPageAset(path, params, listDataScan, kategori, countsc) {
-    console.log('params klik', params)
-    console.log('listDataScan klik', listDataScan)
-    console.log('kategori klik', kategori)
-    console.log('countsc klik', countsc)
+    console.log('params klik', JSON.stringify(params))
+    console.log('listDataScan klik', JSON.stringify(listDataScan))
+    console.log('kategori klik', JSON.stringify(kategori))
+    console.log('countsc klik', JSON.stringify(countsc))
 
     this.navCtrl.navigateForward(path, { state: { params, listDataScan, kategori, countsc } });
   }

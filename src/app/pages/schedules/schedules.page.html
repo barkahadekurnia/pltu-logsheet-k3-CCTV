@@ -180,7 +180,7 @@
           <ion-row  *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center"> 
             <ion-accordion-group class="w-full" *ngFor="let dataShift of dataShift">
               <ion-accordion  *ngIf="dataShift.teamData[dataShift.groupNameData[0].operatorGroupName][1].operatorUserNama === usersData.name || 
-              dataShift.teamData[dataShift.groupNameData[0].operatorGroupName][0].operatorUserNama === usersData.name"  value="first" class="rounded-xl mb-4" toggleIcon="caret-down-circle" >
+              dataShift.teamData[dataShift.groupNameData[0].operatorGroupName][0].operatorUserNama === usersData.name || usersData.group === 'ADMIN' "  value="first" class="rounded-xl mb-4" toggleIcon="caret-down-circle" >
                 <ion-item slot="header" color="dark">
                   <section class=" py-4">
                     <div class="flex mb-3 text-xs font-semibold">
@@ -191,10 +191,10 @@
                         {{dataShift.shift}}
                       </label>
                     </div>
-                    <div class="flex mb-3 text-xs font-semibold">
+                    <div class="flex content-start mb-3 text-xs font-semibold">
                       <div *ngFor="let dataPetugas of dataShift.teamData[dataShift.groupNameData[0].operatorGroupName]">
-                        <label class="p-1 px-2 mr-2 bg-lime-700 text-white rounded-full ">
-                          {{dataPetugas.operatorUserNama}}
+                        <label class="p-1 px-2 mr-2 mb-2 bg-lime-700 text-white rounded-full capitalize">
+                          <ion-icon slot="icon-only" name="person-outline" class="mr-1"></ion-icon> {{lowerCaseLetter(dataPetugas.operatorUserNama)}}
                         </label>
                       </div>
                       <!-- <label *ngIf="usersData" class="p-1 px-2 bg-primary text-white rounded-full ">
@@ -203,32 +203,22 @@
                     </div>
                     <div class="text-sm text-white">
                       <h4 class="font-semibold mb-2">
-                        <ion-icon slot="icon-only" name="person-outline" class="mr-1"></ion-icon>
+                        <!-- <ion-icon slot="icon-only" name="location-outline" class="mr-1"></ion-icon> -->
                         Daftar Area
                       </h4>
                       <!-- <div class="flex justify-between">
                         <div class="text-center mr-4" *ngFor="let namaOperator of dataShift.teamData[dataShift.groupNameData[0].operatorGroupName]">
                           <ion-icon slot="icon-only"  name="person-circle-outline" class="mr-1 pt-1 text-[80px]" ></ion-icon>
                           <p>{{namaOperator.operatorUserNama}}</p>
-                      
                         </div>
                       </div>                                                       -->
-                      <div class="">
-                       <div class="mr-4">
-                         <p>- Unit 3</p>
-                         <p>- Unit 1 & 2</p>
-                        </div>
-                        <!-- <div class="mr-4" *ngFor="let namaUnit of dataShift.detailLocationData">
-                          <ion-icon slot="icon-only"  name="radio-button-on-sharp" class="mr-1 pt-1 text-[10px]" ></ion-icon>
-                          {{namaUnit.locationUnitNama}}                      
-                        </div> -->
+                      <div *ngFor="let unit of dataLokasiUnit"  class="">
+                          <div class="capitalize text-sm mr-2 mb-2">
+                            - {{lowerCaseLetterUnit(unit)}}
+                          </div>
                       </div>                                                      
                     </div>                   
                   </section>
-                  <!-- <button 
-                  class="bg-primary text-white w-full rounded-lg mt-2 p-1">
-                    Detail Lokasi
-                  </button> -->
                 </ion-item>
                 <div 
                 class=" ion-padding border-2 border-gray-300 rounded-b-xl" slot="content">
@@ -298,8 +288,7 @@
             </ng-template>
           </ion-modal>
     
-<!-- 
-
+        <!-- /
           <ion-row  *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center"> 
             <ion-accordion-group class="w-full">
               <ion-accordion value="first" class="rounded-xl" toggleIcon="caret-down-circle" >
@@ -331,20 +320,17 @@
                       <p>- Eko Priyono</p>
                       <p>- Hyuga</p>
                     </div>
-                   
-                  </section>
-                  <button 
-                  
+                    </section>
+                  <button                   
                   class="bg-primary text-white w-full rounded-lg mt-2 p-1">
                     Detail Lokasi
                   </button>
                 </div>
-              
               </ion-accordion>
             </ion-accordion-group>
           </ion-row> -->
 
-          <!-- <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full pt-3 justify-center items-center">
+          <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full pt-3 justify-center items-center">
             <div class="center" *ngFor="let kat of selectedDate?.lokasi; index as idx;">
               <ul (click)="navPageAset('schedule-lokasi', kat, selectedDate, datakategori, countsc[idx])">
                 <li>
@@ -362,7 +348,7 @@
                 </li>
               </ul>
             </div>
-          </ion-row> -->
+          </ion-row>
 
           <ion-row *ngIf="!selectedDate?.schedules?.length">
             <ion-col size="12">

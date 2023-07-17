@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Platform } from '@ionic/angular';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
+import { AlertController } from '@ionic/angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-transaction-detail',
@@ -87,6 +89,8 @@ unitId: string
     private route: ActivatedRoute,
     private database: DatabaseService,
     private platform: Platform,
+    private alertCtrl: AlertController,
+    private routeCtrl: Router,
 
   ) {
     this.parameter = [];
@@ -151,6 +155,10 @@ unitId: '',
     );
     this.dataParent = transitionData.data;
     this.idSchedule = transitionData.scheduleId;
+
+    console.log('id schedule ', this.idSchedule);
+    console.log('asset id ', this.dataParent.assetId);
+    
   }
 
   ngOnInit() {
@@ -244,4 +252,65 @@ unitId: '',
 
     return param[0].parameterName;
   }
+
+   //buat testing
+
+   async deleteTransaksi () {
+    try {
+      const where = { 
+        query: 'scheduleTrxId=?',
+        params: [this.idSchedule],
+      }
+      await this.database.delete('record', where);
+  
+      await this.database.delete('recordHold', {
+        query: 'assetId=?',
+        params: [this.dataParent.assetId],
+      });
+  
+      await this.database.delete('recordAttachment', {
+        query: 'scheduleTrxId=?',
+        params: [this.idSchedule],
+      });
+  
+      await this.database.delete('recordAttachmentPemadam', {
+        query: 'scheduleTrxId=?',
+        params: [this.idSchedule],
+      });
+
+      console.log('sukses bang delete');
+
+      await this.routeCtrl.navigate(['transactions'])
+    } catch (error) {
+      
+      console.error(error)
+    }
+   
+  }
+ 
+  async confirmDelete() {
+    let alert = await this.alertCtrl.create({
+      header: 'Confirm Delete',
+      message: 'yakin mau di delete nih bang?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            console.log('GAJADI DELETE');
+          }
+        },
+        {
+          text: 'Yes',
+          handler: () => {
+            console.log('DELETE DATA BANG');
+            this.deleteTransaksi(); // call deleteData()
+
+          }
+        }
+      ]
+    });
+    alert.present();
+  }
+
 }

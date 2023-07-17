@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { DatabaseService } from 'src/app/services/database/database.service';
 
 @Component({
   selector: 'app-schedule-detail',
@@ -26,6 +27,7 @@ export class ScheduleDetailPage implements OnInit {
 
   constructor(
     private router: Router,
+    private database: DatabaseService
   ) {
     this.segment = 'scanned';
     this.searchTerm = '';
@@ -69,6 +71,10 @@ export class ScheduleDetailPage implements OnInit {
     }
   }
 
+  openScanPage() {
+    return this.router.navigate(['rfid-scan']);
+  } 
+  
   onSegmentChanged(event: any) {
     this.segment = event.detail.value;
 

@@ -8,6 +8,12 @@
     <ion-title class="text-lg font-bold text-center">
       {{ dataParent?.assetNumber }}
     </ion-title>
+
+    <ion-buttons slot="end" class="p-2" mode="ios">
+      <ion-button color="danger" (click)="confirmDelete()">
+        <ion-icon slot="icon-only"  name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -16,6 +22,12 @@
     <ion-toolbar class="ion-bg-white">
       <ion-buttons slot="start" class="p-2" mode="ios">
         <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+      </ion-buttons>
+      <ion-buttons slot="end" class="p-2" mode="ios">
+        <ion-button id="present-alert" color="danger" (click)="confirmDelete()">
+          <ion-icon slot="icon-only"  name="trash-outline"></ion-icon>
+        </ion-button>
+        
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -86,7 +98,7 @@
     <ion-row class="justify-center">
       <ion-accordion-group expand="inset" *ngIf="parameter.length">
         <ion-accordion [value]="item?.assetId" toggleIcon="chevron-down-circle" *ngFor="let item of parameter">
-          <ion-item slot="header" class="accordion">
+          <ion-item slot="header" class="accordion w-screen px-4">
             <p class="text-base font-semibold">{{ item?.parameterName }}</p>
           </ion-item>
           <div class="ion-no-padding" slot="content">

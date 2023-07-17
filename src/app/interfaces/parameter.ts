@@ -1,19 +1,32 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 export interface Parameter {
-    abnormal: string;
+    assetId: string;
+    assetNumber: string;
     description: string;
-    id: string;
-    index: string;
     inputType: string;
     max: string;
     min: string;
-    name: string;
     normal: string;
+    abnormal: string;
     option: string;
-    parameterGroup: string;
+    parameterId: string;
+    parameterName: string;
     schType: string;
-    show_on: string;
-    show_on_value: string[];
-    uom?: string;
-    work_instruction: string;
+    showOn: string;
+    sortId: string;
+    uom: string;
+    workInstruction: string;
+    tagId: any;
+    unit: string;
+    unitId: string;
+    area: string;
+    areaId: string;
+    created_at: string;
+    updated_at: string;
+    col: string;
+    isDeviation: string;
+    isExpanded: string;
+    reportType: string;
+    value: string;
+    attachment: any[];
 }

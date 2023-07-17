@@ -129,6 +129,7 @@
     </ion-grid>
   </div>
   <!-- *ngIf="laporan?.reportDate === null" -->
+  
   <ion-fab  *ngIf="schedules?.length && segment === 'unuploaded'" slot="fixed" vertical="bottom" horizontal="end" (click)="uploadData()">
     <ion-fab-button>
       <ion-icon name="cloud-upload"></ion-icon>
