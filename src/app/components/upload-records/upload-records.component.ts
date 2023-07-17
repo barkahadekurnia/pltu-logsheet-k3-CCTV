@@ -4,6 +4,7 @@ import { DatabaseService } from 'src/app/services/database/database.service';
 import { HttpService } from 'src/app/services/http/http.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
+import { Router } from '@angular/router';
 import * as moment from 'moment';
 
 @Component({
@@ -29,7 +30,8 @@ export class UploadRecordsComponent implements OnInit {
     private popoverCtrl: PopoverController,
     private database: DatabaseService,
     private http: HttpService,
-    private utils: UtilsService
+    private utils: UtilsService,
+    private routeCtrl:Router,
   ) {
     this.loading = true;
     this.remember = false;
@@ -317,6 +319,8 @@ console.log('all',record.requests[index].data);
         const uploaded = record.requests.filter((request: any) => request.status === 'success').length;
         record.decimal = record.requests.length ? uploaded / record.requests.length : 0;
         record.percentage = Math.round(record.decimal * 100);
+        this.dismissPopover()
+        this.routeCtrl.navigate(['transactions'])
       }
     });
   }

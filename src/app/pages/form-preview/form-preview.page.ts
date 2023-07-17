@@ -836,7 +836,7 @@ export class FormPreviewPage {
     const state = this.shared.actionAfterSave || 'unset';
     console.log('aftersave', state)
     console.log('aftersave data', data)
-    if (state === 'unset') {
+     if (state === 'unset') {
       const id = uuid();
 
       const saveOptions = await this.popoverCtrl.create({
@@ -858,8 +858,8 @@ export class FormPreviewPage {
         }
 
         if (detail?.data?.type === 'upload') {
-          //this.uploadRecords(data);
-          this.routeCtrl.navigate(['transactions'])
+          this.uploadRecords(data);
+          //this.routeCtrl.navigate(['transactions'])
         }
       });
     }

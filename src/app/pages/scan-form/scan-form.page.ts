@@ -248,7 +248,7 @@ export class ScanFormPage implements OnInit {
 
   async onNextButtonTouched() {
     console.log(this.resultParam);
-    
+    console.log('ini schedule trx id',this.schedule.scheduleTrxId);
   
     const index = await this.ionSlides.getActiveIndex();
 
