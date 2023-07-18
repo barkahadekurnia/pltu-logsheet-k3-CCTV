@@ -261,6 +261,9 @@ unitId: '',
         query: 'scheduleTrxId=?',
         params: [this.idSchedule],
       }
+
+      console.log('deleting data from scheduleTrxId = ', this.idSchedule) ;
+      
       await this.database.delete('record', where);
   
       await this.database.delete('recordHold', {
@@ -291,7 +294,7 @@ unitId: '',
   async confirmDelete() {
     let alert = await this.alertCtrl.create({
       header: 'Confirm Delete',
-      message: 'yakin mau di delete nih bang?',
+      message: 'yakin mau di delete ?',
       buttons: [
         {
           text: 'Cancel',

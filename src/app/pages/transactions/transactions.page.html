@@ -13,16 +13,16 @@
   <ion-toolbar class="dark:ion-base-gray-800" color="primary">
     <ion-segment class="W-full bg-primary" [value]="segment" (ionChange)="onSegmentChanged($event)">
       <!-- <ion-segment-button class="font-bold uppercase expanded" value="holded">Holded</ion-segment-button> -->
-      <ion-segment-button  *ngIf="jumlahUnuploaded" class="font-bold capitalize " value="unuploaded">
+      <ion-segment-button  *ngIf="jumlahUnuploaded >= 0" class="font-bold capitalize " value="unuploaded">
         <div class="bg-transparent">
           <ion-label class="tracking-normal">Belum Laporan </ion-label>
-          <ion-badge color="danger" class="align-middle">{{jumlahUnuploaded.length}}</ion-badge>
+          <ion-badge color="danger" class="align-middle">{{jumlahUnuploaded}}</ion-badge>
         </div>
       </ion-segment-button>
-      <ion-segment-button  *ngIf="jumlahUploaded" class="font-bold capitalize " value="uploaded">
+      <ion-segment-button  *ngIf="jumlahUploaded >= 0" class="font-bold capitalize " value="uploaded">
         <div class="bg-transparent">
           <ion-label class="tracking-normal">Sudah Laporan </ion-label>
-          <ion-badge color="success" class="align-middle">{{jumlahUploaded.length}}</ion-badge>
+          <ion-badge color="success" class="align-middle">{{jumlahUploaded}}</ion-badge>
         </div>
       </ion-segment-button>
     </ion-segment>
@@ -44,16 +44,16 @@
     <ion-toolbar class="dark:ion-base-gray-800 ion-bg-white">
       <ion-segment class="w-11/12" [value]="segment" (ionChange)="onSegmentChanged($event)">
         <!-- <ion-segment-button class="font-bold uppercase" value="holded">Holded</ion-segment-button> -->
-        <ion-segment-button  *ngIf="jumlahUnuploaded" class="font-bold capitalize" value="unuploaded">
+        <ion-segment-button  *ngIf="jumlahUnuploaded >= 0" class="font-bold capitalize" value="unuploaded">
           <div class="bg-transparent">
             <ion-label class="tracking-normal">Belum Laporan </ion-label>
-            <ion-badge color="danger" class="align-middle">{{jumlahUnuploaded.length}}</ion-badge>
+            <ion-badge color="danger" class="align-middle">{{jumlahUnuploaded}}</ion-badge>
           </div>
         </ion-segment-button>
-        <ion-segment-button  *ngIf="jumlahUploaded" class="font-bold capitalize" value="uploaded">
+        <ion-segment-button  *ngIf="jumlahUploaded >= 0" class="font-bold capitalize" value="uploaded">
           <div class="bg-transparent">
             <ion-label class="tracking-normal">Sudah Laporan </ion-label>
-            <ion-badge color="success" class="align-middle">{{jumlahUploaded.length}}</ion-badge>
+            <ion-badge color="success" class="align-middle">{{jumlahUploaded}}</ion-badge>
           </div>
         </ion-segment-button>
       </ion-segment>
@@ -63,7 +63,6 @@
   <ion-refresher slot="fixed" mode="md" (ionRefresh)="doRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
-
   <app-screen-view *ngIf="loading" type="loading" message="Loading data ..."></app-screen-view>
 
   <div *ngIf="!loading " class="w-full h-full bg-white dark:bg-gray-900">
@@ -80,7 +79,6 @@
 
           <app-screen-view *ngIf="!loading && !schedules?.length" type="no-data" message="Data Kosong"
           description="Synchronize with server to get data"></app-screen-view>
-
           <ion-accordion-group expand="inset" *ngIf="schedules.length">
             <ion-accordion [value]="item?.assetId" toggleIcon="chevron-down-circle" *ngFor="let item of schedules">
               <ion-item slot="header" class="accordion">

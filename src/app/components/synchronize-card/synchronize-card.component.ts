@@ -1,6 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { NavParams } from '@ionic/angular';
 import { Observable, Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 export interface SynchronizeCardOptions {
   complexMessage?: any[];
@@ -24,7 +25,10 @@ export class SynchronizeCardComponent implements OnDestroy {
   secondaryButton: any;
   subscription: Subscription;
 
-  constructor(private navParams: NavParams) {
+  constructor(
+    private navParams: NavParams , 
+    private routeCtrl: Router,
+    ) {
     this.options = this.navParams.get('options');
     [this.primaryButton, this.secondaryButton] = this.options?.buttons || [];
 
