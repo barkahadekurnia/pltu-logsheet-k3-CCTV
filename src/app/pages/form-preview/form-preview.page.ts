@@ -98,6 +98,7 @@ export class FormPreviewPage {
   loading: boolean;
   offset: number;
   readonly: boolean;
+  asset:any;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -113,7 +114,7 @@ export class FormPreviewPage {
     private shared: SharedService,
     private utils: UtilsService,
     private navCtrl: NavController,
-    private routeCtrl: Router,
+    private router: Router,
 
   ) {
     this.record = {
@@ -179,6 +180,7 @@ export class FormPreviewPage {
     this.offset = 0;
     this.readonly = false;
     this.datasc = {};
+    this.asset = {};
   }
 
   ionViewWillEnter() {
@@ -186,6 +188,12 @@ export class FormPreviewPage {
       this.activatedRoute.snapshot.paramMap.get('data')
     );
     this.datasc = transitionData;
+
+     //tambah asset buat detail info
+    this.asset = transitionData.asset;
+    console.log('asset di form preview',this.asset);
+    
+
     if (!transitionData) {
       return this.utils.back();
     }
@@ -209,11 +217,17 @@ export class FormPreviewPage {
         this.record.scannedBy = this.shared.user.name;
         this.schedule = transitionData.schedule;
         this.attachments = transitionData.attachments;
-        this.shared.asset = this.schedule;
+        //this.shared.asset = this.schedule;
         this.loading = false;
+
+        this.shared.asset = this.asset;
 
         this.menuCtrl.enable(true, 'asset-information')
           .then(() => this.menuCtrl.swipeGesture(true, 'asset-information'));
+
+        console.log('schedule di form preview' , this.schedule);
+        console.log('asset di form preview' , transitionData.asset);
+        
       }
     });
   }
@@ -224,7 +238,11 @@ export class FormPreviewPage {
   }
 
   showAssetInfo() {
+    this.shared.currentRoute = this.router.url.toString();
+    console.log('this asset di show asset info', this.asset);
+    
     return this.menuCtrl.open('asset-information');
+    
   }
 
   back() {

@@ -198,6 +198,7 @@ export class ScanFormPage implements OnInit {
     this.platform.ready().then(() => {
       this.getAsset().finally(() => {
         console.log('2. cek assetid on init :', this.asset);
+        this.setDataSchedule() 
         if (this.asset.assetId) {
           this.shared.asset = this.asset;
         } else {
@@ -213,6 +214,12 @@ export class ScanFormPage implements OnInit {
 
     this.menuCtrl.enable(true, 'asset-information')
       .then(() => this.menuCtrl.swipeGesture(true, 'asset-information'));
+
+    console.log('schedule di init',this.schedule);
+
+    // this.getSchedule()
+  
+    
   }
 
   async ionViewWillLeave() {
@@ -249,6 +256,9 @@ export class ScanFormPage implements OnInit {
   async onNextButtonTouched() {
     console.log(this.resultParam);
     console.log('ini schedule trx id',this.schedule.scheduleTrxId);
+    console.log('ini schedule ',this.schedule);
+    console.log('asset when button touched',this.asset);
+    
   
     const index = await this.ionSlides.getActiveIndex();
 
@@ -326,6 +336,7 @@ export class ScanFormPage implements OnInit {
 
   showAssetInfo() {
     this.shared.currentRoute = this.router.url.toString();
+    console.log('this asset di show asset info', this.asset);
     return this.menuCtrl.open('asset-information');
   }
 
@@ -693,6 +704,8 @@ export class ScanFormPage implements OnInit {
   
 
   async preview() {
+
+    // this.showAssetInfo()
     // const emptyParameter = this.resultParam
     //   .find(parameter => parameter.value == null || parameter.value === '');
     // this.record.scannedNotes = 'catatan';
@@ -729,13 +742,29 @@ export class ScanFormPage implements OnInit {
 
     console.log('this sch',this.sch);
     
-    this.schedule.scheduleTrxId = this.sch[0]?.scheduleTrxId;
-    this.schedule.scheduleTo = this.sch[0]?.scheduleTo;
-    this.schedule.schType = this.sch[0]?.schType;
-    this.schedule.schFrequency = this.sch[0]?.schFrequency;
-    this.schedule.schWeeks = this.sch[0]?.schWeeks;
-    this.schedule.schWeekDays = this.sch[0]?.schWeekDays;
-    this.schedule.schDays = this.sch[0]?.schDays;
+    console.log('schedule di preview', JSON.stringify(this.schedule));
+    console.log('schedule di preview', this.schedule);
+    console.log('this asset di preview' , this.asset);
+    
+    
+    this.schedule.scheduleTrxId = this.asset?.scheduleTrxId;
+    this.schedule.scheduleTo = this.asset?.scheduleTo;
+    this.schedule.schType = this.asset?.schType;
+    this.schedule.schFrequency = this.asset?.schFrequency;
+    this.schedule.schWeeks = this.asset?.schWeeks;
+    this.schedule.schWeekDays = this.asset?.schWeekDays;
+    this.schedule.schDays = this.asset?.schDays;
+
+
+    console.log('this schedule after inisiasi asset di preview', this.schedule);
+    
+    // this.schedule.scheduleTrxId = this.sch[0]?.scheduleTrxId;
+    // this.schedule.scheduleTo = this.sch[0]?.scheduleTo;
+    // this.schedule.schType = this.sch[0]?.schType;
+    // this.schedule.schFrequency = this.sch[0]?.schFrequency;
+    // this.schedule.schWeeks = this.sch[0]?.schWeeks;
+    // this.schedule.schWeekDays = this.sch[0]?.schWeekDays;
+    // this.schedule.schDays = this.sch[0]?.schDays;
 
     const mergeDataFormSlides = [].concat.apply([], this.resultParam);
 
@@ -755,7 +784,7 @@ export class ScanFormPage implements OnInit {
     console.log(this.slides);
 
     const data = JSON.stringify({
-      asset: this.schedule,
+      asset: this.asset,
       record: this.record,
       schedule: mergeDataFormSlides,
       offset: this.transitionData?.offset || 0,
@@ -777,6 +806,7 @@ export class ScanFormPage implements OnInit {
 
     return this.router.navigate(['form-preview', { data }]);
   }
+
   async saveTemporary() {
     const loader = await this.loadingCtrl.create({
       spinner: 'dots',
@@ -1147,10 +1177,10 @@ export class ScanFormPage implements OnInit {
 
       const value = await this.getAssetTagValue();
       const result = await this.database.select('schedule', {
-        // where: {
-        //   query: `assetId=?`,
-        //   params: [value]
-        // }
+        where: {
+          query: `assetId=?`,
+          params: [value]
+        }
       });
 
       // console.log({ result: result });
@@ -1165,9 +1195,12 @@ export class ScanFormPage implements OnInit {
 
       // console.log({ schedule: schedule });
 
-      if (schedule) {
-        this.setDataSchedule(schedule);
-      };
+      console.log('schedule',schedule);
+      
+
+      // if (schedule) {
+      //   this.setDataSchedule(schedule);
+      // };
     } catch (error) {
       console.error(error);
     }
@@ -1409,12 +1442,9 @@ export class ScanFormPage implements OnInit {
 
     // this.asset.tags = zip(tagIds, tagNames)
     //   .map(([id, name]) => ({ id, name }));
-
     // this.asset.tagLocations = zip(tagLocationIds, tagLocationNames)
     //   .map(([id, name]) => ({ id, name }));
-
     // console.log({ asset: this.asset.tags, tagLocations: this.asset.tagLocations });
-
   }
 
   private setDataRecord(record: any) {
@@ -1423,15 +1453,24 @@ export class ScanFormPage implements OnInit {
     this.record.scannedNotes = record.scannedNotes;
   }
 
-  private setDataSchedule(schedule: any) {
-    this.schedule.scheduleTrxId = schedule?.scheduleTrxId;
-    this.schedule.scheduleTo = schedule?.scheduleTo;
-    this.schedule.schType = schedule?.schType;
-    this.schedule.schFrequency = schedule?.schFrequency;
-    this.schedule.schWeeks = schedule?.schWeeks;
-    this.schedule.schWeekDays = schedule?.schWeekDays;
-    this.schedule.schDays = schedule?.schDays;
+  private setDataSchedule() {
+    this.schedule.scheduleTrxId = this.asset.scheduleTrxId;
+    this.schedule.scheduleTo = this.asset.scheduleTo;
+    this.schedule.schType = this.asset.schType;
+    this.schedule.schFrequency = this.asset.schFrequency;
+    this.schedule.schWeeks = this.asset.schWeeks;
+    this.schedule.schWeekDays = this.asset.schWeekDays;
+    this.schedule.schDays = this.asset.schDays;
   }
+  // private setDataSchedule(schedule: any) {
+  //   this.schedule.scheduleTrxId = schedule?.scheduleTrxId;
+  //   this.schedule.scheduleTo = schedule?.scheduleTo;
+  //   this.schedule.schType = schedule?.schType;
+  //   this.schedule.schFrequency = schedule?.schFrequency;
+  //   this.schedule.schWeeks = schedule?.schWeeks;
+  //   this.schedule.schWeekDays = schedule?.schWeekDays;
+  //   this.schedule.schDays = schedule?.schDays;
+  // }
 
   private getDataParameter(parameter: any) {
     return {
@@ -1458,7 +1497,7 @@ export class ScanFormPage implements OnInit {
   }
 
   private isDeviation(parameter: any) {
-     console.log('cek deviasi ', parameter)
+     //console.log('cek deviasi ', parameter)
     if (parameter.value == null || parameter.value === '') {
       return false;
     }
@@ -1496,9 +1535,9 @@ export class ScanFormPage implements OnInit {
         //option
         //is deviation false = index 0
         //is deviation true = index 1 
-       console.log('abnormal', parameter.abnormal.split(","));
-       console.log('value', parameter.value);
-       console.log('this.result.params' , this.resultParam);
+      //  console.log('abnormal', parameter.abnormal.split(","));
+      //  console.log('value', parameter.value);
+      //  console.log('this.result.params' , this.resultParam);
       return searchStringInArray(parameter.value, parameter.abnormal.split(","));
     }
 
@@ -1519,7 +1558,7 @@ export class ScanFormPage implements OnInit {
         } else {
           item.value = ''
         }   
-        console.log('result params map true', item)    
+        //console.log('result params map true', item)    
        }
       )
       console.log('sekarang berada di slide nomor' , this.indexSlide)
@@ -1532,7 +1571,7 @@ export class ScanFormPage implements OnInit {
          } else {
            item.value = ''
          }   
-         console.log('result params map false', item)    
+         //console.log('result params map false', item)    
         }
        )
        console.log('sekarang berada di slide nomor' , this.indexSlide)  
