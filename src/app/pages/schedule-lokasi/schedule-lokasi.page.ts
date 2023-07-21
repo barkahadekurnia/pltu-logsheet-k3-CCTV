@@ -38,6 +38,7 @@ export class ScheduleLokasiPage implements OnInit {
     if (router.getCurrentNavigation().extras.state) {
       const navValues = this.router.getCurrentNavigation().extras.state;
       console.log('navValues ', navValues);
+      console.log('navValues LIAT ', this.router.getCurrentNavigation());
       this.assetCategory = navValues?.assetCategory;
 
       const dataSchedules = navValues?.schedulePerDay;

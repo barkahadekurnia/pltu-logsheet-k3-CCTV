@@ -12,6 +12,7 @@ import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { HttpService } from 'src/app/services/http/http.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-schedules',
@@ -45,6 +46,7 @@ export class SchedulesPage implements OnInit {
     private utils: UtilsService,
     private navCtrl: NavController,
     private http: HttpService,
+    private router: Router,
   ) {
     this.calendar = {
       date: null,
@@ -53,6 +55,11 @@ export class SchedulesPage implements OnInit {
       daysInNextMonth: [],
       title: '',
     };
+
+    // if (router.getCurrentNavigation()) {
+    //   const navValues = this.router.getCurrentNavigation();
+    //   console.log('navValues ', navValues);
+    // }
 
     this.schedules = [];
 
@@ -109,6 +116,7 @@ export class SchedulesPage implements OnInit {
   
   //barkah maintance add shift schedule
   async scheduleShift(item: any) {
+
     if (item.schedules.length > 0) {
       const loader = await this.utils.presentLoader();
 
