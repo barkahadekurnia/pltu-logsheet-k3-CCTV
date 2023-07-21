@@ -289,8 +289,8 @@ export class TransactionsPage {
          // uploaded = uniq(uploaded.map(record => record.scheduleTrxId))
           uploaded = uniq(uploaded)
 
-console.log('sch200', response?.data?.dataSchedule?.sch200)
-console.log('sch', response?.data?.dataSchedule)
+          console.log('sch200', response?.data?.dataSchedule?.sch200)
+          console.log('sch', response?.data?.dataSchedule)
           const activityLogs = response?.data?.dataSchedule
             ?.map?.((schedule: any) => ({
               scheduleTrxId: schedule.scheduleId,
@@ -490,6 +490,7 @@ console.log('sch', response?.data?.dataSchedule)
         console.log('data upload item', item)
         console.log('data upload recordAttachmentId', recordAttachmentId)
 
+        
         await this.http.requests({
           requests: [() => this.http.uploadRecordAttachment(data)],
           onSuccess: ([response]) => {
