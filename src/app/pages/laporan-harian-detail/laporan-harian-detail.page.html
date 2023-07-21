@@ -98,8 +98,8 @@
                       <ion-input class="text-right" readonly [value]="item?.date"></ion-input>
                     </ion-item>
                   </ion-list>
-                  <button class="btn btn-sm btn-primary text-white btn-block rounded-lg space-x-1 focus:outline-none" >
-                    <!-- (click)="openDetail(item?.trxParentId)" -->
+                  <button class="btn btn-sm btn-primary text-white btn-block rounded-lg space-x-1 focus:outline-none" (click)="openDetail(item)">
+                    
                     <p class="text-xs font-medium capitalize">Detail</p>
                     <ion-icon name="chevron-forward-outline"></ion-icon>
                   </button>

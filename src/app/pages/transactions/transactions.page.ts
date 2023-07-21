@@ -150,7 +150,6 @@ export class TransactionsPage {
       const start = this.schedules.length;
       console.log('cek isi this schedules',this.schedules);
       
-
       if (start < this.filteredSchedules.length) {
         let end = start + 20;
 

@@ -246,15 +246,10 @@ unitId: '',
     const param = this.database.parseResult(result);
     // console.log('param', param[0].parameterName);
     // result.then(stuff=>{console.log(stuff)})
-
-
-
-
     return param[0].parameterName;
   }
 
    //buat testing
-
    async deleteTransaksi () {
     try {
       const where = { 
