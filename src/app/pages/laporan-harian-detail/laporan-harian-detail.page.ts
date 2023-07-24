@@ -81,7 +81,7 @@ export class LaporanHarianDetailPage implements OnInit {
   }
 
   ngOnInit() {
-    this.getSchedules() 
+    //this.getSchedules() 
   }
 
   async onScroll(e: any) {
@@ -212,13 +212,15 @@ export class LaporanHarianDetailPage implements OnInit {
 
   async openDetail(item){
 
-    console.log(this.schedules[0]);
-    
+    await  this.getSchedules(item);
+
     console.log('cek detail', item)
     const data = JSON.stringify({
       data: this.schedules[0],
-      scheduleId: this.schedules[0].scheduleTrxId,
+      scheduleId: item.scheduleTrxId,
     })
+
+ 
     console.log('data json :', JSON.parse(data));
 
 
@@ -230,7 +232,7 @@ export class LaporanHarianDetailPage implements OnInit {
     return this.router.navigate(['transaction-detail',  {data} ]);
   }
 
-  async getSchedules() {
+  async getSchedules(item) {
     try {
       const resultSchedules = await this.database.select(
         'schedule',
@@ -287,13 +289,16 @@ export class LaporanHarianDetailPage implements OnInit {
 
           where: {
             query: `scheduleTrxId=?`,
-            params: ['8605e342-25a3-11ee-b754-801844f147a4']
+            params: [item.scheduleTrxId]
           },
           groupBy: ['scheduleTrxId'],
         }
       );
       const schedules = this.database.parseResult(resultSchedules);
       console.log('schedule', schedules)
+
+      console.log('isi json string',item.scheduleTrxId);
+      
 
       //const filterLaporan = schedules.filter()
 
