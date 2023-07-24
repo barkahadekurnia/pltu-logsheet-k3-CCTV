@@ -34,6 +34,7 @@ export class LaporanHarianDetailPage implements OnInit {
   form: LaporanData;
 
   sourceSchedules: any[];
+  schedules:any[];
 
   constructor(
     private utils: UtilsService,
@@ -73,6 +74,7 @@ export class LaporanHarianDetailPage implements OnInit {
     this.loading = true;
 
     this.sourceSchedules = [];
+    this.schedules = [] ;
 
     this.getLocalAssets(transitionData.data);
 
@@ -209,13 +211,23 @@ export class LaporanHarianDetailPage implements OnInit {
   }
 
   async openDetail(item){
+
+    console.log(this.schedules[0]);
+    
     console.log('cek detail', item)
     const data = JSON.stringify({
-      data: item,
-      scheduleId: item.scheduleTrxId,
+      data: this.schedules[0],
+      scheduleId: this.schedules[0].scheduleTrxId,
     })
     console.log('data json :', JSON.parse(data));
-    return this.router.navigate(['transaction-detail', { data }]);
+
+
+    // const data = this.schedules[0]
+    // JSON.stringify(data)
+
+    // console.log('dataaaaaa' , data);
+
+    return this.router.navigate(['transaction-detail',  {data} ]);
   }
 
   async getSchedules() {
@@ -272,10 +284,23 @@ export class LaporanHarianDetailPage implements OnInit {
             'assetCategoryName'
           ],
           // join:
+
+          where: {
+            query: `scheduleTrxId=?`,
+            params: ['8605e342-25a3-11ee-b754-801844f147a4']
+          },
+          groupBy: ['scheduleTrxId'],
         }
       );
       const schedules = this.database.parseResult(resultSchedules);
       console.log('schedule', schedules)
+
+      //const filterLaporan = schedules.filter()
+
+      console.log('result schedules',resultSchedules);
+
+      this.schedules= schedules
+      
 
       const resultRecord = await this.database.select(
         'record',
@@ -318,7 +343,7 @@ export class LaporanHarianDetailPage implements OnInit {
       // const lastWeek = Math.max(...dateInThisMonth.map(item => item.week));
       // const schedules = this.database.parseResult(resultSchedules)
       //   .filter(schedule => this.filterSchedule(schedule, now, dateInThisMonth, lastWeek));
-
+        //tes
       const assetIds = uniq(schedules.map((schedule) => schedule.assetId));
       const assetTags = await this.getAssetTags(assetIds);
       const holdedRecords = await this.getHoldedRecords(assetIds);
@@ -329,7 +354,7 @@ export class LaporanHarianDetailPage implements OnInit {
             ? schedule?.tagId?.split?.(',')
             : [];
 
-          console.log('schedule isi ',schedule);
+          //console.log('schedule isi ',schedule);
           
 
           const tagNumber = schedule?.tagNumber;

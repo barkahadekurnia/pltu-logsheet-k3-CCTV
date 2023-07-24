@@ -158,6 +158,7 @@ unitId: '',
 
     console.log('id schedule ', this.idSchedule);
     console.log('asset id ', this.dataParent.assetId);
+    console.log('data Parent', this.dataParent);
     
   }
 
