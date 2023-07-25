@@ -194,12 +194,26 @@
                           {{shift.shift}}
                         </label>
                       </div>
-                      <div class="flex mb-3 text-xs font-semibold">
+                      <div class="mb-3 text-sm font-semibold">
+                        <h4 class="font-semibold mb-2">
+                          <ion-icon slot="icon-only" size="40px" name="person-outline" class="mr-1 pt-1"></ion-icon>
+                          Daftar Petugas
+                        </h4>
+                        <div *ngFor="let dataPetugas of shift.teamData[shift.groupNameData[0].operatorGroupName]">
+                          <p class="text-white capitalize ">
+                            - {{lowerCaseLetter(dataPetugas.operatorUserNama)}}
+                          </p>
+                        </div>
+                      </div>
+                      <!-- <div class="flex mb-3 text-xs font-semibold">
                         <div *ngFor="let dataPetugas of shift.teamData[shift.groupNameData[0].operatorGroupName]">
                           <label class="p-1 px-2 mr-2 bg-lime-700 text-white rounded-full">
                             {{dataPetugas.operatorUserNama}}
                           </label>
                         </div>
+                      </div> -->
+                      <div class="absolute top-5 right-5 text-white text-sm align-middle flex place-items-center"  >
+                          <div class="p-1 px-2 w-max h-5 flex justify-center items-center rounded-full bg-error ">Total : {{jumlahAssetShift(shift.detailLocationData)}} </div>
                       </div>
                     </section>
                   </ion-item>
@@ -213,17 +227,17 @@
                       <ng-container *ngIf="shift.detailLocationData?.length > 0">
                         <div class="text-sm mb-1.5 font-semibold"
                           *ngFor="let dataLocation of shift.detailLocationData; index as idx;">
-                          <div class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between"
+                          <div class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
                             (click)="viewAssetsCategory('schedule-lokasi', dataLocation?.assetData, assetCategory)">
                             <div>
-                              {{dataLocation.locationUnitNama}}
-                              - {{dataLocation.locationLokasiDescription}}
+                              {{lowerCaseLetter(dataLocation.locationUnitNama)}}
+                              - {{lowerCaseLetter(dataLocation.locationLokasiDescription)}}
                               ({{dataLocation.locationLokasiNama}})
                             </div>
                             <div class="align-middle flex place-items-center">
                               <!-- <ion-icon slot="icon-only" name="chevron-forward-outline"
                                 class="mr-1 pt-1 text-base text-gray-200"></ion-icon> -->
-                                <div class="w-5 h-5 flex justify-center items-center rounded-full bg-error "> {{dataLocation.assetData.length}} </div>
+                                <div class="p-1 w-max h-5 flex justify-center items-center rounded-full bg-error "> {{dataLocation.assetData.length}} </div>
                             </div>
                           </div>
                         </div>

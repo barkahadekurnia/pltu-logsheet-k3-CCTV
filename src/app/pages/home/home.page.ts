@@ -317,6 +317,9 @@ export class HomePage implements OnInit {
     this.application.lastSync = moment(now).from(now);
     this.application.bgSyncButton = 'btn-success';
     this.shared.setLastSynchronize(moment(now).format('YYYY-MM-DDTHH:mm:ss'));
+    
+    //nambahna men ra refresh
+    await this.getLocalAssets();
   }
   // pengecekan jumlah alat pemadam
   private async getCountAssets() {
@@ -444,11 +447,19 @@ export class HomePage implements OnInit {
       const result = await this.database.select('schedule', {
         column: ['scheduleTrxId', 'assetId', 'scannedAt', 'syncAt'],
         groupBy: ['scheduleTrxId'],
-        where: {
-          query: `assetId IN (${marks})`,
-          params: assetIds,
-        },
+        // where: {
+        //   query: `assetId IN (${marks})`,
+        //   params: assetIds,
+        // },
       });
+      // const result = await this.database.select('schedule', {
+      //   column: ['scheduleTrxId', 'assetId', 'scannedAt', 'syncAt'],
+      //   groupBy: ['scheduleTrxId'],
+      //   where: {
+      //     query: `assetId IN (${marks})`,
+      //     params: assetIds,
+      //   },
+      // });
 
       const now = this.utils.getTime();
       const dateInThisMonth = this.getDateInThisMonth(now);

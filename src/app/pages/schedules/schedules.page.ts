@@ -5,7 +5,7 @@ import { Platform, NavController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
 
-import { uniq, uniqBy } from 'lodash';
+import { reduce, uniq, uniqBy } from 'lodash';
 import * as moment from 'moment';
 
 import { DatabaseService } from 'src/app/services/database/database.service';
@@ -132,6 +132,8 @@ export class SchedulesPage implements OnInit {
         const bodyResponse = response.data?.data;
         this.dataShiftPerDay = bodyResponse;
         console.log('dataShiftPerDay', this.dataShiftPerDay);
+
+
       } catch (err) {
         console.error(err);
       } finally {
@@ -629,4 +631,31 @@ export class SchedulesPage implements OnInit {
     return unuploadedRecords;
   }
 
+  //barkah maintance add shift schedule
+  lowerCaseLetter(string) {
+    let lower = string.toLowerCase() 
+    return lower
+  }
+  lowerCaseLetterUnit(string) {
+    let split = string.split(' ')
+
+    let depan = split[0].toLowerCase() 
+    let belakang = split[1].toUpperCase() 
+
+    let join = depan + ' ' + belakang
+    return join
+  }
+
+  jumlahAssetShift(shift) {
+    //const total = shift.assetData.reduce((a, b) => a + b);
+    let total = 0
+
+    for ( let i = 0 ; i < shift.length ; i++) {
+      total = total + shift[i].assetData.length
+    }
+
+    console.log('ini total shift di asset', shift.length);
+    
+    return total
+  }
 }
