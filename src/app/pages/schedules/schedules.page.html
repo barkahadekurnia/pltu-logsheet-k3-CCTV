@@ -231,8 +231,11 @@
                             (click)="viewAssetsCategory('schedule-lokasi', dataLocation?.assetData, assetCategory)">
                             <div>
                               {{lowerCaseLetter(dataLocation.locationUnitNama)}}
-                              - {{lowerCaseLetter(dataLocation.locationLokasiDescription)}}
+                              - {{dataLocation.locationLokasiDescription}}
                               ({{dataLocation.locationLokasiNama}})
+                              <!-- {{lowerCaseLetter(dataLocation.locationUnitNama)}}
+                              - {{lowerCaseLetter(dataLocation.locationLokasiDescription)}}
+                              ({{dataLocation.locationLokasiNama}}) -->
                             </div>
                             <div class="align-middle flex place-items-center">
                               <!-- <ion-icon slot="icon-only" name="chevron-forward-outline"

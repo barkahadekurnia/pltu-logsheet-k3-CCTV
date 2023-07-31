@@ -633,9 +633,13 @@ export class SchedulesPage implements OnInit {
 
   //barkah maintance add shift schedule
   lowerCaseLetter(string) {
-    let lower = string.toLowerCase() 
+    let lower = ''
+    if(string) {
+      lower = string.toLowerCase() 
+    } 
     return lower
   }
+
   lowerCaseLetterUnit(string) {
     let split = string.split(' ')
 

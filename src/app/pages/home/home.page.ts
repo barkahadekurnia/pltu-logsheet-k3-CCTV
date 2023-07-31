@@ -642,6 +642,8 @@ export class HomePage implements OnInit {
     return this.menuCtrl.open('sidebar');
   }
 
+
+  //nyimpen ke SQLite
   private async getParameterByAssetId(assetId) {
     const loader = await this.utils.presentLoader();
     return this.http.requests({
@@ -685,7 +687,7 @@ export class HomePage implements OnInit {
               parameters.push(data);
             }
           }
-          console.log('parameter1', parameters);
+          console.log('parameter data sebelum di push SQL', parameters);
 
           let storeParameters = [];
          
