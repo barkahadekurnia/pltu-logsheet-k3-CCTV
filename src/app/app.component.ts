@@ -256,7 +256,14 @@ export class AppComponent implements AfterViewInit {
         : 'mapbox://styles/mapbox/streets-v11'
     );
     // [109.0873408, -7.6847873]
+    parseInt(this.shared.asset.longitude)
+    parseInt(this.shared.asset.latitude)
+    console.log('this shared asset', this.shared.asset);
+    console.log('this asset di app comp', this.asset);
+    
     this.marker = new mapboxgl.Marker()
+   
+    
       .setLngLat([
         +this.shared.asset.longitude,
         +this.shared.asset.latitude

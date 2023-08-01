@@ -6,7 +6,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-import { intersection, unionBy, uniq, zip, uniqBy, groupBy } from 'lodash';
+import { intersection, unionBy, uniq, zip, uniqBy, groupBy, orderBy } from 'lodash';
 import { point } from '@turf/helpers';
 import turf_distance from '@turf/distance';
 import * as moment from 'moment';
@@ -61,8 +61,8 @@ export class TransactionsPage {
   dataBelum: any[];
   dataSudah: any[];
 
-  jumlahUploaded:any;
-  jumlahUnuploaded:any;
+  jumlahUploaded:number;
+  jumlahUnuploaded:number;
 
   constructor(
     private router: Router,
@@ -100,6 +100,9 @@ export class TransactionsPage {
       order: {},
       isUploading: false,
     };
+
+    this.jumlahUnuploaded=0;
+    this.jumlahUploaded=0;
   }
 
   ionViewWillEnter() {
@@ -109,6 +112,7 @@ export class TransactionsPage {
     });
   }
 
+  
   ionViewWillLeave() {
 
   }
@@ -125,13 +129,12 @@ export class TransactionsPage {
     } else if (this.segment === 'uploaded') {
       this.schedules = this.dataBelum;
       console.log('segmen uploaded this.dataBelum', this.dataBelum)
-
     }
     this.onSearch();
   }
 
   doRefresh(e: any) {
-    this.getSchedules().finally(() => e.target.complete());
+   this.getSchedules().finally(() => e.target.complete());
   }
 
   onScroll(e: any) {
@@ -147,7 +150,6 @@ export class TransactionsPage {
       const start = this.schedules.length;
       console.log('cek isi this schedules',this.schedules);
       
-
       if (start < this.filteredSchedules.length) {
         let end = start + 20;
 
@@ -222,6 +224,7 @@ export class TransactionsPage {
       }
     });
 
+    //try to hide 
     await loader.present();
     const orders = Object.values(this.syncJob.order);
 
@@ -280,10 +283,14 @@ export class TransactionsPage {
             throw response;
           }
 
-          const uploaded = response?.data?.dataSchedule
-            ?.map?.((schedule: any) => schedule);
-console.log('sch200', response?.data?.dataSchedule?.sch200)
-console.log('sch', response?.data?.dataSchedule)
+          let uploaded = response?.data?.dataSchedule
+            ?.map?.((schedule: any) => schedule); 
+          
+         // uploaded = uniq(uploaded.map(record => record.scheduleTrxId))
+          uploaded = uniq(uploaded)
+
+          console.log('sch200', response?.data?.dataSchedule?.sch200)
+          console.log('sch', response?.data?.dataSchedule)
           const activityLogs = response?.data?.dataSchedule
             ?.map?.((schedule: any) => ({
               scheduleTrxId: schedule.scheduleId,
@@ -301,11 +308,11 @@ console.log('sch', response?.data?.dataSchedule)
               }))
             || []
           ));
-console.log('uploaded?.length', uploaded);
+          console.log('uploaded?.length', uploaded);
           if (uploaded?.length) {
             const marks = this.database.marks(uploaded.length).join(',');
-console.log('mark', marks);
-console.log('mark2', uploaded);
+            console.log('mark', marks);
+            console.log('mark2', uploaded);
             const where = {
               query: `scheduleTrxId IN (${marks})`,
               params: uploaded
@@ -319,9 +326,19 @@ console.log('mark2', uploaded);
             this.syncJob.order.records.status = 'success';
             this.syncJob.order.records.message = 'Success upload data records';
 
+            console.log('this data uploaded' , uploaded); //7
+            console.log('this schedule trx id' , scheduleTrxIds); //2
+            
+
             if (uploaded.length > 1) {
               this.syncJob.order.records.message += ` (${uploaded.length})`;
             }
+            
+            //kasi jeda sebelum ngeclose
+            await setTimeout(() => {
+              loader.dismiss()
+              }, 1500)
+           // await loader.dismiss()
           } else {
             this.syncJob.order.records.status = 'failed';
             this.syncJob.order.records.message = 'Failed to upload data records';
@@ -330,6 +347,9 @@ console.log('mark2', uploaded);
             if (failureCount > 0) {
               this.syncJob.order.records.message += ` (${failureCount})`;
             }
+
+            //dismissing error but no error
+            //await loader.dismiss()
           }
 
           this.shared.addLogActivity({
@@ -418,8 +438,6 @@ console.log('mark2', uploaded);
     }
   }
 
-
-
   private async uploadRecordAttachments(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
     const recordAttachments = (await this.getUnuploadedData('recordAttachment'))
       .map((attachment) => ({
@@ -472,6 +490,7 @@ console.log('mark2', uploaded);
         console.log('data upload item', item)
         console.log('data upload recordAttachmentId', recordAttachmentId)
 
+        
         await this.http.requests({
           requests: [() => this.http.uploadRecordAttachment(data)],
           onSuccess: ([response]) => {
@@ -1066,139 +1085,40 @@ console.log('mark2', uploaded);
 
         console.log('cek semua', this.sourceSchedules);
 
-        this.schedulesUnuploaded = schedules.map((schedule) => {
-          const tagIds = schedule?.tagId?.length
-            ? schedule?.tagId?.split?.(',')
-            : [];
+       
 
-          const tagNumber = schedule?.tagNumber;
-          const data = {
-            scheduleTrxId: schedule.scheduleTrxId,
-            assetId: schedule.assetId,
-            assetNumber: schedule.assetNumber,
-            assetStatusId: schedule.assetStatusId,
-            assetStatusName: schedule.assetStatusName,
-            assetTags: assetTags
-              .filter(assetTag => assetTag.assetId === schedule.assetId),
-            shift: null,
-            scheduleType: 'Manual',
-            scheduleFrom: moment(schedule.scheduleFrom)
-              .format('D MMMM YYYY HH:mm'),
-            scheduleTo: moment(schedule.scheduleTo)
-              .format('D MMMM YYYY HH:mm'),
-            uploadedOn: schedule.syncAt != null
-              ? moment(schedule.syncAt).format('D MMMM YYYY HH:mm')
-              : '-',
-            scannedEnd: schedule.scannedEnd,
-            tags: zip(tagIds, tagNumber).map(([id, name]) => ({ id, name })),
-            isUploaded: false,
-            isUnuploaded: false,
-            hasPreview: false,
-            hasRecordHold: false,
-            abbreviation: schedule.abbreviation,
-            adviceDate: schedule.adviceDate,
-            approvedAt: schedule.approvedAt,
-            approvedBy: schedule.approvedBy,
-            approvedNotes: schedule.approvedNotes,
-            condition: schedule.condition,
-            capacityValue: schedule.capacityValue,
-            unitCapacity: schedule.unitCapacity,
-            supplyDate: moment(schedule.supplyDate).format('D MMMM YYYY'),
-            reportPhoto: schedule.reportPhoto,
-            scannedAccuration: schedule.scannedAccuration,
-            scannedAt: schedule.scannedAt,
-            scannedBy: schedule.scannedBy,
-            scannedNotes: schedule.scannedNotes,
-            scannedWith: schedule.scannedWith,
-            schDays: schedule.schDays,
-            schFrequency: schedule.schFrequency,
-            schManual: schedule.schManual,
-            schType: schedule.schType,
-            schWeekDays: schedule.schWeekDays,
-            schWeeks: schedule.schWeeks,
-            tagId: schedule.tagId,
-            photo: schedule.photo,
-            unit: schedule.unit,
-            unitId: schedule.unitId,
-            area: schedule.area,
-            areaId: schedule.areaId,
-            latitude: schedule.latitude,
-            longitude: schedule.longitude,
-            created_at: schedule.created_at,
-            deleted_at: schedule.deleted_at,
-            date: schedule.schedule,
-            assetCategoryId: schedule.assetCategoryId,
-            assetCategoryName: schedule.assetCategoryName
-          };
+        this.jumlahUnuploaded = 0 ; 
+        this.jumlahUploaded = 0 ; 
 
+        for( const transaksi of this.sourceSchedules) {
 
-          if (!schedule.scheduleManual) {
-            let shiftFormat = 'HH:mm';
-
-            if (schedule.schType?.toLowerCase() === 'weekly') {
-              shiftFormat = '[W]-w';
-            } else if (schedule.schType?.toLowerCase() === 'monthly') {
-              shiftFormat = 'MMMM';
-            }
-
-            data.shift = moment(schedule.scheduleFrom).format(shiftFormat);
-            data.scheduleType = 'Automatic';
+          if (transaksi.isUploaded === true){
+            this.jumlahUploaded++
+          } else if ( transaksi.isUnuploaded ===true) {
+            this.jumlahUnuploaded++
           }
 
-          if (schedule.syncAt != null) { // Uploaded
-            data.isUploaded = true;
-            data.hasPreview = uploadedRecords.includes(schedule.scheduleTrxId);
-            data.scannedEnd = moment(schedule.scannedEnd, 'YYYY-MM-DD HH:mm:ss')
-              .format('D MMMM YYYY HH:mm');
-          } else if (schedule.scheduleTrxId in unuploadedRecords) { // Unuploaded
-            data.isUnuploaded = true;
-            data.hasPreview = true;
-            const scannedEnd = unuploadedRecords[schedule.scheduleTrxId];
+        }
 
-            if (scannedEnd) {
-              data.scannedEnd = moment(scannedEnd, 'YYYY-MM-DD HH:mm:ss')
-                .format('D MMMM YYYY HH:mm');
-            }
-          } else if (holdedRecords.includes(schedule.assetId)) { // Holded
-            const start = new Date(schedule.scheduleFrom).getTime();
-            const end = new Date(schedule.scheduleTo).getTime();
-            data.hasRecordHold = moment(now).isBetween(start, end);
-          }
-
-          if (!data.scannedEnd) {
-            data.scannedEnd = '-';
-          }
-
-          return data;
-        })
-        .filter(schedule => schedule.isUnuploaded);
-
-        console.log('schedule unuploaded' , this.schedulesUnuploaded);
+        console.log('jumlah Unuploaded' , this.jumlahUnuploaded);
+        console.log('jumlah Uploaded' , this.jumlahUploaded);
         
-      this.dataSudah = [];
-  this.dataBelum=this.sourceSchedules;
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.onSearch();
-      this.loading = false;
+        this.dataSudah = [];
+
+        this.dataBelum=this.sourceSchedules;
+          } catch (error) {
+            console.error(error);
+          } finally {
+            this.onSearch();
+            this.loading = false;
+          }
+                  //lodash disini
+
+          const res = orderBy(this.sourceSchedules, [(o) => new Date(o.uploadedOn)], ["desc"]);
+          this.sourceSchedules = res
+          // [{date:"2022-09-01"},{date:"2022-05-03"},{date:"2021-05-01"}]
+          console.log('ini transaksi schedule sorting',res);
     }
-    
-  console.log('dataSudah',this.dataSudah);
-  console.log('dataBelum',this.dataBelum);
-
-  //this.jumlahUnuploaded=this.dataSudah;
-  this.jumlahUnuploaded=this.schedulesUnuploaded
-  this.jumlahUploaded=this.dataBelum;
-
-  console.log('jumlah Unuploaded' , this.jumlahUnuploaded);
-  console.log('jumlah Uploaded' , this.jumlahUploaded);
-  
-  
-  
-  }
-
-
 
   private async getUploadedRecords(scheduleTrxIds: string[]) {
     const records: string[] = [];

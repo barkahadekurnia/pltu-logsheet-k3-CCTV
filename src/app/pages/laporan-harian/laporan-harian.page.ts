@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Platform } from '@ionic/angular';
+import { DatabaseService } from 'src/app/services/database/database.service';
 import { HttpService } from 'src/app/services/http/http.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
+import { intersection, unionBy, uniq, zip, uniqBy, groupBy, orderBy } from 'lodash';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-laporan-harian',
@@ -29,6 +32,8 @@ export class LaporanHarianPage implements OnInit {
     syncAt: string;
     trxData: any[];
     trxParentId: string;
+    //add
+    assetId:string;
   };
 
   searchTerm: string;
@@ -44,11 +49,15 @@ export class LaporanHarianPage implements OnInit {
   dataSudah: any[];
   sourceData: any[];
   loaded: number;
+
+  sourceSchedules: any[];
+
   constructor(
     private utils: UtilsService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private http: HttpService,
+    private database: DatabaseService,
     private shared: SharedService,
     private platform: Platform
   ) {
@@ -71,6 +80,7 @@ export class LaporanHarianPage implements OnInit {
       syncAt: '',
       trxData: [],
       trxParentId: '',
+      assetId:'',
     };
 
     this.listDataScan = {
@@ -97,6 +107,8 @@ export class LaporanHarianPage implements OnInit {
     this.filteredData = transitionData.data;
     this.dataBelum = transitionData.data;
     this.loading = false;
+    this.sourceSchedules = [];
+
     this.getData();
   }
 
@@ -202,7 +214,16 @@ export class LaporanHarianPage implements OnInit {
       event.target.complete();
     }, 500);
   }
-
+  
+  // async openDetail(item){
+  //   console.log('cek detail', item)
+  //   const data = JSON.stringify({
+  //     data: item,
+  //     scheduleId: item.trxParentId,
+  //   })
+  //   console.log('data json :', JSON.parse(data));
+  //   return this.router.navigate(['transaction-detail', { data }]);
+  // }
   async openDetail(id) {
     const data = JSON.stringify({
       data: id,
@@ -210,6 +231,9 @@ export class LaporanHarianPage implements OnInit {
     console.log('data json :', JSON.parse(data));
     return this.router.navigate(['laporan-harian-detail', { data }]);
   }
+
+
+
   doRefresh(e: any) {
     // menghitung chart
     this.getData().finally(() => e.target.complete());

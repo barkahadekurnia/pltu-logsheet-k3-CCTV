@@ -158,6 +158,7 @@ unitId: '',
 
     console.log('id schedule ', this.idSchedule);
     console.log('asset id ', this.dataParent.assetId);
+    console.log('data Parent', this.dataParent);
     
   }
 
@@ -246,21 +247,19 @@ unitId: '',
     const param = this.database.parseResult(result);
     // console.log('param', param[0].parameterName);
     // result.then(stuff=>{console.log(stuff)})
-
-
-
-
     return param[0].parameterName;
   }
 
    //buat testing
-
    async deleteTransaksi () {
     try {
       const where = { 
         query: 'scheduleTrxId=?',
         params: [this.idSchedule],
       }
+
+      console.log('deleting data from scheduleTrxId = ', this.idSchedule) ;
+      
       await this.database.delete('record', where);
   
       await this.database.delete('recordHold', {
@@ -291,7 +290,7 @@ unitId: '',
   async confirmDelete() {
     let alert = await this.alertCtrl.create({
       header: 'Confirm Delete',
-      message: 'yakin mau di delete nih bang?',
+      message: 'yakin mau di delete ?',
       buttons: [
         {
           text: 'Cancel',

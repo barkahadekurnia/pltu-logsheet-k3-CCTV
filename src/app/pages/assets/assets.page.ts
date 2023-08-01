@@ -5,7 +5,7 @@ import { Capacitor } from '@capacitor/core';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-import { groupBy, intersection, unionBy, uniq, zip } from 'lodash';
+import { each, groupBy, intersection, unionBy, uniq, zip } from 'lodash';
 
 @Component({
   selector: 'app-assets',
@@ -23,6 +23,8 @@ export class AssetsPage implements OnInit {
   loaded: number;
   loading: boolean;
 
+  temporaryAssets: any[];
+
   isSearchFocus: boolean;
 
   constructor(
@@ -36,10 +38,12 @@ export class AssetsPage implements OnInit {
     this.assets = [];
     this.filteredAssets = [];
     this.sourceAssets = [];
+    this.temporaryAssets = [];
 
     this.isHeaderVisible = false;
-    this.loaded = 5;
+    this.loaded = 10;
     this.loading = true;
+    this.searchTerm = '';
   }
 
   async ngOnInit() {
@@ -88,37 +92,107 @@ export class AssetsPage implements OnInit {
   async showDetails(asset?: any) {
     this.shared.asset = asset;
     console.log('showDetails', asset);
-
-
     await this.menuCtrl.enable(true, 'asset-information');
     return this.menuCtrl.open('asset-information');
   }
 
   async onSearch(event?: any) {
+    //this.loading=true
     if (event) {
-      console.log('filteraset source', this.sourceAssets)
-
-      this.filteredAssets = this.sourceAssets
-        ?.filter((sch: any) => {
-          const keyword = this.searchTerm?.toLowerCase();
-          const matchAssetName = sch?.assetName?.toLowerCase()?.includes(keyword);
-          const matchUnit = sch?.unit?.toLowerCase()?.includes(keyword);
-          const matchArea = sch?.area?.toLowerCase()?.includes(keyword);
-
-          return matchAssetName || matchUnit || matchArea;
-        });
-      this.filteredAssets = this.filteredAssets.slice(0, 5);
+      this.shared.filterOptions.keyword = event.detail.value;
     }
-    console.log('filteraser', this.filteredAssets)
+
+    this.filteredAssets = this.sourceAssets.filter((sch) => {
+      let condition = { 
+        assetNumber: sch.assetNumber,
+        area: sch.area,
+        unit: sch.unit
+      }
+
+      condition = condition && sch.assetNumber?.toLowerCase?.()
+        .includes(this.shared.filterOptions.keyword.toLowerCase());
+
+      
+      const filteredData = this.shared.filterOptions.data
+      .map(filter => {
+        const values = filter.values
+          .filter((value) => value.selected)
+          .map((value) => value.value);
+        return { ...filter, values };
+      })
+      .filter(filter => filter.values.length);
+      
+      if (filteredData.length) {
+        condition &&
+          !Boolean(
+            filteredData
+              .map(({ key, values }) =>
+                intersection(
+                  sch[key]?.map?.((item: any) => item.id),
+                  values
+                )
+              )
+              .find((data) => data.length === 0)
+          );
+      }
+      //  else {
+      //   return this.sourceAssets
+      // }
+      console.log('hasil pencatioan', condition);
+      return condition;
+      
+    })
+   this.filteredAssets = this.filteredAssets.slice(0, 10);
+   //this.pushData(event) 
+   console.log('filtered asset' , this.filteredAssets);
+  //  if ( this.filteredAssets.length >= 0) {
+  //   this.loading = false
+  //  }
 
   }
 
+  loadingFalse(){
+    console.log('this.loading' , this.loading);
+    
+    this.loading=false
+  }
+
+ 
+  // async onSearch(event?: any) {
+  //   if (event) {
+  //     console.log('filteraset source', this.sourceAssets)
+
+  //     this.filteredAssets = this.sourceAssets
+  //       ?.filter((sch: any) => {
+  //         const keyword = this.searchTerm?.toLowerCase();
+  //         const matchAssetName = sch?.assetNumber?.toLowerCase()?.includes(keyword);
+  //         const matchUnit = sch?.unit?.toLowerCase()?.includes(keyword);
+  //         const matchArea = sch?.area?.toLowerCase()?.includes(keyword);
+
+  //         return matchAssetName || matchUnit || matchArea;
+  //         // if(matchAssetName!== null || matchUnit!==null || matchArea!==null) {
+  //         //   return matchAssetName || matchUnit || matchArea;
+  //         // } else {
+  //         //   return console.log('tidak nemu')
+  //         // }
+  //       });
+  //     this.filteredAssets = this.filteredAssets.slice(0, 5);
+  //   }
+  //   console.log('filteraser', this.filteredAssets)
+  // }
+
   pushData(event: any) {
+    console.log();
+    this.loading=true
+    
+    //this.temporaryAssets = this.filteredAssets
     setTimeout(async () => {
       const start = this.filteredAssets.length;
 
       if (start < this.sourceAssets.length) {
-        let end = start + 5;
+        //console.log('temporary Assets',this.temporaryAssets);
+        
+        let end = start + 10;
 
         end = end > this.sourceAssets.length
           ? this.sourceAssets.length
@@ -133,9 +207,65 @@ export class AssetsPage implements OnInit {
         }
       }
 
-      event.target.complete();
+      event.target.complete(
+        this.loading=false
+      );
     }, 500);
   }
+
+
+
+  // pushDataFiltered(event: any) {
+  //   setTimeout(async () => {
+  //     const start = this.temporaryAssets.length;
+
+  //     if (start < this.filteredAssets.length) {
+  //       console.log('temporary Assets',this.temporaryAssets);
+        
+  //       let end = start + 20;
+
+  //       end = end > this.filteredAssets.length
+  //         ? this.filteredAssets.length
+  //         : end;
+
+  //       this.temporaryAssets.push(
+  //         ...this.filteredAssets.slice(start, end)
+  //       );
+
+  //       if (this.loaded < this.temporaryAssets.length) {
+  //         this.loaded = this.temporaryAssets.length;
+  //       }
+  //     }
+
+  //     event.target.complete(
+  //       this.loading=false
+  //     );
+  //   }, 500);
+  // }
+
+  // pushData(event: any) {
+  //   setTimeout(async () => {
+  //     const start = this.filteredAssets.length;
+
+  //     if (start < this.sourceAssets.length) {
+  //       let end = start + 5;
+
+  //       end = end > this.sourceAssets.length
+  //         ? this.sourceAssets.length
+  //         : end;
+
+  //       this.filteredAssets.push(
+  //         ...this.sourceAssets.slice(start, end)
+  //       );
+
+  //       if (this.loaded < this.filteredAssets.length) {
+  //         this.loaded = this.filteredAssets.length;
+  //       }
+  //     }
+
+  //     event.target.complete();
+  //   }, 500);
+  // }
 
   private async getAssets() {
     try {
@@ -299,16 +429,13 @@ export class AssetsPage implements OnInit {
       console.log('assets', assets);
       this.sourceAssets = assets;
       this.filteredAssets = this.sourceAssets.slice(0, this.loaded)
-
-
     } catch (error) {
       console.error(error);
     } finally {
       this.onSearch();
-      console.log('filter', this.filteredAssets)
+     // console.log('filter', this.filteredAssets)
       this.loading = false;
     }
-
   }
 
   // private async getAssetsParameterStatuses() {
