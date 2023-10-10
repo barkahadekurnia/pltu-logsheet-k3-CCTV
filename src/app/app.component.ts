@@ -19,6 +19,10 @@ import { chain, filter, find, intersectionBy, intersectionWith, map, merge, some
 import { of } from 'rxjs';
 import { tap, map as rxjsMap } from 'rxjs/operators';
 
+import { register } from 'swiper/element/bundle';
+
+register();
+
 export interface AssetDetails {
   assetCategoryCode: string;
   assetCategoryId: string;

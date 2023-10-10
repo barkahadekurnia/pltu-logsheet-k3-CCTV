@@ -649,6 +649,7 @@ export class HomePage implements OnInit {
     return this.http.requests({
       requests: [() => this.http.getParameters(assetId)],
       onSuccess: async ([responseParameters]) => {
+        console.log('respon blabla', responseParameters)
         if (![200, 201].includes(responseParameters.status)) {
           throw responseParameters;
         }
@@ -1215,6 +1216,7 @@ export class HomePage implements OnInit {
 
   private async getSchedules(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
     const shared = this.injector.get(SharedService);
+    console.log('get schedule di eksekusi')
     if (shared.user.group === 'ADMIN') {
       return this.http.requests({
         requests: [() => this.http.getSchedules()],
@@ -1836,6 +1838,8 @@ export class HomePage implements OnInit {
         };
 
         this.database.update('record', { isUploaded: 1 }, where);
+
+        console.log ( 'where', where)
       }
       this.onProcessFinished(subscriber, loader);
     }

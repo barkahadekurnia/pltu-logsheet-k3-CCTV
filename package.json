@@ -74,6 +74,7 @@
     "ngx-echarts": "^8.0.1",
     "phonegap-nfc": "^1.2.0",
     "rxjs": "~6.6.0",
+    "swiper": "^10.2.0",
     "tslib": "^2.2.0",
     "uuid": "^8.3.2",
     "viewerjs": "^1.10.5",

@@ -874,10 +874,10 @@ export class FormPreviewPage {
         if (detail?.data?.remember) {
           this.shared.setActionAfterSave(detail?.data?.type);
         }
-
+        console.log('detail dismiss',detail)
         if (detail?.data?.type === 'upload') {
-          this.uploadRecords(data);
-          //this.routeCtrl.navigate(['transactions'])
+          //this.uploadRecords(data);
+          this.router.navigate(['transactions'])
         }
       });
     }

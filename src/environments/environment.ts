@@ -3,14 +3,14 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: true,
+  production: false,
   url: {
-    //base: 'http://114.6.64.2:11241/api/logsheet_dev',
-     base: 'http://114.6.64.2:11241/api/logsheet_new',
+     base: 'http://114.6.64.2:11241/api/logsheet_dev',
+    //base: 'http://114.6.64.2:11241/api/logsheet_new',
     // base: 'http://192.168.4.99',
     // base: 'http://app.logsheet.digital',
     // base: 'http://45.77.45.6/logsheet',
-    get login() {
+    get login() { 
       return this.base + '/api/login';
     },
     get grupoperator() {
@@ -99,7 +99,28 @@ export const environment = {
     },
     get schedulesShift() {
       return this.base + `/api/schedule/getTeamSchedule`;
+    },
+    get selectionUnit() {
+      return 'http://114.6.64.2:11231/api/master/lokasi/unit';
+    },
+    // + unitId (1)
+    get selectionArea() {
+      return 'http://114.6.64.2:11231/api/master/lokasi/area';
+    },
+    // + areaId ()
+    get selectionTandaPemasangan() {
+      return this.base + '/api/tag/getTagByArea?area=';
+    },
+    // ambil semua data tanda pemasangan ()
+    get allTandaPemasangan() {
+      return this.base + '/api/tag/index?search=undefined';
+    },
+    //body tag id  pakai /assetId
+    get updateAssetTag(){
+      return this.base + '/api/asset/updateAssetTag';
     }
+
+
   },
   values: {
     mapbox: 'pk.eyJ1IjoiYXJpc2NhYWJkdWxhaCIsImEiOiJja3Vuamc3eTgyNXMxMndteDI2MTY3NnBlIn0.7M2M8TyoZrrZuN85yrQPTQ',

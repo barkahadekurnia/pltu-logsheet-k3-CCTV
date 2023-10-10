@@ -98,6 +98,17 @@ export const environment = {
     },
     get schedulesShift() {
       return this.base + `/api/schedule/getTeamSchedule`;
+    },
+    get selectionUnit() {
+      return 'http://114.6.64.2:11231/api/master/lokasi/unit';
+    },
+    // + unitId (1)
+    get selectionArea() {
+      return 'http://114.6.64.2:11231/api/master/lokasi/area/';
+    },
+    // + areaId ()
+    get selectionTandaPemasangan() {
+      return 'http://114.6.64.2:11241/api/logsheet_new/api/tag/getTagByArea?area=';
     }
   },
   values: {

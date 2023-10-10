@@ -51,7 +51,7 @@ type DataKey = {
   providedIn: 'root'
 })
 export class SharedService {
-  asset: {
+  asset:{
     abbreviation?: string;
     adviceDate?: string;
     approvedAt?: string;
@@ -145,6 +145,7 @@ export class SharedService {
     deleted_at: string;
     date: string;
   };
+  
   akun: {
     nama: string;
     role: string;

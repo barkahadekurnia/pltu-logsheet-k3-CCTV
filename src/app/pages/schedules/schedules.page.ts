@@ -658,7 +658,7 @@ export class SchedulesPage implements OnInit {
       total = total + shift[i].assetData.length
     }
 
-    console.log('ini total shift di asset', shift.length);
+    //console.log('ini total shift di asset', shift.length);
     
     return total
   }

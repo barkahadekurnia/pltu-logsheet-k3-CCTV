@@ -92,7 +92,7 @@ export class HttpService {
     private platform: Platform,
     private loadingCtrl: LoadingController,
     private navCtrl: NavController,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
   ) {
     this.timeout = 10000;
     this.retry = 3;
@@ -141,6 +141,34 @@ export class HttpService {
     // };
 
     // return Http.post(options);
+  }
+
+  postAnyDataJson(url: string, data) {
+    const observable = this.httpClient
+      .post(url, data, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          'Content-Type': 'application/json'
+        },
+        observe: 'response',
+        responseType: 'json'
+      })
+      .pipe(timeout(this.timeout), retry(this.retry));
+
+    return observable.toPromise();
+  }
+
+  postAnyDataNative(url: string, data) {
+    const options = {
+      url, 
+      data, 
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      }
+    }
+    const observable = Http.post(options);
+
+    return observable;
   }
 
   login(data: LoginData) {
@@ -549,6 +577,46 @@ export class HttpService {
     };
 
     return Http.put(options);
+  }
+
+  //upgrade buat edit lokasi
+  selectionUnit() {
+    const options: HttpOptions = { 
+      url: `${environment.url.selectionUnit}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json'
+      },
+      responseType: 'json'
+    }
+
+    return Http.get(options);
+  }
+
+  selectionArea(unitId:any) {
+    const options: HttpOptions = {
+      url: `${environment.url.selectionArea}${unitId}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type' :'application/json'
+      },
+      responseType: 'json'
+    }
+
+    return Http.get(options);
+  }
+
+  selectionTandaPemasangan(areaId:any) {
+    const options: HttpOptions = {
+      url: `${environment.url.selectionArea}${areaId}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type' :'application/json'
+      },
+      responseType: 'json'
+    }
+
+    return Http.get(options);
   }
 
   async refreshToken() {

@@ -37,6 +37,8 @@ import { ScreenViewComponentModule } from './components/screen-view/screen-view.
 import { SynchronizeCardComponentModule } from './components/synchronize-card/synchronize-card.component.module';
 import { UploadRecordsComponentModule } from './components/upload-records/upload-records.component.module';
 import { StreamingMedia } from '@awesome-cordova-plugins/streaming-media/ngx';
+
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -90,5 +92,6 @@ import { StreamingMedia } from '@awesome-cordova-plugins/streaming-media/ngx';
     StreamingMedia
   ],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule { }

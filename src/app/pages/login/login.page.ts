@@ -72,7 +72,8 @@ export class LoginPage implements OnInit {
         const response = await this.http.login(this.form);
         console.log('respon login',response)
 
-        if (response.data?.status !== 200) {
+        if (response.data.status !== 200) {
+          
           const alert = await this.utils.createCustomAlert({
             type: 'error',
             header: 'Error',
@@ -83,6 +84,7 @@ export class LoginPage implements OnInit {
             }]
           })
         alert.present();
+
 
           // throw response.data;
 

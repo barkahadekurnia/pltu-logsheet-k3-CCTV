@@ -104,7 +104,7 @@ export class NfcService {
     // if (this.platform.is('android')) {
     //   this.tagListener = this.nfc.addTagDiscoveredListener().subscribe(listener);
     // }
-var kali =0;
+    var kali =0;
 
     this.nfc.addTagDiscoveredListener().subscribe(async event => {
       const res = this.nfc.bytesToHexString(event.tag.id)
