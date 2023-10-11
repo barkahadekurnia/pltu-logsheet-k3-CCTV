@@ -85,10 +85,14 @@ export class RfidScanPage implements OnInit {
     console.log(this.nfcStatus);
   }
 
-  ionViewWillLeave() {
+  async ionViewWillLeave() {
     this.nfc.invalidateTagListener();
     this.subscription?.unsubscribe?.();
-    this.nfc.unsubscribeTagListener();
+    await this.nfc.unsubscribeTagListener();
+  }
+
+  async ngOnDestroy(){
+    await this.nfc.unsubscribeTagListener();
   }
 
   doRefresh(e: any) {
