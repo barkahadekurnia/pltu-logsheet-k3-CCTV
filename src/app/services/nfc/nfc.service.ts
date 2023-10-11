@@ -52,9 +52,18 @@ export class NfcService {
         this.nfcStatus = error;
       }
     }
-
+    console.log('check status nfc')
     return this.nfcStatus;
   }
+
+  unsubscribeTagListener(){
+    console.log('this tag listener' , this.tagListener)
+    if (this.tagListener) {
+      this.tagListener.unsubscribe();
+      this.tagListener = null;
+    }
+  }
+
 
   async setTagListener(listener: TagListener) {
     console.log('cek listener', this.tagListener)
@@ -66,7 +75,8 @@ export class NfcService {
     // if (this.platform.is('android')) {
     //   this.tagListener = this.nfc.addTagDiscoveredListener().subscribe(listener);
     // }
-    this.nfc.addTagDiscoveredListener().subscribe(event => {
+    
+    (this.tagListener as any) = this.nfc.addTagDiscoveredListener().subscribe(event => {
       // console.log(event.tag.id);
       // this.router.navigate(['scan-form', { data }]);
       // this.nfc1.addTagDiscoveredListener().subscribe(event => {
@@ -105,8 +115,7 @@ export class NfcService {
     //   this.tagListener = this.nfc.addTagDiscoveredListener().subscribe(listener);
     // }
     var kali =0;
-
-    this.nfc.addTagDiscoveredListener().subscribe(async event => {
+    (this.tagListener as any) =  this.nfc.addTagDiscoveredListener().subscribe(async event => {
       const res = this.nfc.bytesToHexString(event.tag.id)
       console.log('res', res);
 
@@ -115,7 +124,7 @@ export class NfcService {
         data: res
       });
       const reco = { rfid: res };
-      console.log('kali1', kali)
+      console.log('kali1 nfc', kali)
 
       if(kali < 1){
       await this.http.requests({
@@ -141,9 +150,9 @@ export class NfcService {
         },
         onError: error => console.error(error)
       });
-      console.log('kali2', kali)
+      console.log('kali2 nfc', kali)
     }
-    console.log('kali3', kali)
+    console.log('kali3 nfc', kali)
 
 kali++;
     });

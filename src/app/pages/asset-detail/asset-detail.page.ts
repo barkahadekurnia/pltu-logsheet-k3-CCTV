@@ -127,19 +127,19 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     this.showData();
   }
 
-  async checkStatus() {
-    if (this.platform.is('capacitor')) {
-      try {
-        this.nfcStatus = await this.nfc1.enabled();
-      } catch (error) {
-        this.nfcStatus = error;
-      }
-    }
+  // async checkStatus() {
+  //   if (this.platform.is('capacitor')) {
+  //     try {
+  //       this.nfcStatus = await this.nfc1.enabled();
+  //     } catch (error) {
+  //       this.nfcStatus = error;
+  //     }
+  //   }
 
-    return this.nfcStatus;
-  }
+  //   return this.nfcStatus;
+  // }
   async ngAfterViewInit() {
-    await this.nfc.changesetup();
+   //await this.nfc.changesetup();
   }
 
   async ionViewWillEnter() {
@@ -202,51 +202,51 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       BarcodeScanner.stopScan();
     });
   }
-  private async setupNfc() {
-    await this.nfc.checkStatus();
-    console.log('cek status', this.checkOnly);
+  // private async setupNfc() {
+  //   await this.nfc.checkStatus();
+  //   console.log('cek status', this.checkOnly);
 
-    await this.nfc.setTagListener(async (event: any) => {
-      // console.log('cek event', event);
-      console.log('checkOnly', this.checkOnly);
-      console.log('tag', event?.tag?.id);
-      if (this.checkOnly && event?.tag?.id) {
-        const data = await this.nfc.getTagString(event.tag.id);
+  //   await this.nfc.setTagListener(async (event: any) => {
+  //     // console.log('cek event', event);
+  //     console.log('checkOnly', this.checkOnly);
+  //     console.log('tag', event?.tag?.id);
+  //     if (this.checkOnly && event?.tag?.id) {
+  //       const data = await this.nfc.getTagString(event.tag.id);
 
-        const alert = await this.alertCtrl.create({
-          header: 'Result',
-          message: data,
-          mode: 'ios',
-          cssClass: 'dark:ion-bg-gray-800',
-          buttons: [
-            {
-              text: 'Cancel',
-              role: 'cancel'
-            },
-            {
-              text: 'Copy',
-              handler: () => {
-                Clipboard.write({
-                  // eslint-disable-next-line id-blacklist
-                  string: data
-                });
-              }
-            }
-          ]
-        });
+  //       const alert = await this.alertCtrl.create({
+  //         header: 'Result',
+  //         message: data,
+  //         mode: 'ios',
+  //         cssClass: 'dark:ion-bg-gray-800',
+  //         buttons: [
+  //           {
+  //             text: 'Cancel',
+  //             role: 'cancel'
+  //           },
+  //           {
+  //             text: 'Copy',
+  //             handler: () => {
+  //               Clipboard.write({
+  //                 // eslint-disable-next-line id-blacklist
+  //                 string: data
+  //               });
+  //             }
+  //           }
+  //         ]
+  //       });
 
-        this.utils.back();
-        alert.present();
-      } else if (event?.tag?.id) {
-        const data = JSON.stringify({
-          type: 'rfid',
-          data: await this.nfc.getTagString(event.tag.id)
-        });
+  //       this.utils.back();
+  //       alert.present();
+  //     } else if (event?.tag?.id) {
+  //       const data = JSON.stringify({
+  //         type: 'rfid',
+  //         data: await this.nfc.getTagString(event.tag.id)
+  //       });
 
-        // this.router.navigate(['scan-form', { data }]);
-      }
-    });
-  }
+  //       // this.router.navigate(['scan-form', { data }]);
+  //     }
+  //   });
+  // }
 
   async showData() {
     try {

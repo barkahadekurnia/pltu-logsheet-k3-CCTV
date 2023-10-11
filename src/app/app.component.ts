@@ -94,6 +94,7 @@ export class AppComponent implements AfterViewInit {
     // this.user = this.shared.user;
     // console.log('yuhu', shared.user)
     console.log('form asset shared', this.shared.asset.assetForm);
+    console.log('cek isi asset shared', this.shared.asset);
     // console.log('form asset json', JSON.parse(this.shared.asset.assetForm))
     // this.formaset = JSON.parse(this.shared.asset.assetForm);
     this.progress = 0;

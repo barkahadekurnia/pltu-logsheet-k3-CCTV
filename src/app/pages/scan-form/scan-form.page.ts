@@ -218,7 +218,7 @@ export class ScanFormPage implements OnInit {
     console.log('schedule di init',this.schedule);
 
     // this.getSchedule()
-  
+    
     
   }
 
@@ -978,6 +978,8 @@ export class ScanFormPage implements OnInit {
       this.record.scannedBy = this.shared.user.name;
       this.record.scannedWith = this.transitionData?.type;
       let value = '';
+      
+      console.log('transition data tag',this.transitionData)
       if (this.record.scannedWith === 'qr') {
         value = this.transitionData.data;
       } else {
