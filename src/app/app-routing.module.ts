@@ -160,7 +160,11 @@ const routes: Routes = [
   {
     path: 'asset-detail',
     loadChildren: () => import('./pages/asset-detail/asset-detail.module').then( m => m.AssetDetailPageModule)
+  },  {
+    path: 'laporan-detail-transaction',
+    loadChildren: () => import('./pages/laporan-detail-transaction/laporan-detail-transaction.module').then( m => m.LaporanDetailTransactionPageModule)
   }
+
 ];
 
 @NgModule({

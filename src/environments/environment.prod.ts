@@ -120,7 +120,11 @@ export const environment = {
     //body tag id  pakai /assetId
     get updateAssetTag(){
       return this.base + '/api/asset/updateAssetTag';
-    }
+    },
+    // +/scheduleTrxId
+    get assetParameterTransaksi(){
+      return this.base + '/api/transaction/schedule/view/trxParentId';
+    },
   },
   values: {
     mapbox: 'pk.eyJ1IjoiYXJpc2NhYWJkdWxhaCIsImEiOiJja3Vuamc3eTgyNXMxMndteDI2MTY3NnBlIn0.7M2M8TyoZrrZuN85yrQPTQ',
