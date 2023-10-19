@@ -15,14 +15,15 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./laporan-detail-transaction.page.scss'],
 })
 export class LaporanDetailTransactionPage implements OnInit {
-
+ 
   isHeaderVisible: boolean;
   transaction: any;
   parameter: any[];
   dataParent: any;
   idSchedule: string;
   dataAsset:any;
-  dataParameter:any[];
+  dataParameter:any = {parameter : [] ,scannedWith:'', scannedBy:''}; 
+  public loaded:boolean = false;
   constructor(
     private utils: UtilsService,
     private route: ActivatedRoute,
@@ -105,13 +106,14 @@ export class LaporanDetailTransactionPage implements OnInit {
 
   ngOnInit() {
     this.getData();
+    console.log('loaded',this.loaded)
   }
 
-  ionViewWillEnter() {
-    this.platform.ready().then(() => {
-      this.getData();
-    });
-  }
+  // ionViewWillEnter() {
+  //   this.platform.ready().then(() => {
+  //     // this.getData();
+  //   });
+  // }
 
   async onScroll(e: any) {
     const val = e.detail.scrollTop > 0;
@@ -200,13 +202,25 @@ export class LaporanDetailTransactionPage implements OnInit {
         console.log('response transaksi' , responseParameter.data.data)
         console.log('response Parameter' , responseParameter.data.data.parameter)
         this.dataAsset = responseAsset.data.data
-        this.dataParameter = responseParameter.data.data.parameter
+        this.dataParameter.parameter = responseParameter.data.data.parameter
 
         //masukin data yang ada di API sebelah
         this.dataAsset.schType = responseParameter.data.data.schType
         this.dataAsset.scheduleFrom = responseParameter.data.data.scheduleFrom
         this.dataAsset.scannedEnd = responseParameter.data.data.scannedEnd
 
+        //nambah scannedWith dan scannedBy
+        this.dataParameter.scannedWith = responseParameter.data.data.scannedWith
+        this.dataParameter.scannedBy = responseParameter.data.data.scannedBy
+
+
+        console.log('this data aset' , this.dataAsset)
+        console.log('this data parameter' , this.dataParameter)
+
+        if (this.dataAsset){
+          this.loaded = true
+          console.log('loaded' , this.loaded)
+        }
       },
       onError: (err) => {
         console.log('error bang')

@@ -318,7 +318,7 @@ export class ChangeRfidPage implements OnInit {
           const alert = await this.utils.createCustomAlert({
             type: 'success',
             header: 'Berhasil',
-            message: 'Berhasil merubah RFID Asset',
+            message: 'Berhasil merubah RFID Asset,\nSilahkan lakukan Sinkronisasi kembali untuk memperbarui Data',
             buttons: [{
               text: 'Okay',
               handler: () => alert.dismiss()
