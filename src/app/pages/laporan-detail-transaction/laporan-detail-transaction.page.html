@@ -115,7 +115,7 @@
             [color]="dataAsset?.isUploaded == true ? 'success' : 'warning'"
             mode="ios"
             slot="end"
-            >{{ transaction?.isUploaded == true ? 'Terupload' : 'Pending'
+            >{{ dataAsset?.isUploaded == true ? 'Terupload' : 'Pending'
             }}</ion-badge
           >
         </ion-item>
@@ -142,11 +142,11 @@
                       <ion-item>
                         <ion-label>Status</ion-label>
                         <ion-badge
-                          [color]="item?.isUploaded == 1 ? 'success' : 'danger'"
+                          [color]="dataAsset?.isUploaded == 1 ? 'success' : 'danger'"
                           mode="ios"
                           slot="end"
                         >
-                          {{ item?.isUploaded == '1' ? 'Sudah Di Upload' : 'Belum Di Upload' }}
+                          {{ dataAsset?.isUploaded == '1' ? 'Sudah Di Upload' : 'Belum Di Upload' }}
                         </ion-badge>
                       </ion-item>
                       <ion-item class="text-xs">

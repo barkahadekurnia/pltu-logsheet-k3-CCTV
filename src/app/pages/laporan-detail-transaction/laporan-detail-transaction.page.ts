@@ -21,7 +21,7 @@ export class LaporanDetailTransactionPage implements OnInit {
   parameter: any[];
   dataParent: any;
   idSchedule: string;
-  dataAsset:any;
+  dataAsset:any = {isUploaded:''};
   dataParameter:any = {parameter : [] ,scannedWith:'', scannedBy:''}; 
   public loaded:boolean = false;
   constructor(
@@ -221,6 +221,9 @@ export class LaporanDetailTransactionPage implements OnInit {
           this.loaded = true
           console.log('loaded' , this.loaded)
         }
+
+        this.dataAsset.isUploaded = '1'
+        console.log('this data assete . is uploaded' , this.dataAsset.isUploaded)
       },
       onError: (err) => {
         console.log('error bang')

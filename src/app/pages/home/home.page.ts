@@ -688,7 +688,7 @@ export class HomePage implements OnInit {
               parameters.push(data);
             }
           }
-          console.log('parameter data sebelum di push SQL', parameters);
+         // console.log('parameter data sebelum di push SQL', parameters);
 
           let storeParameters = [];
          
