@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { MenuController } from '@ionic/angular';
 import { DatabaseService } from 'src/app/services/database/database.service';
+import { SharedService } from 'src/app/services/shared/shared.service';
 
 @Component({
   selector: 'app-schedule-detail',
@@ -27,7 +29,9 @@ export class ScheduleDetailPage implements OnInit {
 
   constructor(
     private router: Router,
-    private database: DatabaseService
+    private database: DatabaseService,
+    private menuCtrl: MenuController,
+    private shared: SharedService,
   ) {
     this.segment = 'scanned';
     this.searchTerm = '';
@@ -85,9 +89,16 @@ export class ScheduleDetailPage implements OnInit {
       this.filteredData = this.listDataScan.unscanned.slice(0, this.loaded);
       this.sourceData = this.listDataScan.unscanned;
       console.log('sourceData', this.sourceData);
-
+      console.log('barkah tes')
     }
     this.onSearch();
+  }
+
+  async showDetails(asset?: any) {
+    this.shared.asset = asset;
+    console.log('showDetails', asset);
+    await this.menuCtrl.enable(true, 'asset-information');
+    return this.menuCtrl.open('asset-information');
   }
 
   onSearch(event?: any) {
