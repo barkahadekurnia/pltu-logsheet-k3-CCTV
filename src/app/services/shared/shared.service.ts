@@ -4,7 +4,9 @@
 import { Injectable, Injector } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { Filesystem, Directory } from '@capacitor/filesystem';
-import { Storage } from '@capacitor/storage';
+//import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
+
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
@@ -378,7 +380,7 @@ export class SharedService {
       if (data[key.key]) {
         this._user[key.key] = data[key.key];
 
-        Storage.set({
+        Preferences.set({
           key: key.storageKey,
           value: JSON.stringify(data[key.key])
         });
@@ -389,7 +391,7 @@ export class SharedService {
     for (const key of this.userDetailKey) {
       if (data[key.key]) {
         this._userdetail[key.key] = data[key.key];
-        Storage.set({
+        Preferences.set({
           key: key.storageKey,
           value: JSON.stringify(data[key.key])
         });
@@ -401,7 +403,7 @@ export class SharedService {
     for (const key of this.userSchType) {
       if (data[key.key]) {
         this._schtype[key.key] = data[key.key];
-        Storage.set({
+        Preferences.set({
           key: key.storageKey,
           value: JSON.stringify(data[key.key])
         });
@@ -415,7 +417,7 @@ export class SharedService {
       if (config[key.key] != null) {
         this._attachmentConfig[key.key] = config[key.key];
 
-        Storage.set({
+        Preferences.set({
           key: key.storageKey,
           value: JSON.stringify(config[key.key])
         });
@@ -426,7 +428,7 @@ export class SharedService {
   setActionAfterSave(value: 'local' | 'upload') {
     this._actionAfterSave = value;
 
-    Storage.set({
+    Preferences.set({
       key: 'record__actionAfterSave',
       value: JSON.stringify(value)
     });
@@ -435,7 +437,7 @@ export class SharedService {
   setLastSynchronize(value: string) {
     this._lastSynchronize = value;
 
-    Storage.set({
+    Preferences.set({
       key: 'app__lastSynchronize',
       value: JSON.stringify(value)
     });
@@ -444,7 +446,7 @@ export class SharedService {
   setLastOpened(value: string) {
     this._lastOpened = value;
 
-    Storage.set({
+    Preferences.set({
       key: 'app__lastOpened',
       value: JSON.stringify(value)
     });
@@ -453,7 +455,7 @@ export class SharedService {
   setImageQuality(value: 'high' | 'normal' | 'low') {
     this._imageQuality = value;
 
-    Storage.set({
+    Preferences.set({
       key: 'app__imageQuality',
       value: JSON.stringify(value)
     });
@@ -462,7 +464,7 @@ export class SharedService {
   setOfflineImages(value: boolean) {
     this._offlineImages = value;
 
-    Storage.set({
+    Preferences.set({
       key: 'app__offlineImages',
       value: JSON.stringify(value)
     });
@@ -471,7 +473,7 @@ export class SharedService {
   setTextZoom(value: number) {
     this._textZoom = value;
 
-    Storage.set({
+    Preferences.set({
       key: 'app__textZoom',
       value: JSON.stringify(value)
     });
@@ -480,7 +482,7 @@ export class SharedService {
   setNotificationIds(data: any[]) {
     this._notificationIds = data;
 
-    Storage.set({
+    Preferences.set({
       key: 'notification__ids',
       value: JSON.stringify(data)
     });
@@ -490,73 +492,73 @@ export class SharedService {
     await this.platform.ready();
     const utils = this.injector.get(UtilsService);
 
-    const { value: textZoom } = await Storage.get({
+    const { value: textZoom } = await Preferences.get({
       key: 'app__textZoom'
     });
 
     this._textZoom = textZoom != null ? utils.parseJson(textZoom) : 1.0;
 
-    const { value: imageQuality } = await Storage.get({
+    const { value: imageQuality } = await Preferences.get({
       key: 'app__imageQuality'
     });
 
     this._imageQuality = imageQuality != null ? utils.parseJson(imageQuality) : 'low';
 
-    const { value: offlineImages } = await Storage.get({
+    const { value: offlineImages } = await Preferences.get({
       key: 'app__offlineImages'
     });
 
     this._offlineImages = utils.parseJson(offlineImages);
 
     for (const setting of this.attachmentSettingKeys) {
-      const { value } = await Storage.get({
+      const { value } = await Preferences.get({
         key: setting.storageKey
       });
 
       this._attachmentConfig[setting.key] = utils.parseJson(value) || setting.defaultValue;
     }
 
-    const { value: actionAfterSave } = await Storage.get({
+    const { value: actionAfterSave } = await Preferences.get({
       key: 'record__actionAfterSave'
     });
 
     this._actionAfterSave = utils.parseJson(actionAfterSave);
 
     for (const { key, storageKey } of this.userDataKeys) {
-      const { value } = await Storage.get({
+      const { value } = await Preferences.get({
         key: storageKey
       });
 
       this._user[key] = utils.parseJson(value);
     }
     for (const { key, storageKey } of this.userDetailKey) {
-      const { value } = await Storage.get({
+      const { value } = await Preferences.get({
         key: storageKey
       });
 
       this._userdetail[key] = utils.parseJson(value);
     }
     for (const { key, storageKey } of this.userSchType) {
-      const { value } = await Storage.get({
+      const { value } = await Preferences.get({
         key: storageKey
       });
 
       this._schtype[key] = utils.parseJson(value);
     }
 
-    const { value: lastSynchronize } = await Storage.get({
+    const { value: lastSynchronize } = await Preferences.get({
       key: 'app__lastSynchronize'
     });
 
     this._lastSynchronize = utils.parseJson(lastSynchronize);
 
-    const { value: lastOpened } = await Storage.get({
+    const { value: lastOpened } = await Preferences.get({
       key: 'app__lastOpened'
     });
 
     this._lastOpened = utils.parseJson(lastOpened);
 
-    const { value: notificationIds } = await Storage.get({
+    const { value: notificationIds } = await Preferences.get({
       key: 'notification__ids'
     });
 
@@ -594,7 +596,7 @@ export class SharedService {
     ];
 
     for (const key of storageKeys) {
-      await Storage.remove({ key });
+      await Preferences.remove({ key });
     }
 
     this._user = {};

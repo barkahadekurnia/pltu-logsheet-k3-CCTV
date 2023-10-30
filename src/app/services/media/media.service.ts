@@ -95,29 +95,34 @@ export class MediaService {
   }
 
   async captureAudio() {
-    let audio: MediaFile;
+
+    await this.platform.ready();
+    //let audio: MediaFile;
 
     try {
-      const shared = this.injector.get(SharedService);
-      const { audioMaxDuration } = shared.attachmentConfig;
+      // const shared = this.injector.get(SharedService);
+      // const { audioMaxDuration } = shared.attachmentConfig;
 
       const options: CaptureAudioOptions = {
         limit: 1,
-        duration: audioMaxDuration
+        duration: 30
+        //duration: audioMaxDuration
       };
 
-      if (this.platform.is('android')) {
-        this.foregroundService.start(
-          'Mobile Scanner',
-          'Recording audio...',
-          'ic_notification_mic',
-          3
-        );
-      }
+      // if (this.platform.is('android')) {
+      //   this.foregroundService.start(
+      //     'Mobile Scanner',
+      //     'Recording audio...',
+      //     'ic_notification_mic',
+      //     3
+      //   );
+      // }
 
-      [audio] = await this.mediaCapture.captureAudio(options) as MediaFile[];
+      const [result] = await this.mediaCapture.captureAudio(options) as MediaFile[];
+      console.log('plugin audio ', [result])
+      return result;
     } catch (error) {
-      const message = this.getCaptureMediaError('video', error.code);
+      const message = this.getCaptureMediaError('audio', error.code);
 
       if (message) {
         const utils = this.injector.get(UtilsService);
@@ -134,13 +139,14 @@ export class MediaService {
 
         alert.present();
       }
-    } finally {
-      if (this.platform.is('android')) {
-        this.foregroundService.stop();
-      }
+      return null;
     }
+    //  finally {
+    //   if (this.platform.is('android')) {
+    //     this.foregroundService.stop();
+    //   }
+    // }
 
-    return audio;
   }
 
   async captureVideo() {
@@ -160,14 +166,14 @@ export class MediaService {
         quality: videoHighResolution ? 1 : 0
       };
 
-      if (this.platform.is('android')) {
-        this.foregroundService.start(
-          'Mobile Scanner',
-          'Recording video...',
-          'ic_notification_videocam',
-          3
-        );
-      }
+      // if (this.platform.is('android')) {
+      //   this.foregroundService.start(
+      //     'Mobile Scanner',
+      //     'Recording video...',
+      //     'ic_notification_videocam',
+      //     3
+      //   );
+      // }
 
       [video] = await this.mediaCapture.captureVideo(options) as MediaFile[];
     } catch (error) {
@@ -343,6 +349,46 @@ console.log('file',file)
     const blob = await response.blob();
     return blob;
   }
+
+
+  //blob
+
+  async blobToFilePath(filePath: string) {
+    try {
+      const blob = await this.convertFileToBlob(filePath);
+
+      const fixedFilePath = await write_blob({
+        path: filePath,
+        directory: Directory.Data,
+        blob,
+        fast_mode: true,
+        recursive: true,
+      });
+
+      return fixedFilePath;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async writeBlob(blob: Blob, fileName: string) {
+    try {
+      const filePath = await write_blob({
+        path: `media/${fileName}`,
+        directory: Directory.Data,
+        blob,
+        fast_mode: true,
+        recursive: true,
+      });
+
+      return filePath;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }
+
+
   getCaptureMediaError(type: 'audio' | 'video', code: number) {
     if (code === 3) { // CaptureError.CAPTURE_NO_MEDIA_FILES
       return null;
@@ -389,5 +435,50 @@ console.log('file',file)
     }
 
     return 'An error occurred while playing audio';
+  }
+
+  
+  getMimeTypes(path: string) {
+    if (path.endsWith('.jpg')) {
+      return 'image/jpeg';
+    }
+
+    if (path.endsWith('.jpeg')) {
+      return 'image/jpeg';
+    }
+
+    if (path.endsWith('.png')) {
+      return 'image/png';
+    }
+
+    if (path.endsWith('.mp3')) {
+      return 'audio/mpeg';
+    }
+
+    if (path.endsWith('.wav')) {
+      return 'audio/wav';
+    }
+
+    if (path.endsWith('.aac')) {
+      return 'audio/aac';
+    }
+
+    if (path.endsWith('.3gp')) {
+      return 'video/3gp';
+    }
+
+    if (path.endsWith('.mp4')) {
+      return 'video/mp4';
+    }
+
+    if (path.endsWith('.mov')) {
+      return 'video/quicktime';
+    }
+
+    if (path.endsWith('.MOV')) {
+      return 'video/quicktime';
+    }
+
+    return 'image/jpeg';
   }
 }

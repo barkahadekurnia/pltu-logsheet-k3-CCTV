@@ -164,6 +164,7 @@ export class ChangeRfidPage implements OnInit {
     // window.addEventListener('keypress', (v) => {
     //   console.log('vsa', v);
     // })
+    console.log('this tag listener', this.tagListener)
     
   }
 
@@ -179,7 +180,7 @@ export class ChangeRfidPage implements OnInit {
     // this.nfcPlugin.cancelScan
   }
   async ngOnDestroy() {
-    console.log('i wanna destroy nfc')
+    //console.log('i wanna destroy nfc')
     if (this.tagListener) {
       this.tagListener.unsubscribe();
       this.tagListener = null;

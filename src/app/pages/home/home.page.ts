@@ -45,6 +45,7 @@ import {
   SupportedFormat,
 } from '@capacitor-community/barcode-scanner';
 import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
+import { MediaService } from 'src/app/services/media/media.service';
 
 type NfcStatus =
   | 'NO_NFC'
@@ -66,6 +67,7 @@ type RequestOrder = {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
+
 export class HomePage implements OnInit {
   private nfcStatus: NfcStatus;
 
@@ -127,7 +129,8 @@ export class HomePage implements OnInit {
     private utils: UtilsService,
     private menuCtrl: MenuController,
     private injector: Injector,
-    private nfc1: NFC
+    private nfc1: NFC,
+    private media: MediaService,
   ) {
     this.application = {
       name: 'Digital Logsheet',
@@ -168,7 +171,8 @@ export class HomePage implements OnInit {
     this.datanonsift = this.shared.userdetail.nonshift;
     this.datalk3 = this.shared.userdetail.lk3;
 
-    console.log(this.gruprole, this.datasift, this.datanonsift, this.datalk3);
+    console.log(this.shared, this.gruprole, this.datasift, this.datanonsift, this.datalk3);
+    console.log(this.shared.user.group)
   }
 
   get applicationLogo() {
@@ -571,7 +575,7 @@ export class HomePage implements OnInit {
         directory: Directory.Data,
       });
 
-      const fileToDeleted = files.filter((file) => !exceptions.includes(file));
+      const fileToDeleted = files.filter((file) => !exceptions.includes(file as any));
 
       for (const file of fileToDeleted) {
         await Filesystem.deleteFile({
@@ -688,7 +692,7 @@ export class HomePage implements OnInit {
               parameters.push(data);
             }
           }
-         // console.log('parameter data sebelum di push SQL', parameters);
+          console.log('parameter data sebelum di push SQL', parameters);
 
           let storeParameters = [];
          
@@ -2602,16 +2606,41 @@ export class HomePage implements OnInit {
 
   private async offlinePhoto(type: string, url: string) {
     let filePath: string;
-
+    console.log('data lempar', url)
+    console.log('data lempar , types' , type)
     try {
       const name = url?.split('/').pop();
 
-      const { path } = await this.http.download({
-        url,
-        filePath: `${name}`,
-        fileDirectory: Directory.Data,
-      });
-      filePath = path;
+      const response = await this.http.nativeGetBlob(url);
+
+      if (![200, 201].includes(response.status)) {
+        return;
+      }
+  
+
+      //const name = row.substr(row.lastIndexOf('/') + 1);
+      const mimeType = (response.headers as any)?.['Content-Type'] || this.media.getMimeTypes(url);
+      const base64 = `data:${mimeType};base64,${response.data}`;
+      const blob = await this.media.convertFileToBlob(base64);
+      const fileURI = await this.media.writeBlob(blob, name);
+      
+      // const { path } = await this.http.download({
+      //   url,
+      //   filePath: `${name}`,
+      //   fileDirectory: Directory.Data,
+      // });
+      // const urlfile = fileURI.replace('///','/')
+      // console.log('file url',urlfile)
+      //console.log('file url',fileURI)
+
+      console.log('fileUrl' , fileURI)
+      console.log('blob' , blob)
+      //console.log('base64', base64) 
+      console.log('mimeType', mimeType)
+      console.log('type', type)
+
+     // filePath = urlfile;
+      filePath = fileURI;
     } catch (error) {
       console.error(error);
     }

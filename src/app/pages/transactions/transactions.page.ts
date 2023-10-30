@@ -15,6 +15,7 @@ import { HttpService } from 'src/app/services/http/http.service';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { SynchronizeCardComponent } from 'src/app/components/synchronize-card/synchronize-card.component';
 import { Observable, Subscriber } from 'rxjs';
+import { MediaService } from 'src/app/services/media/media.service';
 type RequestOrder = {
   [key: string]: {
     label: string;
@@ -77,7 +78,8 @@ export class TransactionsPage {
     private popoverCtrl: PopoverController,
     private http: HttpService,
     private notification: NotificationService,
-    private injector: Injector
+    private injector: Injector,
+    private media: MediaService,
   ) {
     this.segment = 'unuploaded';
     this.dataBelum= [];
@@ -400,7 +402,7 @@ export class TransactionsPage {
     } catch (error) {
       console.error(error);
     }
-
+    console.log('this unuploaded data' , data)
     return data;
   }
   private onProcessFinished(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
@@ -490,8 +492,19 @@ export class TransactionsPage {
         console.log('data upload item', item)
         console.log('data upload recordAttachmentId', recordAttachmentId)
 
-        
+        // const bodyObj = new FormData();
+
+        // bodyObj.append('attachment[]', await this.media.convertFileToBlob(data.filePath));
+        // const respUploadReplace = await this.http.postFormData('', bodyObj);
+
+        // if (![200, 201].includes(respUploadReplace!.status)) {
+        //   throw respUploadReplace;
+        // }
+
+        // console.log('resupload', respUploadReplace)
+
         await this.http.requests({
+          
           requests: [() => this.http.uploadRecordAttachment(data)],
           onSuccess: ([response]) => {
             if (response.status >= 400) {
