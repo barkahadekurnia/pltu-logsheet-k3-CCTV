@@ -79,6 +79,8 @@ export class ChangeRfidPage implements OnInit {
 
   async ngOnInit() {
     await this.checkStatus();
+    //await this.changesetup();
+
 
     this.transitionData = this.utils.parseJson(
       this.activatedRoute.snapshot.paramMap.get('data')
@@ -146,6 +148,7 @@ export class ChangeRfidPage implements OnInit {
     if (this.platform.is('capacitor')) {
       try {
         this.nfcStatus = await this.nfcPlugin.enabled();
+    
       } catch (error) {
         this.nfcStatus = error;
       }
@@ -156,16 +159,14 @@ export class ChangeRfidPage implements OnInit {
     return this.nfcStatus;
   }
   async ngAfterViewInit() {
-    await this.changesetup();
-    
+    await this.changesetup(); 
   }
   async ionViewWillEnter() {
      this.platform.ready().then(() => this.setupNfc());
     // window.addEventListener('keypress', (v) => {
     //   console.log('vsa', v);
     // })
-    console.log('this tag listener', this.tagListener)
-    
+    console.log('this tag listener', this.tagListener)   
   }
 
   async ionViewWillLeave() {
@@ -202,86 +203,13 @@ export class ChangeRfidPage implements OnInit {
     await this.menuCtrl.enable(true, 'asset-information');
     return this.menuCtrl.open('asset-information');
   }
-  // scanQrCode() {
-  //   BarcodeScanner.hideBackground();
-  //   document.body.classList.add('qrscanner');
-
-  //   const options: ScanOptions = {
-  //     targetedFormats: [SupportedFormat.QR_CODE]
-  //   };
-
-  //   BarcodeScanner.startScan(options).then(async result => {
-  //     this.utils.overrideBackButton();
-  //     document.body.classList.remove('qrscanner');
-
-  //     if (result.hasContent) {
-  //       const key = 'assetId=';
-  //       const startIndex = result.content.indexOf(key) + key.length;
-
-  //       const assetId = result.content;
-  //       const data = JSON.stringify({
-  //         type: 'qr',
-  //         data: assetId
-  //       });
-
-  //       //this.router.navigate(['scan-form', { data }]);
-  //     }
-  //   });
-
-  //   this.utils.overrideBackButton(() => {
-  //     this.utils.overrideBackButton();
-  //     document.body.classList.remove('qrscanner');
-  //     BarcodeScanner.showBackground();
-  //     BarcodeScanner.stopScan();
-  //   });
-  // }
 
   private async setupNfc() {
     await this.checkStatus();
   }
 
-  // async setTagListener(listener: TagListener) {
-  //   console.log('cek listener', this.tagListener)
-  //   if (this.tagListener) {
-  //     this.tagListener.unsubscribe();
-  //     this.tagListener = null;
-  //   }
-
-  //   // if (this.platform.is('android')) {
-  //   //   this.tagListener = this.nfc.addTagDiscoveredListener().subscribe(listener);
-  //   // }
-   
-  //   this.nfcPlugin.addTagDiscoveredListener().subscribe(event => {
-  //     // console.log(event.tag.id);
-  //     // this.router.navigate(['scan-form', { data }]);
-  //     // this.nfcPlugin.addTagDiscoveredListener().subscribe(event => {
-  //     // console.log('cek event', event);
-  //     const res = this.nfcPlugin.bytesToHexString(event.tag.id)
-  //     console.log('res', res);
-  //     // const data = res;
-  //     const data = JSON.stringify({
-  //       type: 'rfid',
-  //       data: res
-  //     });
-  //     //this.router.navigate(['scan-form', { data }]);
-
-  //     // this.setupNfc();
-
-  //     // });
-  //   });
-
-  //   if (this.platform.is('ios')) {
-  //     try {
-  //       this.tagListener = await this.nfcPlugin.scanTag().then(listener);
-  //       console.log('tag listener', this.tagListener);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   }
-  // }
-
   async setRfid(listener: TagListener) {
-    console.log('cek listener', this.tagListener)
+    console.log('cek listener', listener)
     if (this.tagListener) {
       this.tagListener.unsubscribe();
       this.tagListener = null;
@@ -292,9 +220,12 @@ export class ChangeRfidPage implements OnInit {
     // }
     var kali =0;
 
-    (this.tagListener as any) = this.nfcPlugin.addTagDiscoveredListener().subscribe(async event => {
+    this.tagListener  = this.nfcPlugin.addTagDiscoveredListener().subscribe(async event => {
       const res = this.nfcPlugin.bytesToHexString(event.tag.id)
       console.log('res', res);
+
+      console.log('data NFC', event.tag)
+      console.log('tag  listerner' , this.tagListener);
 
       const data = JSON.stringify({
         type: 'qr',
@@ -338,7 +269,7 @@ export class ChangeRfidPage implements OnInit {
     //}
 
     console.log('kali3 aset', kali)
-
+      console.log('this tag listener' , this.tagListener)
     kali++;
     }
     
