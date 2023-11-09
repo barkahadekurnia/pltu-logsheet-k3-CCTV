@@ -16,6 +16,15 @@ import { NotificationService } from 'src/app/services/notification/notification.
 import { SynchronizeCardComponent } from 'src/app/components/synchronize-card/synchronize-card.component';
 import { Observable, Subscriber } from 'rxjs';
 import { MediaService } from 'src/app/services/media/media.service';
+import { environment } from 'src/environments/environment';
+
+import { SQLite, SQLiteObject } from '@awesome-cordova-plugins/sqlite/ngx';
+
+type QuerySet = {
+  query: string;
+  params: any[];
+};
+
 type RequestOrder = {
   [key: string]: {
     label: string;
@@ -30,6 +39,7 @@ type RequestOrder = {
   styleUrls: ['./transactions.page.scss'],
 })
 export class TransactionsPage {
+
   application: {
     name: string;
     logo: {
@@ -200,21 +210,21 @@ export class TransactionsPage {
       recordAttachmentsApar: {
         label: 'Record Attachments Apar',
         status: 'loading',
-        message: 'Periksa record attachments...',
+        message: 'Periksa record attachments apar...',
       },
     };
 
     const loader = await this.popoverCtrl.create({
       component: SynchronizeCardComponent,
       cssClass: 'alert-popover center-popover',
-      backdropDismiss: false,
+      backdropDismiss: true,
       mode: 'ios',
       componentProps: {
         options: {
           complexMessage: Object.values(this.syncJob.order),
           observable: new Observable((subscriber) => {
-            this.syncJob.order.records.request = () =>
-              this.uploadRecords(subscriber, loader);
+            // this.syncJob.order.records.request = () =>
+            //   this.uploadRecords(subscriber, loader);
 
             this.syncJob.order.recordAttachments.request = () =>
               this.uploadRecordAttachments(subscriber, loader);
@@ -452,7 +462,7 @@ export class TransactionsPage {
         timestamp: attachment.timestamp,
         parameterId: attachment.parameterId,
       }));
-    // console.log('isi att', recordAttachments);
+     console.log('isi att', recordAttachments);
     if (recordAttachments.length) {
       console.log('recordAttachments', recordAttachments)
       const uploaded = [];
@@ -460,282 +470,237 @@ export class TransactionsPage {
       this.syncJob.isUploading = true;
       this.syncJob.order.recordAttachments.message = 'Upload file attachments...';
 
-      if (recordAttachments.length > 1) {
-        this.syncJob.order.recordAttachments.message += `(${recordAttachments.length})`;
-      }
+      //upload attachment
+      try {
+        for (let file of recordAttachments) {
+          const body = new FormData();
+          body.append('scheduleTrxId', file.scheduleTrxId);
+          body.append('trxId', file.trxId);
+          body.append('notes', file.notes);
+          body.append('timestamp',file.timestamp);
+          body.append('filePath', await this.media.convertFileToBlob(file.filePath));
+          body.append('parameterId',file.parameterId);
+       
 
-      const attachmentBySchedule: any = {};
+            console.log('isi body', ...<[]><unknown>body);
+            
+           const response = await this.http.postFormData(`${environment.url.recordAttachment}`, body);
+          if (![200, 201].includes(response!.status)) {
+            throw response;
+          }
+          activityLogs.push({
+            scheduleTrxId: file.scheduleTrxId,
+            status: 'success',
+            message: `berhasil upload file attachment`,
+          });
 
-      Object.entries(groupBy(recordAttachments, 'scheduleTrxId'))
-        .forEach(([scheduleTrxId, attachments]) => {
-          console.log('attachments cek1', attachments)
-          attachmentBySchedule[scheduleTrxId] = {
-            attachmentIds: attachments
-              .map(attachment => attachment.recordAttachmentId),
-            uploadedAttachmentIds: [],
-          };
-        });
+        }
+          this.syncJob.order.recordAttachments.status = 'success';
+          this.syncJob.order.recordAttachments.message = 'Berhasil mengupload draft lampiran';
 
-      subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
-      });
-      console.log('recordAttachmentId', recordAttachments.entries())
+       
+          // for (const [i, item] of recordAttachments.entries()) {
+          //       const { recordAttachmentId, ...data } = item;
+        
+          // uploaded.push(recordAttachmentId);
+          // const attachmentBySchedule:any = {}
 
-      for (const [i, item] of recordAttachments.entries()) {
-        const { recordAttachmentId, ...data } = item;
+          // attachmentBySchedule[item.scheduleTrxId].uploadedAttachmentIds
+          //     .push(recordAttachmentId);
+          //   const uploadedBySchedule = Object.entries<any>(attachmentBySchedule)
+          //     .filter(([key, value]) =>
+          //       value.attachmentIds?.length === value.uploadedAttachmentIds?.length
+          //     )
+          //     .map(([scheduleTrxId]) => scheduleTrxId);
+          //   console.log('uploadedBySchedule ', uploadedBySchedule);
 
-        const leftover = recordAttachments.length - (i + 1);
-        // console.log('recordAttachments.length :', recordAttachments.length)
-        // console.log('i :', i)
-        // console.log({ uploadRecordAttachment: JSON.stringify(data) });
-        console.log('data upload', data)
-        console.log('data upload item', item)
-        console.log('data upload recordAttachmentId', recordAttachmentId)
+          //   if (uploadedBySchedule.length) {
+          //     const marks = this.database.marks(uploadedBySchedule.length);
+          //     // console.log('marks', marks);
 
-        // const bodyObj = new FormData();
+          //     const where = {
+          //       query: `trxId IN (${marks})`,
+          //       params: uploadedBySchedule
+          //     };
+          //     console.log(where)
+          //     this.database.update('recordAttachment', { isUploaded: 1 }, where);
+          //   }
+          // }
 
-        // bodyObj.append('attachment[]', await this.media.convertFileToBlob(data.filePath));
-        // const respUploadReplace = await this.http.postFormData('', bodyObj);
+          this.shared.addLogActivity({
+            activity: 'User upload file attachments ke server',
+            data: activityLogs
+          });
+          this.onProcessFinished(subscriber, loader);
 
-        // if (![200, 201].includes(respUploadReplace!.status)) {
-        //   throw respUploadReplace;
-        // }
+      } catch (err) {
+        console.error(err);
+        this.syncJob.order.recordAttachments.status= 'failed';
+        this.syncJob.order.recordAttachments.message = 'Gagal mengupload draft lampiran';
+      } 
+    } 
+    else { 
+    //delete this.syncJob.order.recordAttachmentsApar;
 
-        // console.log('resupload', respUploadReplace)
+    // subscriber.next({
+    //   complexMessage: Object.values(this.syncJob.order)
+    // });
 
-        await this.http.requests({
-          
-          requests: [() => this.http.uploadRecordAttachment(data)],
-          onSuccess: ([response]) => {
-            if (response.status >= 400) {
-              throw response;
-            }
-            console.log('recordAttachmentId', response)
-            uploaded.push(recordAttachmentId);
-
-            attachmentBySchedule[item.scheduleTrxId].uploadedAttachmentIds
-              .push(recordAttachmentId);
-
-            activityLogs.push({
-              scheduleTrxId: item.scheduleTrxId,
-              status: 'success',
-              message: `berhasil upload file attachment`,
-            });
-          },
-          onError: (error) => {
-            console.log(error)
-            activityLogs.push({
-              scheduleTrxId: item.scheduleTrxId,
-              status: 'failed',
-              message: error?.data
-                ? this.http.getErrorMessage(error.data)
-                : this.http.getErrorMessage(error)
-            });
-          },
-          onComplete: () => {
-            if (leftover) {
-              this.syncJob.order.recordAttachments.message = 'Upload file attachments...';
-
-              if (leftover > 1) {
-                this.syncJob.order.recordAttachments.message += ` (${leftover})`;
-              }
-
-              subscriber.next({
-                complexMessage: Object.values(this.syncJob.order)
-              });
-            } else {
-              const uploadedBySchedule = Object.entries<any>(attachmentBySchedule)
-                .filter(([key, value]) =>
-                  value.attachmentIds?.length === value.uploadedAttachmentIds?.length
-                )
-                .map(([scheduleTrxId]) => scheduleTrxId);
-              console.log('uploadedBySchedule ', uploadedBySchedule);
-
-              if (uploadedBySchedule.length) {
-                const marks = this.database.marks(uploadedBySchedule.length);
-                // console.log('marks', marks);
-
-                const where = {
-                  query: `trxId IN (${marks})`,
-                  params: uploadedBySchedule
-                };
-                console.log(where)
-                this.database.update('recordAttachment', { isUploaded: 1 }, where);
-              }
-
-              if (uploaded.length === recordAttachments.length) {
-                this.syncJob.order.recordAttachments.status = 'success';
-                this.syncJob.order.recordAttachments.message = 'Berhasil upload file attachment';
-
-                if (uploaded.length > 1) {
-                  this.syncJob.order.recordAttachments.message += `s (${uploaded.length})`;
-                }
-              } else {
-                const failureCount = recordAttachments.length - uploaded.length;
-                this.syncJob.order.recordAttachments.status = 'failed';
-                this.syncJob.order.recordAttachments.message = 'Gagal upload file attachment';
-
-                if (failureCount > 0) {
-                  this.syncJob.order.recordAttachments.message += ` (${failureCount})`;
-                }
-              }
-
-              this.shared.addLogActivity({
-                activity: 'User upload file attachments ke server',
-                data: activityLogs
-              });
-
-              this.onProcessFinished(subscriber, loader);
-            }
-          },
-        });
-      }
-    } else {
-      delete this.syncJob.order.recordAttachments;
-
-      subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
-      });
     }
+
+    this.syncJob.order.recordAttachments.status = 'success';
+    this.syncJob.order.recordAttachments.message = 'Berhasil mengupload draft lampiran';
+
+    console.log('record attachment done')
   }
 
-  private async uploadRecordAttachmentsApar(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
-    const recordAttachmentsApar = (await this.getUnuploadedData('recordAttachmentPemadam'))
-      .map((attachment) => ({
-        recordAttachmentId: attachment.recordAttachmentId,
-        scheduleTrxId: attachment.scheduleTrxId,
-        trxId: attachment.trxId,
-        notes: attachment.notes,
-        type: attachment.type,
-        filePath: attachment.filePath,
-        timestamp: attachment.timestamp
-      }));
-    console.log('isi att', recordAttachmentsApar);
-    if (recordAttachmentsApar.length) {
-      const uploaded = [];
-      const activityLogs = [];
-      this.syncJob.isUploading = true;
-      this.syncJob.order.recordAttachmentsApar.message = 'Upload file attachments...';
-
-      if (recordAttachmentsApar.length > 1) {
-        this.syncJob.order.recordAttachmentsApar.message += `(${recordAttachmentsApar.length})`;
-      }
-
-      const attachmentBySchedule: any = {};
-
-      Object.entries(groupBy(recordAttachmentsApar, 'scheduleTrxId'))
-        .forEach(([scheduleTrxId, attachments]) => {
-          attachmentBySchedule[scheduleTrxId] = {
-            attachmentIds: attachments
-              .map(attachment => attachment.recordAttachmentId),
-            uploadedAttachmentIds: [],
-          };
+    private async uploadRecordAttachmentsApar(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
+      const recordAttachmentsApar = (await this.getUnuploadedData('recordAttachmentPemadam'))
+        .map((attachment) => ({
+          recordAttachmentId: attachment.recordAttachmentId,
+          scheduleTrxId: attachment.scheduleTrxId,
+          trxId: attachment.trxId,
+          notes: attachment.notes,
+          type: attachment.type,
+          filePath: attachment.filePath,
+          timestamp: attachment.timestamp
+        }));
+      console.log('isi att', recordAttachmentsApar);
+      if (recordAttachmentsApar.length) {
+        const uploaded = [];
+        const activityLogs = [];
+        this.syncJob.isUploading = true;
+        this.syncJob.order.recordAttachmentsApar.message = 'Upload file attachments...';
+  
+        if (recordAttachmentsApar.length > 1) {
+          this.syncJob.order.recordAttachmentsApar.message += `(${recordAttachmentsApar.length})`;
+        }
+  
+        const attachmentBySchedule: any = {};
+  
+        Object.entries(groupBy(recordAttachmentsApar, 'scheduleTrxId'))
+          .forEach(([scheduleTrxId, attachments]) => {
+            attachmentBySchedule[scheduleTrxId] = {
+              attachmentIds: attachments
+                .map(attachment => attachment.recordAttachmentId),
+              uploadedAttachmentIds: [],
+            };
+          });
+  
+        subscriber.next({
+          complexMessage: Object.values(this.syncJob.order)
         });
+  
+        for (const [i, item] of recordAttachmentsApar.entries()) {
+          const { recordAttachmentId, ...data } = item;
+  
+          const leftover = recordAttachmentsApar.length - (i + 1);
+           const body = new FormData();
+          body.append('scheduleTrxId', item.scheduleTrxId);
+          body.append('trxId', item.trxId);
+          body.append('notes', item.notes);
+          body.append('timestamp',item.timestamp);
+          body.append('filePath', await this.media.convertFileToBlob(item.filePath));
+        // body.append('parameterId',item.parameterId);
+       
 
-      subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
-      });
+            console.log('isi body', ...<[]><unknown>body);
 
-      for (const [i, item] of recordAttachmentsApar.entries()) {
-        const { recordAttachmentId, ...data } = item;
-
-        const leftover = recordAttachmentsApar.length - (i + 1);
-
-        await this.http.requests({
-          requests: [() => this.http.uploadRecordAttachmentApar(data)],
-          onSuccess: ([response]) => {
-            if (response.status >= 400) {
-              throw response;
-            }
-            console.log('recordAttachmentId', response)
-            uploaded.push(recordAttachmentId);
-
-            attachmentBySchedule[item.scheduleTrxId].uploadedAttachmentIds
-              .push(recordAttachmentId);
-
-            activityLogs.push({
-              scheduleTrxId: item.scheduleTrxId,
-              status: 'success',
-              message: `berhasil upload file attachment`,
-            });
-          },
-          onError: (error) => {
-            console.log(error)
-            activityLogs.push({
-              scheduleTrxId: item.scheduleTrxId,
-              status: 'failed',
-              message: error?.data
-                ? this.http.getErrorMessage(error.data)
-                : this.http.getErrorMessage(error)
-            });
-          },
-          onComplete: () => {
-            if (leftover) {
-              this.syncJob.order.recordAttachmentsApar.message = 'Upload file attachments...';
-
-              if (leftover > 1) {
-                this.syncJob.order.recordAttachmentsApar.message += ` (${leftover})`;
+          await this.http.requests({
+            requests: [() => this.http.postFormData(`${environment.url.attach}`, body)],
+            onSuccess: ([response]) => {
+              if (response.status >= 400) {
+                throw response;
               }
-
-              subscriber.next({
-                complexMessage: Object.values(this.syncJob.order)
+              console.log('recordAttachmentId', response)
+              uploaded.push(recordAttachmentId);
+  
+              attachmentBySchedule[item.scheduleTrxId].uploadedAttachmentIds
+                .push(recordAttachmentId);
+  
+              activityLogs.push({
+                scheduleTrxId: item.scheduleTrxId,
+                status: 'success',
+                message: `berhasil upload file attachment`,
               });
-            } else {
-              const uploadedBySchedule = Object.entries<any>(attachmentBySchedule)
-                .filter(([key, value]) =>
-                  value.attachmentIds?.length === value.uploadedAttachmentIds?.length
-                )
-                .map(([scheduleTrxId]) => scheduleTrxId);
-              // console.log('uploadedBySchedule', uploadedBySchedule);
-
-              if (uploadedBySchedule.length) {
-                const marks = this.database.marks(uploadedBySchedule.length);
-                // console.log('marks', marks);
-
-                const where = {
-                  query: `trxId IN (${marks})`,
-                  params: uploadedBySchedule
-                };
-                console.log(where)
-                this.database.update('recordAttachmentPemadam', { isUploaded: 1 }, where);
-              }
-
-              if (uploaded.length === recordAttachmentsApar.length) {
-                this.syncJob.order.recordAttachmentsApar.status = 'success';
-                this.syncJob.order.recordAttachmentsApar.message = 'Berhasil upload file attachment';
-
-                if (uploaded.length > 1) {
-                  this.syncJob.order.recordAttachmentsApar.message += `s (${uploaded.length})`;
+            },
+            onError: (error) => {
+              console.log(error)
+              activityLogs.push({
+                scheduleTrxId: item.scheduleTrxId,
+                status: 'failed',
+                message: error?.data
+                  ? this.http.getErrorMessage(error.data)
+                  : this.http.getErrorMessage(error)
+              });
+            },
+            onComplete: () => {
+              if (leftover) {
+                this.syncJob.order.recordAttachmentsApar.message = 'Upload file attachments...';
+  
+                if (leftover > 1) {
+                  this.syncJob.order.recordAttachmentsApar.message += ` (${leftover})`;
                 }
+  
+                subscriber.next({
+                  complexMessage: Object.values(this.syncJob.order)
+                });
               } else {
-                const failureCount = recordAttachmentsApar.length - uploaded.length;
-                this.syncJob.order.recordAttachmentsApar.status = 'failed';
-                this.syncJob.order.recordAttachmentsApar.message = 'Gagal upload file attachment';
-
-                if (failureCount > 0) {
-                  this.syncJob.order.recordAttachmentsApar.message += ` (${failureCount})`;
+                const uploadedBySchedule = Object.entries<any>(attachmentBySchedule)
+                  .filter(([key, value]) =>
+                    value.attachmentIds?.length === value.uploadedAttachmentIds?.length
+                  )
+                  .map(([scheduleTrxId]) => scheduleTrxId);
+                // console.log('uploadedBySchedule', uploadedBySchedule);
+  
+                if (uploadedBySchedule.length) {
+                  const marks = this.database.marks(uploadedBySchedule.length);
+                  // console.log('marks', marks);
+  
+                  const where = {
+                    query: `trxId IN (${marks})`,
+                    params: uploadedBySchedule
+                  };
+                  console.log(where)
+                  this.database.update('recordAttachmentPemadam', { isUploaded: 1 }, where).then((res)=> console.log('update sqllite attachment', res));
                 }
+  
+                if (uploaded.length === recordAttachmentsApar.length) {
+                  this.syncJob.order.recordAttachmentsApar.status = 'success';
+                  this.syncJob.order.recordAttachmentsApar.message = 'Berhasil upload file attachment';
+  
+                  if (uploaded.length > 1) {
+                    this.syncJob.order.recordAttachmentsApar.message += `s (${uploaded.length})`;
+                  }
+                } else {
+                  const failureCount = recordAttachmentsApar.length - uploaded.length;
+                  this.syncJob.order.recordAttachmentsApar.status = 'failed';
+                  this.syncJob.order.recordAttachmentsApar.message = 'Gagal upload file attachment';
+  
+                  if (failureCount > 0) {
+                    this.syncJob.order.recordAttachmentsApar.message += ` (${failureCount})`;
+                  }
+                }
+  
+                this.shared.addLogActivity({
+                  activity: 'User upload file attachments ke server',
+                  data: activityLogs
+                });
+  
+                this.onProcessFinished(subscriber, loader);
               }
-
-              this.shared.addLogActivity({
-                activity: 'User upload file attachments ke server',
-                data: activityLogs
-              });
-
-              this.onProcessFinished(subscriber, loader);
-            }
-          },
+            },
+          });
+        }
+      } else {
+        delete this.syncJob.order.recordAttachmentsApar;
+  
+        subscriber.next({
+          complexMessage: Object.values(this.syncJob.order)
         });
       }
-    } else {
-      delete this.syncJob.order.recordAttachmentsApar;
-
-      subscriber.next({
-        complexMessage: Object.values(this.syncJob.order)
-      });
     }
-  }
-
+  
 
   openPreview(scheduleTrxId: string) {
     const data = JSON.stringify({ scheduleTrxId });
@@ -962,7 +927,7 @@ export class TransactionsPage {
       const uploadedRecords = await this.getUploadedRecords(scheduleTrxIds);
       console.log('uploadedRecords', uploadedRecords)
       const unuploadedRecords = await this.getUnuploadedRecords();
-      console.log('uploadedRecords', unuploadedRecords)
+      console.log('unusploadedRecords', unuploadedRecords)
 
 
 

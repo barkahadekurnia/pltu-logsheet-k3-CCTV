@@ -215,7 +215,8 @@ export class HttpService {
     const options: HttpOptions = {
       url: environment.url.kirimlaporan + '/' + id,
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        //'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
       data,
       responseType: 'json'
@@ -532,13 +533,11 @@ export class HttpService {
 
   async postFormData(path: string, body: FormData): Promise<any> {
     const observable = this.httpClient
-      .post(environment.url.recordAttachment, body, {
+      .post(path, body, {
         observe: 'response',
         responseType: 'json',
         headers: {
-          Authorization: `Bearer ${this.token}`,
-          'Content-Type': 'application/json',
-
+          Authorization: `Bearer ${this.token}`
         },
       })
       .pipe(timeout(this.timeout), retry(this.retry));

@@ -106,7 +106,8 @@ export class AppComponent implements AfterViewInit {
       { name: this.androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE },
       { name: this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE },
       { name: this.androidPermissions.PERMISSION.CAMERA },
-      { name: this.androidPermissions.PERMISSION.NFC }
+      { name: this.androidPermissions.PERMISSION.NFC },
+      { name: this.androidPermissions.PERMISSION.POST_NOTIFICATIONS },
     ];
 
     this.initializeApp();

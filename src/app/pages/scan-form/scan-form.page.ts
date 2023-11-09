@@ -1530,7 +1530,7 @@ export class ScanFormPage implements OnInit {
     }
 
     if (parameter.inputType === 'select') {
-      function searchStringInArray(str, strArray) {
+      const f = function searchStringInArray(str, strArray) {
         return strArray.includes(str);
       }
       // console.log('hasil', );
@@ -1540,7 +1540,7 @@ export class ScanFormPage implements OnInit {
       //  console.log('abnormal', parameter.abnormal.split(","));
       //  console.log('value', parameter.value);
       //  console.log('this.result.params' , this.resultParam);
-      return searchStringInArray(parameter.value, parameter.abnormal.split(","));
+      return f(parameter.value, parameter.abnormal.split(","));
     }
 
     return false;

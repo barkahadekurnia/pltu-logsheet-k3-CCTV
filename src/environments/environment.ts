@@ -43,7 +43,7 @@ export const environment = {
       return this.base + '/api/transaction/schedule/viewTrxParent';
     },
     get kirimlaporan() {
-      return this.base + '/api/transaction/schedule/reportTrxParent/';
+      return this.base + '/api/transaction/schedule/reportTrxParent';
     },
     get assetTags() {
       return this.base + `/api/transaction/asset/tagging`;

@@ -127,8 +127,18 @@ export class LaporanHarianDetailPage implements OnInit {
       alert.present();
       this.utils.back()
         // throw response.data;
-
       }
+
+      const alert = await this.utils.createCustomAlert({
+        type: 'success',
+        header: 'Berhasil',
+        message: 'Sukses Kirim Laporan',
+        buttons: [{
+          text: 'Close',
+          handler: () =>  alert.dismiss()
+        }]
+        })
+      alert.present();
       this.utils.back()
 
     } catch (error) {

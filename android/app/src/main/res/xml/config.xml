@@ -44,8 +44,8 @@
     <param name="android-package" value="com.hutchind.cordova.plugins.streamingmedia.StreamingMedia"/>
   </feature>
 
-  <feature name="VideoPlayer">
-    <param name="android-package" value="com.moust.cordova.videoplayer.VideoPlayer"/>
+  <feature name="VideoPlayerPlugin">
+    <param name="android-package" value="jp.phi.cordova.plugin.videoplayer.VideoPlayerPlugin"/>
   </feature>
 
   <feature name="SQLitePlugin">
