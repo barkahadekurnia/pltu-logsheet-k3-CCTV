@@ -279,7 +279,6 @@ export class TransactionsPage {
       }));
 
     // console.log('records', records);
-
     if (records.length) {
       this.syncJob.isUploading = true;
       this.syncJob.order.records.message = 'Uploading data records...';
