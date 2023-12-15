@@ -13,7 +13,8 @@ import {
 
 import { App } from '@capacitor/app';
 import { Device } from '@capacitor/device';
-import { Storage } from '@capacitor/storage';
+//import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 import { AES256 } from '@awesome-cordova-plugins/aes-256/ngx';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { environment } from 'src/environments/environment';
@@ -92,7 +93,7 @@ export class UtilsService {
     }
 
     if (!this.secureKey) {
-      const { value } = await Storage.get({
+      const { value } = await Preferences.get({
         key: environment.values.secureKey
       });
 
@@ -102,14 +103,14 @@ export class UtilsService {
     if (!this.secureKey) {
       this.secureKey = await this.aes256.generateSecureKey(environment.values.salt);
 
-      await Storage.set({
+      await Preferences.set({
         key: environment.values.secureKey,
         value: this.secureKey
       });
     }
 
     if (!this.secureIV) {
-      const { value } = await Storage.get({
+      const { value } = await Preferences.get({
         key: environment.values.secureIV
       });
 
@@ -119,7 +120,7 @@ export class UtilsService {
     if (!this.secureIV) {
       this.secureIV = await this.aes256.generateSecureIV(environment.values.salt);
 
-      await Storage.set({
+      await Preferences.set({
         key: environment.values.secureIV,
         value: this.secureIV
       });
@@ -134,7 +135,7 @@ export class UtilsService {
     }
 
     if (!this.secureKey) {
-      const { value } = await Storage.get({
+      const { value } = await Preferences.get({
         key: environment.values.secureKey
       });
 
@@ -142,7 +143,7 @@ export class UtilsService {
     }
 
     if (!this.secureIV) {
-      const { value } = await Storage.get({
+      const { value } = await Preferences.get({
         key: environment.values.secureIV
       });
 
@@ -273,6 +274,7 @@ export class UtilsService {
     }
   }
 
+  
   delay(delay: number) {
     return new Promise<void>(resolve => {
       setTimeout(() => resolve(), delay);

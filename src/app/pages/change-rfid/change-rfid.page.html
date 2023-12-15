@@ -7,11 +7,11 @@
     <ion-title class="text-lg font-semibold">UBAH RFID</ion-title>
 
     <ion-buttons slot="end" mode="md">
-      <ion-button *ngIf="!checkOnly && (nfcStatus === 'NFC_OK' || nfcStatus === 'NFC_DISABLED' || nfcStatus !== 'NO_NFC')" mode="md"
+      <!-- <ion-button *ngIf="!checkOnly && (nfcStatus === 'NFC_OK' || nfcStatus === 'NFC_DISABLED' || nfcStatus !== 'NO_NFC')" mode="md"
         (click)="scanQrCode()">
         <ion-icon slot="icon-only" name="reload-circle-sharp"></ion-icon>
 
-      </ion-button>
+      </ion-button> -->
       <ion-button *ngIf="!checkOnly && (nfcStatus === 'NFC_OK' || nfcStatus === 'NFC_DISABLED' || nfcStatus !== 'NO_NFC')" mode="md"
       (click)="showDetails()">
       <ion-icon name="information-circle-outline"></ion-icon>

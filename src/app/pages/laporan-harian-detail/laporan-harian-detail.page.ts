@@ -127,8 +127,18 @@ export class LaporanHarianDetailPage implements OnInit {
       alert.present();
       this.utils.back()
         // throw response.data;
-
       }
+
+      const alert = await this.utils.createCustomAlert({
+        type: 'success',
+        header: 'Berhasil',
+        message: 'Sukses Kirim Laporan',
+        buttons: [{
+          text: 'Close',
+          handler: () =>  alert.dismiss()
+        }]
+        })
+      alert.present();
       this.utils.back()
 
     } catch (error) {
@@ -206,8 +216,6 @@ export class LaporanHarianDetailPage implements OnInit {
     } finally {
       this.loading = false;
     }
-
-
   }
 
   async openDetail(item){
@@ -216,12 +224,16 @@ export class LaporanHarianDetailPage implements OnInit {
 
     console.log('cek detail', item)
     const data = JSON.stringify({
-      data: this.schedules[0],
-      scheduleId: item.scheduleTrxId,
+      data: item,
     })
+    // const data = JSON.stringify({
+    //   data: this.schedules[0],
+    //   scheduleId: item.scheduleTrxId,
+    //   parentId: item.trxParentId,
+    // })
 
  
-    console.log('data json :', JSON.parse(data));
+    // console.log('data json :', JSON.parse(data));
 
 
     // const data = this.schedules[0]
@@ -229,7 +241,7 @@ export class LaporanHarianDetailPage implements OnInit {
 
     // console.log('dataaaaaa' , data);
 
-    return this.router.navigate(['transaction-detail',  {data} ]);
+    return this.router.navigate(['laporan-detail-transaction',  {data} ]);
   }
 
   async getSchedules(item) {

@@ -11,6 +11,9 @@ import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
 import { SharedService } from 'src/app/services/shared/shared.service';
 type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK';
 
+type TagListener = (event?: any) => any | void;
+
+
 @Component({
   selector: 'app-change-rfid',
   templateUrl: './change-rfid.page.html',
@@ -20,6 +23,7 @@ type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK'
 export class ChangeRfidPage implements OnInit {
   checkOnly: boolean;
   subscription: Subscription;
+  
 
   openSettingsButton: {
     text: string;
@@ -41,6 +45,7 @@ export class ChangeRfidPage implements OnInit {
   };
   resultParam = [];
   public nfcStatus: NfcStatus;
+  private tagListener: Subscription;
 
   // asset = [];
   constructor(
@@ -50,11 +55,11 @@ export class ChangeRfidPage implements OnInit {
     private alertCtrl: AlertController,
     private nfc: NfcService,
     private utils: UtilsService,
-    private nfc1: NFC,
+    private nfcPlugin: NFC,
     private menuCtrl: MenuController,
     private shared: SharedService,
 
-    private http: HttpService
+    private http: HttpService,
   ) {
     // this.openSettingsButton = {
     //   text: 'Open Settings',
@@ -74,6 +79,8 @@ export class ChangeRfidPage implements OnInit {
 
   async ngOnInit() {
     await this.checkStatus();
+    //await this.changesetup();
+
 
     this.transitionData = this.utils.parseJson(
       this.activatedRoute.snapshot.paramMap.get('data')
@@ -84,49 +91,39 @@ export class ChangeRfidPage implements OnInit {
     }
 
     console.log('transitionData :', this.transitionData);
+    console.log('transitionData.data :', this.transitionData.data);
 
-    this.checkOnly = this.utils.parseJson(
-      this.activatedRoute.snapshot.paramMap.get('checkOnly')
-    );
+    // this.checkOnly = this.utils.parseJson(
+    //   this.activatedRoute.snapshot.paramMap.get('checkOnly')
+    // );
 
-    if (!this.checkOnly) {
-      this.scanQrButton = {
-        text: 'Scan with QR Code',
-        icon: 'qr-code-outline',
-        handler: () => this.scanQrCode()
-      };
-    }
+    // console.log('check only kah? ' , this.checkOnly)
+
+    // if (!this.checkOnly) {
+    //   this.scanQrButton = {
+    //     text: 'Scan with QR Code',
+    //     icon: 'qr-code-outline',
+    //     //handler: () => this.scanQrCode()
+    //   };
+    // }
 
     // this.subscription = this.platform.resume
     //   .subscribe(() => this.nfc.checkStatus());
 
+    console.log('transition Data',this.transitionData.data)
 
-  }
-  async checkStatus() {
-    if (this.platform.is('capacitor')) {
-      try {
-        this.nfcStatus = await this.nfc1.enabled();
-      } catch (error) {
-        this.nfcStatus = error;
-      }
+    if (this.transitionData.data === undefined) {
+      return console.log('kosong mamang data bawaannya (aset id)')
     }
 
-    return this.nfcStatus;
-  }
-  async ngAfterViewInit() {
-    await this.nfc.changesetup();
-  }
-  async ionViewWillEnter() {
-    // this.platform.ready().then(() => this.setupNfc());
-    // window.addEventListener('keypress', (v) => {
-    //   console.log('vsa', v);
-    // })
     await this.http.requests({
       requests: [() => this.http.getAssetsId(this.transitionData.data)],
       onSuccess: async ([responseParameters]) => {
         if (responseParameters.status >= 400) {
           throw responseParameters;
         }
+
+        console.log('respons parameter',responseParameters)
         // console.log('parameter', responseParameters?.data?.data);
         // if (responseParameters?.data?.data?.length) {
         const data = responseParameters?.data?.data;
@@ -147,100 +144,154 @@ export class ChangeRfidPage implements OnInit {
       onError: error => console.error(error)
     });
   }
+  async checkStatus() {
+    if (this.platform.is('capacitor')) {
+      try {
+        this.nfcStatus = await this.nfcPlugin.enabled();
+    
+      } catch (error) {
+        this.nfcStatus = error;
+      }
+    }
 
-  ionViewWillLeave() {
-    // this.nfc.invalidateTagListener();
-    // this.subscription?.unsubscribe?.();
+    console.log('nfc status bang',this.nfcStatus)
+
+    return this.nfcStatus;
+  }
+  async ngAfterViewInit() {
+    await this.changesetup(); 
+  }
+  async ionViewWillEnter() {
+     this.platform.ready().then(() => this.setupNfc());
+    // window.addEventListener('keypress', (v) => {
+    //   console.log('vsa', v);
+    // })
+    console.log('this tag listener', this.tagListener)   
+  }
+
+  async ionViewWillLeave() {
+    //  this.nfc.invalidateTagListener();
+    //  this.subscription?.unsubscribe?.();
+    // console.log('i wanna out nfc')
+    // if (this.tagListener) {
+    //   this.tagListener.unsubscribe();
+    //   this.tagListener = null;
+    // }
+
+    // this.nfcPlugin.cancelScan
+  }
+  async ngOnDestroy() {
+    //console.log('i wanna destroy nfc')
+    if (this.tagListener) {
+      this.tagListener.unsubscribe();
+      this.tagListener = null;
+    }
   }
 
   doRefresh(e: any) {
-    // this.setupNfc().finally(() => {
-    //   setTimeout(() => e.target.complete(), 300);
-    // });
-
+    this.setupNfc().finally(() => {
+      setTimeout(() => e.target.complete(), 300);
+    });
   }
+  async changesetup(listener: TagListener = () => { }) {
+    await this.checkStatus();
+    await this.setRfid(listener);
+  }
+
   async showDetails() {
-    // this.shared.asset = asset;
+    // this .shared.asset = asset;
     await this.menuCtrl.enable(true, 'asset-information');
     return this.menuCtrl.open('asset-information');
   }
-  scanQrCode() {
-    BarcodeScanner.hideBackground();
-    document.body.classList.add('qrscanner');
 
-    const options: ScanOptions = {
-      targetedFormats: [SupportedFormat.QR_CODE]
-    };
-
-    BarcodeScanner.startScan(options).then(async result => {
-      this.utils.overrideBackButton();
-      document.body.classList.remove('qrscanner');
-
-      if (result.hasContent) {
-        const key = 'assetId=';
-        const startIndex = result.content.indexOf(key) + key.length;
-
-        const assetId = result.content;
-        const data = JSON.stringify({
-          type: 'qr',
-          data: assetId
-        });
-
-        this.router.navigate(['scan-form', { data }]);
-      }
-    });
-
-    this.utils.overrideBackButton(() => {
-      this.utils.overrideBackButton();
-      document.body.classList.remove('qrscanner');
-      BarcodeScanner.showBackground();
-      BarcodeScanner.stopScan();
-    });
-  }
   private async setupNfc() {
-    await this.nfc.checkStatus();
-    console.log('cek status', this.checkOnly);
-
-    await this.nfc.setTagListener(async (event: any) => {
-      // console.log('cek event', event);
-      console.log('checkOnly', this.checkOnly);
-      console.log('tag', event?.tag?.id);
-      if (this.checkOnly && event?.tag?.id) {
-        const data = await this.nfc.getTagString(event.tag.id);
-
-        const alert = await this.alertCtrl.create({
-          header: 'Result',
-          message: data,
-          mode: 'ios',
-          cssClass: 'dark:ion-bg-gray-800',
-          buttons: [
-            {
-              text: 'Cancel',
-              role: 'cancel'
-            },
-            {
-              text: 'Copy',
-              handler: () => {
-                Clipboard.write({
-                  // eslint-disable-next-line id-blacklist
-                  string: data
-                });
-              }
-            }
-          ]
-        });
-
-        this.utils.back();
-        alert.present();
-      } else if (event?.tag?.id) {
-        const data = JSON.stringify({
-          type: 'rfid',
-          data: await this.nfc.getTagString(event.tag.id)
-        });
-
-        // this.router.navigate(['scan-form', { data }]);
-      }
-    });
+    await this.checkStatus();
   }
 
+  async setRfid(listener: TagListener) {
+    console.log('cek listener', listener)
+    if (this.tagListener) {
+      this.tagListener.unsubscribe();
+      this.tagListener = null;
+    }
+
+    // if (this.platform.is('android')) {
+    //   this.tagListener = this.nfcPlugin.addTagDiscoveredListener().subscribe(listener);
+    // }
+    var kali =0;
+
+    this.tagListener  = this.nfcPlugin.addTagDiscoveredListener().subscribe(async event => {
+      const res = this.nfcPlugin.bytesToHexString(event.tag.id)
+      console.log('res', res);
+
+      console.log('data NFC', event.tag)
+      console.log('tag  listerner' , this.tagListener);
+
+      const data = JSON.stringify({
+        type: 'qr',
+        data: this.shared.asset.assetId,
+      });
+      // const data = JSON.stringify({
+      //   type: 'rfid',
+      //   data: res
+      // });
+      
+      const reco = { rfid: res };
+      console.log('kali1 aset', kali)
+
+      // if(kali < 1){
+      await this.http.requests({
+        requests: [() => this.http.changerfid(this.shared.asset.assetId, reco)],
+        onSuccess: async ([responseParameters]) => {
+          if (responseParameters.status >= 400) {
+            throw responseParameters;
+          }
+
+          const alert = await this.utils.createCustomAlert({
+            type: 'success',
+            header: 'Berhasil',
+            message: 'Berhasil merubah RFID Asset,\nSilahkan lakukan Sinkronisasi kembali untuk memperbarui Data',
+            buttons: [{
+              text: 'Okay',
+              handler: () => alert.dismiss()
+            }]
+          });
+
+          alert.present();
+          console.log('pindah kehalaman asset detail')
+          //this.router.navigate(['tabs/home', { data }]);
+          await this.router.navigate(['asset-detail', { data }]);
+
+        },
+        onError: error => console.error(error)
+      });
+      console.log('kali2 aset', kali)
+    //}
+
+    console.log('kali3 aset', kali)
+      console.log('this tag listener' , this.tagListener)
+    kali++;
+    }
+    
+    );
+  
+
+    if (this.platform.is('ios')) {
+      try {
+        this.tagListener = await this.nfcPlugin.scanTag().then(listener);
+        console.log(this.tagListener);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+async getTagString(id: number[]) {
+  if (this.platform.is('capacitor')) {
+    return this.nfcPlugin.bytesToHexString(id);
+
+  }
+
+  return null;
+}
 }

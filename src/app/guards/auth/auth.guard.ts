@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
     if (this.shared.isInitialCheck) {
       await this.shared.getAppData();
     }
-
+      
     const atNeedAuthPage = !this.noAuthPages.includes(state.url);
 
     if (
@@ -29,7 +29,7 @@ export class AuthGuard implements CanActivate {
     ) {
       return true;
     }
-
+    
     console.log('isAuthenticated', this.shared.isAuthenticated);
     console.log('atNeedAuthPage', atNeedAuthPage);
     console.log('noAuthPages', this.noAuthPages);

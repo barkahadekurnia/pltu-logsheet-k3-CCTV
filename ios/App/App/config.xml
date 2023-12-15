@@ -35,9 +35,5 @@
     <param name="ios-package" value="SQLitePlugin"/>
   </feature>
 
-  <feature name="NfcPlugin">
-    <param name="ios-package" value="NfcPlugin"/>
-  </feature>
-
   
 </widget>

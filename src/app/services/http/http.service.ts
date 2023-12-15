@@ -2,23 +2,30 @@
 import { Injectable, Injector } from '@angular/core';
 import { Platform, LoadingController, NavController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
+import { CapacitorHttp, HttpOptions } from '@capacitor/core';
+
+import { Observable, lastValueFrom } from 'rxjs';
+
 
 import { App } from '@capacitor/app';
 import { Device } from '@capacitor/device';
-import { Storage } from '@capacitor/storage';
+//import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
+
 import {
   Http,
-  HttpOptions,
+  HttpOptions as httpOption,
   HttpUploadFileOptions,
   HttpDownloadFileOptions
 } from '@capacitor-community/http';
+
 
 import { timeout, retry } from 'rxjs/operators';
 
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService, MyAlertOptions } from 'src/app/services/utils/utils.service';
 import { environment } from 'src/environments/environment';
-
+''
 export type LoginData = {
   username: string;
   password: string;
@@ -92,7 +99,7 @@ export class HttpService {
     private platform: Platform,
     private loadingCtrl: LoadingController,
     private navCtrl: NavController,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
   ) {
     this.timeout = 10000;
     this.retry = 3;
@@ -113,7 +120,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
 
   postAnyData(url: string, data) {
@@ -140,34 +147,82 @@ export class HttpService {
     //   responseType: 'json'
     // };
 
-    // return Http.post(options);
+    // return CapacitorHttp.post(options);
   }
+
+  postAnyDataJson(url: string, data) {
+    const observable = this.httpClient
+      .post(url, data, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          'Content-Type': 'application/json'
+        },
+        observe: 'response',
+        responseType: 'json'
+      })
+      .pipe(timeout(this.timeout), retry(this.retry));
+
+    return observable.toPromise();
+  }
+
+  postAnyDataNative(url: string, data) {
+    const options = {
+      url, 
+      data, 
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      }
+    }
+    const observable = CapacitorHttp.post(options);
+
+    return observable;
+  }
+
+
+
+  // login(data: LoginData) {
+
+  //   const observable:any = this.httpClient
+  //   .post(environment.url.login, data, {
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     observe: 'response',
+  //     responseType: 'json'
+  //   })
+  //   .pipe(timeout(this.timeout), retry(this.retry));
+
+  // //return observable.toPromise();
+  // return observable.toPromise();
+
+  // }
 
   login(data: LoginData) {
 
     const options: HttpOptions = {
       url: environment.url.login,
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
       data,
       responseType: 'json'
     };
 
-    return Http.post(options);
+    return CapacitorHttp.post(options);
   }
   kirimlaporan(id: string, data: LaporanData) {
 
     const options: HttpOptions = {
       url: environment.url.kirimlaporan + '/' + id,
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        //'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
       data,
       responseType: 'json'
     };
 
-    return Http.post(options);
+    return CapacitorHttp.post(options);
   }
 
   getAssets(params: { tag?: string; tagLocation?: string } = {}) {
@@ -180,7 +235,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getAssetsId(params: string) {
     const options: HttpOptions = {
@@ -191,7 +246,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getAssetsDetail(params: string) {
     const options: HttpOptions = {
@@ -202,7 +257,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
 
   getAssetTags() {
@@ -214,7 +269,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   typeTag(data: AssetIdToType) {
     console.log('data cek type', data);
@@ -228,7 +283,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.post(options);
+    return CapacitorHttp.post(options);
   }
   getAssetTagsAsset(asset) {
     const options: HttpOptions = {
@@ -239,7 +294,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getjadwal(params: { tanggal?: string } = {}) {
     const options: HttpOptions = {
@@ -251,7 +306,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
 
   getjadwaldate(params: { userId?: string; date?: string } = {}, categoryid) {
@@ -266,7 +321,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getapar() {
     const options: HttpOptions = {
@@ -277,7 +332,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   changerfid(params: string, data: Rfid) {
     const options: HttpOptions = {
@@ -290,7 +345,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.post(options);
+    return CapacitorHttp.post(options);
   }
   getCountAsset() {
     const options: HttpOptions = {
@@ -301,7 +356,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   // getTags(params: { tag?: string; tagLocation?: string } = {}) {
   //   const options: HttpOptions = {
@@ -313,7 +368,7 @@ export class HttpService {
   //     responseType: 'json'
   //   };
 
-  //   return Http.get(options);
+  //   return CapacitorHttp.get(options);
   // }
 
   // getTagLocations(params: { tag?: string; tagLocation?: string } = {}) {
@@ -326,7 +381,7 @@ export class HttpService {
   //     responseType: 'json'
   //   };
 
-  //   return Http.get(options);
+  //   return CapacitorHttp.get(options);
   // }
 
   getParameters(data: AssetIdToType) {
@@ -336,13 +391,14 @@ export class HttpService {
       url: environment.url.parameters,
       headers: {
         Authorization: `Bearer ${this.token}`,
-        'Content-Type': 'multipart/form-data'
+       // 'Content-Type': 'multipart/form-data'
+        'Content-Type': 'application/json',
       },
       data,
       responseType: 'json'
     };
 
-    return Http.post(options);
+    return CapacitorHttp.post(options);
   }
 
   getSchedules(params: { groupOperatorId?: string } = {}) {
@@ -355,7 +411,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
 
   getSchedulesShift(params) {
@@ -367,7 +423,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   
   getSchedulesnonsift(params: { userId?: string } = {}) {
@@ -380,7 +436,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getSchedulesnonsiftadmin() {
     const options: HttpOptions = {
@@ -391,7 +447,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getSchedulesManual(params: { userId?: string } = {}) {
     const options: HttpOptions = {
@@ -403,7 +459,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getSchedulesManualadmin() {
     const options: HttpOptions = {
@@ -414,7 +470,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   //http://114.6.64.2:11241/api/logsheet_dev/api/transaction/schedule/nonShift?userId=6596
   //http://114.6.64.2:11241/api/logsheet_new/api/transaction/schedule/viewTrxParent/
@@ -426,7 +482,7 @@ export class HttpService {
       },
       responseType: 'json'
     };
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getDetailLaporan(params) {
     const options: HttpOptions = {
@@ -436,7 +492,7 @@ export class HttpService {
       },
       responseType: 'json'
     };
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getCategory() {
     const options: HttpOptions = {
@@ -446,7 +502,7 @@ export class HttpService {
       },
       responseType: 'json'
     };
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
   getLaporan(params: { userId?: string } = {}) {
     const options: HttpOptions = {
@@ -457,7 +513,7 @@ export class HttpService {
       params,
       responseType: 'json'
     };
-    return Http.get(options);
+    return CapacitorHttp.get(options);
   }
 
   uploadRecords(data: RecordData[]) {
@@ -471,7 +527,22 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.post(options);
+    return CapacitorHttp.post(options);
+  }
+
+
+  async postFormData(path: string, body: FormData): Promise<any> {
+    const observable = this.httpClient
+      .post(path, body, {
+        observe: 'response',
+        responseType: 'json',
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        },
+      })
+      .pipe(timeout(this.timeout), retry(this.retry));
+
+    return await lastValueFrom<any>(observable);
   }
 
   uploadRecordAttachment(attachment: RecordAttachment) {
@@ -498,6 +569,8 @@ export class HttpService {
 
     return Http.uploadFile(options);
   }
+
+
 
   uploadRecordAttachmentApar(attachment: RecordAttachmentApar) {
     const options: HttpUploadFileOptions = {
@@ -534,7 +607,7 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.post(options);
+    return CapacitorHttp.post(options);
   }
 
   uploadDetailLocation(tagId, data: any) {
@@ -548,7 +621,47 @@ export class HttpService {
       responseType: 'json'
     };
 
-    return Http.put(options);
+    return CapacitorHttp.put(options);
+  }
+
+  //upgrade buat edit lokasi
+  selectionUnit() {
+    const options: HttpOptions = { 
+      url: `${environment.url.selectionUnit}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json'
+      },
+      responseType: 'json'
+    }
+
+    return CapacitorHttp.get(options);
+  }
+
+  selectionArea(unitId:any) {
+    const options: HttpOptions = {
+      url: `${environment.url.selectionArea}${unitId}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type' :'application/json'
+      },
+      responseType: 'json'
+    }
+
+    return CapacitorHttp.get(options);
+  }
+
+  selectionTandaPemasangan(areaId:any) {
+    const options: HttpOptions = {
+      url: `${environment.url.selectionArea}${areaId}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type' :'application/json'
+      },
+      responseType: 'json'
+    }
+
+    return CapacitorHttp.get(options);
   }
 
   async refreshToken() {
@@ -556,7 +669,7 @@ export class HttpService {
     // console.log('utils', utils);
     // console.log('environment.values.form', environment.values.form);
 
-    const { value } = await Storage.get({
+    const { value } = await Preferences.get({
       key: environment.values.form
     });
 
@@ -587,6 +700,31 @@ export class HttpService {
 
   async download(options: HttpDownloadFileOptions) {
     return Http.downloadFile(options);
+  }
+
+  async getBlob(path: string): Promise<any> {
+    const observable = this.httpClient
+      .get(path, {
+        observe: 'events',
+        responseType: 'blob',
+        reportProgress: true
+      })
+      .pipe(timeout(this.timeout), retry(this.retry));
+
+    return await lastValueFrom<any>(observable);
+  }
+
+  async nativeGetBlob(path: string) {
+    const options: HttpOptions = {
+      url: path,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'GET',
+      responseType: 'blob',
+    };
+    const response = await CapacitorHttp.request({ ...options, method: 'GET' });
+    return response;
   }
 
   requests(options: RequestSet) {

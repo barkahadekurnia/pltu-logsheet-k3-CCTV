@@ -218,7 +218,7 @@ export class ScanFormPage implements OnInit {
     console.log('schedule di init',this.schedule);
 
     // this.getSchedule()
-  
+    
     
   }
 
@@ -978,6 +978,8 @@ export class ScanFormPage implements OnInit {
       this.record.scannedBy = this.shared.user.name;
       this.record.scannedWith = this.transitionData?.type;
       let value = '';
+      
+      console.log('transition data tag',this.transitionData)
       if (this.record.scannedWith === 'qr') {
         value = this.transitionData.data;
       } else {
@@ -1528,7 +1530,7 @@ export class ScanFormPage implements OnInit {
     }
 
     if (parameter.inputType === 'select') {
-      function searchStringInArray(str, strArray) {
+      const f = function searchStringInArray(str, strArray) {
         return strArray.includes(str);
       }
       // console.log('hasil', );
@@ -1538,7 +1540,7 @@ export class ScanFormPage implements OnInit {
       //  console.log('abnormal', parameter.abnormal.split(","));
       //  console.log('value', parameter.value);
       //  console.log('this.result.params' , this.resultParam);
-      return searchStringInArray(parameter.value, parameter.abnormal.split(","));
+      return f(parameter.value, parameter.abnormal.split(","));
     }
 
     return false;
@@ -1647,7 +1649,7 @@ export class ScanFormPage implements OnInit {
 
   }
   private async captureAudio(parameter?: any) {
-    const audio: any = await this.media.captureAudio();
+    const audio = await this.media.captureAudio();
     console.log('audio', audio);
     if (audio) {
       const type = audio.type ? audio.type : `audio/${audio.fullPath?.substring(audio.fullPath?.indexOf('.') + 1)}`;
@@ -1682,9 +1684,6 @@ export class ScanFormPage implements OnInit {
       //   };
       //   (parameter?.attachments || this.attachments)?.push?.(attachment);
       // });
-
-
-
     }
   }
   // const blob1 = this.media.convert(filePath);
@@ -1694,6 +1693,7 @@ export class ScanFormPage implements OnInit {
 
   //   console.log("Video written.");
   // });
+  
   private async captureVideo(parameter?: any) {
     const video: any = await this.media.captureVideo();
 
@@ -1708,6 +1708,28 @@ export class ScanFormPage implements OnInit {
       (parameter?.attachments || this.attachments)?.push?.(attachment);
     }
   }
+
+
+  // private async captureVideo() {
+  //   const video = await this.media.captureVideo();
+
+  //   if (video) {
+  //     const type = video.type ? video.type : `video/${video.fullPath?.substring(video.fullPath?.indexOf('.') + 1)}`;
+  //     const toFileUri = this.platform.is('ios') ? `file://${video.fullPath}` : video.fullPath;
+  //     const filePath = await this.media.blobToFilePath(toFileUri);
+
+  //     const attachment: any = {
+  //       name: video.name,
+  //       type,
+  //       fileURI: toFileUri,
+  //       filePath: this.platform.is('android') ? filePath! : toFileUri,
+  //     };
+
+  //     this.attachments.push(attachment);
+  //   }
+  // }
+
+  
   private async captureVideo1(parameter?: any) {
     const video: any = await this.media.captureVideo();
 

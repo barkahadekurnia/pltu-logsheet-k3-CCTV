@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { MenuController } from '@ionic/angular';
 import { DatabaseService } from 'src/app/services/database/database.service';
+import { SharedService } from 'src/app/services/shared/shared.service';
 
 @Component({
   selector: 'app-schedule-detail',
@@ -27,7 +29,9 @@ export class ScheduleDetailPage implements OnInit {
 
   constructor(
     private router: Router,
-    private database: DatabaseService
+    private database: DatabaseService,
+    private menuCtrl: MenuController,
+    private shared: SharedService,
   ) {
     this.segment = 'scanned';
     this.searchTerm = '';
@@ -81,13 +85,25 @@ export class ScheduleDetailPage implements OnInit {
     if (this.segment === 'scanned') {
       this.filteredData = this.listDataScan.scanned.slice(0, this.loaded);
       this.sourceData = this.listDataScan.scanned;
+      const sortData = this.sourceData.sort((a, b) => a.assetNumber.toLowerCase().localeCompare(b.assetNumber.toLowerCase())); 
+      this.sourceData = sortData
+      
     } else if (this.segment === 'unscanned') {
       this.filteredData = this.listDataScan.unscanned.slice(0, this.loaded);
       this.sourceData = this.listDataScan.unscanned;
       console.log('sourceData', this.sourceData);
-
+      const sortData = this.sourceData.sort((a, b) => a.assetNumber.toLowerCase().localeCompare(b.assetNumber.toLowerCase())); 
+      this.sourceData = sortData
+      console.log('barkah tes')
     }
     this.onSearch();
+  }
+
+  async showDetails(asset?: any) {
+    this.shared.asset = asset;
+    console.log('showDetails', asset);
+    await this.menuCtrl.enable(true, 'asset-information');
+    return this.menuCtrl.open('asset-information');
   }
 
   onSearch(event?: any) {
@@ -96,11 +112,21 @@ export class ScheduleDetailPage implements OnInit {
         ?.filter((sch: any) => {
           const keyword = this.searchTerm?.toLowerCase();
           const matchAssetName = sch?.assetName?.toLowerCase()?.includes(keyword);
+          const matchAssetNumber = sch?.assetNumber?.toLowerCase()?.includes(keyword);
           const matchUnit = sch?.unit?.toLowerCase()?.includes(keyword);
           const matchArea = sch?.area?.toLowerCase()?.includes(keyword);
 
-          return matchAssetName || matchUnit || matchArea;
+          return matchAssetName || matchUnit || matchArea || matchAssetNumber ;
         });
+      
+      const sortData = this.filteredData.sort((a, b) => a.assetNumber.toLowerCase().localeCompare(b.assetNumber.toLowerCase())); 
+      this.filteredData = sortData
+      console.log('sort data' , this.filteredData)
+
+      Object.entries(sortData).forEach(entry => {
+        const [key, value] = entry;
+        console.log(key, value.assetNumber);
+      });
 
       this.filteredData = this.filteredData.slice(0, 5);
     }

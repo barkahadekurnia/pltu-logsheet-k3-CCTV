@@ -51,15 +51,15 @@
                     </div>
                   </div>
 
-                  <ion-input *ngIf="!parameter.isExpanded" class="ion-no-padding min-w-12 flex-grow text-sm text-right"
+                  <ion-input *ngIf="!parameter.isExpanded" class="ion-no-padding min-w-12 flex-grow text-xs text-right"
                     type="text" readonly [value]="parameter.value">
                   </ion-input>
                 </div>
 
                 <div *ngIf="parameter.isExpanded" class="w-full p-2 flex flex-col justify-start items-start space-y-2">
                   <div class="w-full flex flex-col justify-start items-start space-y-1">
-                    <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
-                      <ion-input class="ion-no-padding min-w-12 flex-grow" type="text" readonly
+                    <div class="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-xs">
+                      <ion-input class="ion-no-padding min-w-12 flex-grow text-xs" type="text" readonly
                         [value]="parameter.value">
                       </ion-input>
                     </div>

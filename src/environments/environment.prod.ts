@@ -5,10 +5,13 @@
 export const environment = {
   production: true,
   url: {
+    //base: 'http://114.6.64.2:11241/api/logsheet_dev',
     base: 'http://114.6.64.2:11241/api/logsheet_new',
     // base: 'http://192.168.4.99',
     // base: 'http://app.logsheet.digital',
     // base: 'http://45.77.45.6/logsheet',
+    public: 'http://114.6.64.2:11231/',
+
     get login() {
       return this.base + '/api/login';
     },
@@ -98,7 +101,32 @@ export const environment = {
     },
     get schedulesShift() {
       return this.base + `/api/schedule/getTeamSchedule`;
-    }
+    },
+    get selectionUnit() {
+      return this.public + '/api/master/lokasi/unit';
+    },
+     // + unitId (1)
+     get selectionArea() {
+      return this.public + '/api/master/lokasi/area';
+    },
+    // + areaId ()
+    get selectionTandaPemasangan() {
+      return this.base + '/api/tag/getTagByArea?area=';
+    },
+    // ambil semua data tanda pemasangan ()
+    get allTandaPemasangan() {
+      return this.base + '/api/tag/index?search=undefined';
+    },
+    //body tag id  pakai /assetId
+    get updateAssetTag(){
+      return this.base + '/api/asset/updateAssetTag';
+    },
+    // +/trxparentId/scheduleTrxId
+    get assetParameterTransaksi(){
+      return this.base + '/api/transaction/schedule/view';
+    },
+    
+
   },
   values: {
     mapbox: 'pk.eyJ1IjoiYXJpc2NhYWJkdWxhaCIsImEiOiJja3Vuamc3eTgyNXMxMndteDI2MTY3NnBlIn0.7M2M8TyoZrrZuN85yrQPTQ',

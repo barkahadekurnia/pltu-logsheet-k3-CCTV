@@ -4,7 +4,6 @@
     <ion-buttons slot="start" class="p-2" mode="ios">
       <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
     </ion-buttons>
-
     <ion-title class="text-lg font-bold text-center">
       {{ params?.assetCategoryName }}
     </ion-title>
@@ -106,8 +105,14 @@
                   </ion-item>
                   <ion-item class="text-xs dark:ion-border-gray-600">
                     <ion-label>Detail Lokasi</ion-label>
-                    <ion-textarea class="text-right font-semibold" readonly rows="3" [value]="item?.detailLocation"></ion-textarea>
+                    <ion-textarea class="text-right font-semibold" readonly rows="2" [value]="item?.detailLocation"></ion-textarea>
                     <!-- <ion-input class="text-right" readonly [value]="item?.detailLocation"></ion-input> -->
+                  </ion-item>
+                  <ion-item>
+                    <button class="btn btn-sm btn-primary text-white btn-block rounded-lg space-x-1 focus:outline-none" (click)="showDetails(item)">
+                      <p class="text-xs font-medium capitalize">Details</p>
+                      <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </button>
                   </ion-item>
                 </ion-list>
               </div>

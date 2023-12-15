@@ -8,6 +8,9 @@ import { AssetDetailPageRoutingModule } from './asset-detail-routing.module';
 
 import { AssetDetailPage } from './asset-detail.page';
 
+
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -15,6 +18,7 @@ import { AssetDetailPage } from './asset-detail.page';
     IonicModule,
     AssetDetailPageRoutingModule
   ],
-  declarations: [AssetDetailPage]
+  declarations: [AssetDetailPage],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AssetDetailPageModule {}

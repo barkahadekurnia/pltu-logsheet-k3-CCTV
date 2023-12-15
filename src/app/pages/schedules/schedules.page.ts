@@ -222,7 +222,8 @@ export class SchedulesPage implements OnInit {
             description: kat?.description,
             kode: kat?.kode,
             urlImage: kat?.urlImage,
-            urlOffline: Capacitor.convertFileSrc('file://' + kat?.urlOffline)
+           urlOffline: Capacitor.convertFileSrc(kat?.urlOffline)
+            //urlOffline:  kat?.urlOffline
           };
           return data;
         });
@@ -658,7 +659,7 @@ export class SchedulesPage implements OnInit {
       total = total + shift[i].assetData.length
     }
 
-    console.log('ini total shift di asset', shift.length);
+    //console.log('ini total shift di asset', shift.length);
     
     return total
   }

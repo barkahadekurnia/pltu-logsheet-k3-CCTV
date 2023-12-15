@@ -19,6 +19,10 @@ import { chain, filter, find, intersectionBy, intersectionWith, map, merge, some
 import { of } from 'rxjs';
 import { tap, map as rxjsMap } from 'rxjs/operators';
 
+import { register } from 'swiper/element/bundle';
+
+register();
+
 export interface AssetDetails {
   assetCategoryCode: string;
   assetCategoryId: string;
@@ -51,6 +55,7 @@ export interface typeForm {
   more: any[];
   type_name: string;
 };
+
 
 @Component({
   selector: 'app-root',
@@ -89,6 +94,7 @@ export class AppComponent implements AfterViewInit {
     // this.user = this.shared.user;
     // console.log('yuhu', shared.user)
     console.log('form asset shared', this.shared.asset.assetForm);
+    console.log('cek isi asset shared', this.shared.asset);
     // console.log('form asset json', JSON.parse(this.shared.asset.assetForm))
     // this.formaset = JSON.parse(this.shared.asset.assetForm);
     this.progress = 0;
@@ -100,7 +106,8 @@ export class AppComponent implements AfterViewInit {
       { name: this.androidPermissions.PERMISSION.READ_EXTERNAL_STORAGE },
       { name: this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE },
       { name: this.androidPermissions.PERMISSION.CAMERA },
-      { name: this.androidPermissions.PERMISSION.NFC }
+      { name: this.androidPermissions.PERMISSION.NFC },
+      { name: this.androidPermissions.PERMISSION.POST_NOTIFICATIONS },
     ];
 
     this.initializeApp();
