@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.ssp.logsheet.k3"
+    namespace "com.ssp.logsheet.k3.CCTV"
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.ssp.logsheet.k3"
+        applicationId "com.ssp.logsheet.k3.CCTV"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
+        versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

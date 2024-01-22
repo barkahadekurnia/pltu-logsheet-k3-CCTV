@@ -193,7 +193,7 @@ export class HomePage implements OnInit {
     this.platform.ready().then(() => {
       this.user = this.shared.user;
       this.detailuser = this.shared.userdetail;
-      this.application.name = 'Digital Damkar';
+      this.application.name = 'CCTV Logsheet';
       this.application.logo.light = 'assets/img/s2p-logo.png';
       this.application.logo.dark = 'assets/img/s2p-logo.png';
     });

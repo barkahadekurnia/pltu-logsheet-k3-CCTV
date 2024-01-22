@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Digital Damkar</string>
-    <string name="title_activity_main">Digital Damkar</string>
-    <string name="package_name">com.ssp.logsheet.k3</string>
-    <string name="custom_url_scheme">com.ssp.logsheet.k3</string>
+    <string name="app_name">CCTV Logsheet</string>
+    <string name="title_activity_main">CCTV Logsheet</string>
+    <string name="package_name">com.ssp.logsheet.k3.CCTV</string>
+    <string name="custom_url_scheme">com.ssp.logsheet.k3.CCTV</string>
 </resources>
