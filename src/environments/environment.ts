@@ -10,6 +10,8 @@ export const environment = {
     // base: 'http://192.168.4.99',
     // base: 'http://app.logsheet.digital',
     // base: 'http://45.77.45.6/logsheet',
+    // CCTV
+    //base: 'http://114.6.64.2:11244/app/cctv',
     public: 'http://114.6.64.2:11231/',
 
     get login() { 
@@ -125,7 +127,10 @@ export const environment = {
     get assetParameterTransaksi(){
       return this.base + '/api/transaction/schedule/view';
     },
-    
+    //get all asset 2k++
+    get assetsAll() {
+      return this.base + '/api/asset/all';
+    },
 
 
   },

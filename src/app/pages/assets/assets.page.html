@@ -5,7 +5,7 @@
       <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
     </ion-buttons>
 
-    <ion-title class="text-lg font-bold text-center">APA List</ion-title>
+    <ion-title class="text-lg font-bold text-center">List CCTV</ion-title>
 
     <ion-buttons slot="end" *ngIf="isSearchFocus">
       <ion-button (click)="dismissModal()">
@@ -25,21 +25,28 @@
       <ion-toolbar class="ion-bg-white">
         <ion-buttons slot="start" class="p-2" mode="ios" *ngIf="!isSearchFocus">
           <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
+          
         </ion-buttons>
+<!-- 
+        <ion-buttons slot="end" class="p-2" mode="ios" *ngIf="!isSearchFocus">
+          <button (click)="openPage(['add-cctv'])" 
+          class="px-4 p-2 bg-lime-500 rounded-lg"  >Add CCTV</button>
+        </ion-buttons> -->
 
         <ion-buttons slot="end" *ngIf="isSearchFocus">
           <ion-button (click)="dismissModal()">
             <ion-icon name="close" class="text-3xl" color="primary"></ion-icon>
           </ion-button>
+          
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <div class="pl-6">
-      <h4 class="text-2xl font-bold">APA List</h4>
+      <h4 class="text-2xl font-bold">List CCTV</h4>
     </div>
     <div class="px-6">
       <ion-searchbar class="ion-no-margin ion-no-padding text-xs" placeholder="Search assets"
-                inputmode="text" type="text" mode="ios" (ionChange)="onSearch($event)" [(ngModel)]="searchTerm" #autoFocus></ion-searchbar>
+       inputmode="text" type="text" mode="ios" (ionChange)="onSearch($event)" [(ngModel)]="searchTerm" #autoFocus></ion-searchbar>
     </div>
   </div>
 

@@ -12,6 +12,7 @@ module.exports = {
       white: require('tailwindcss/colors').white,
       gray: require('tailwindcss/colors').gray,
       black: require('tailwindcss/colors').black,
+      slate: require('tailwindcss/colors').slate,
       transparent: 'transparent',
       current: 'currentColor',
     },

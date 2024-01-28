@@ -237,6 +237,19 @@ export class HttpService {
 
     return CapacitorHttp.get(options);
   }
+
+  getAssetsAll() {
+    const options: HttpOptions = {
+      url: environment.url.assetsAll,
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      },
+      responseType: 'json'
+    };
+
+    return CapacitorHttp.get(options);
+  }
+
   getAssetsId(params: string) {
     const options: HttpOptions = {
       url: environment.url.assetsid + '/' + params,

@@ -112,11 +112,13 @@ export class SchedulesPage implements OnInit {
     const dataSchedulePerDay = this.selectedDate.schedules;
     const dataGroupByAreaId = uniqBy(dataSchedulePerDay, 'areaId');
     this.selectedDate.lokasi = dataGroupByAreaId;
+
+    console.log('this selected date lokasi', this.selectedDate.lokasi)
   }
   
   //barkah maintance add shift schedule
   async scheduleShift(item: any) {
-
+    console.log('item when select date' , item)
     if (item.schedules.length > 0) {
       const loader = await this.utils.presentLoader();
 
@@ -297,7 +299,7 @@ export class SchedulesPage implements OnInit {
       );
 
       const schedules = this.database.parseResult(result);
-
+      console.log('isi dari sql lite schedules', schedules)
       const assetIds = uniq(schedules.map(schedule => schedule.assetId));
       const assetTags = await this.getAssetTags(assetIds);
       const holdedRecords = await this.getHoldedRecords(assetIds);

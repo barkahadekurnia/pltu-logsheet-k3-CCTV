@@ -6,6 +6,7 @@ import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { each, groupBy, intersection, unionBy, uniq, zip } from 'lodash';
+import { Route, Router } from '@angular/router';
 
 @Component({
   selector: 'app-assets',
@@ -27,6 +28,8 @@ export class AssetsPage implements OnInit {
 
   isSearchFocus: boolean;
 
+  assetAll:any[];
+
   constructor(
     private platform: Platform,
     private menuCtrl: MenuController,
@@ -34,6 +37,7 @@ export class AssetsPage implements OnInit {
     private shared: SharedService,
     private utils: UtilsService,
     private modalCtrl: ModalController,
+    private router: Router,
   ) {
     this.assets = [];
     this.filteredAssets = [];
@@ -44,11 +48,13 @@ export class AssetsPage implements OnInit {
     this.loaded = 10;
     this.loading = true;
     this.searchTerm = '';
+    this.assetAll = [];
   }
 
   async ngOnInit() {
     this.platform.ready().then(() => {
       this.getAssets().finally();
+      this.getAssetsAll();
     });
   }
 
@@ -82,6 +88,10 @@ export class AssetsPage implements OnInit {
 
   dismissModal() {
     this.modalCtrl.dismiss();
+  }
+
+  openPage(commands:any[]) {
+    return this.router.navigate(commands);
   }
 
   async openFilter() {
@@ -213,6 +223,61 @@ export class AssetsPage implements OnInit {
     }, 500);
   }
 
+  async getAssetsAll(){
+    try {
+      const result = await this.database.select('asset' , {
+        column: [
+          'assetId ',
+          'assetCategoryId ',
+          'assetCategoryName ',
+          'assetName ',
+          'assetNumber ',
+          'mediaId ',
+          'mediaName ',
+          'photo ',
+          'description ',
+          'schManual ',
+          'schType ',
+          'schWeekDays ',
+          'schWeeks ',
+          'supplyDate',
+          'schMonthly',
+          'schFrequency',
+          'schYearly',
+          'reportPhoto',
+          'assetStatusId',
+          'assetStatusName',
+          'abbreviation',
+          'capacityId',
+          'capacityValue',
+          'unitCapacity',
+          'merkName',
+          'typeName',
+          'tagId',
+          'tagNumber',
+          'typeTag',
+          'areaId',
+          'area',
+          'unit',
+          'unitId',
+          'bangunan',
+          'location',
+          'detailLocation',
+          'latitude',
+          'longitude',
+          'created_at',
+          'cctvIP'
+        ]
+      })
+      console.log('result', result)
+      this.assetAll = this.database.parseResult(result)
+    } catch (error) {
+      console.error(error);
+    } finally {
+      console.log('this asset all SQL lite', this.assetAll)
+    }
+
+  }
 
 
   // pushDataFiltered(event: any) {
@@ -514,4 +579,6 @@ export class AssetsPage implements OnInit {
   //       });
   //   });
   // }
+
+
 }

@@ -191,18 +191,17 @@
       <div class="relative w-full">
         <input type="text" class="bg-white shadow rounded-xl border border-gray-300 p-3 w-full"
           placeholder="Cari CCTV..." readonly (click)="openModal()" />
-        <div class="absolute top-0 right-0 pr-3 text-black">
-          <!-- <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="absolute top-0 right-0 pr-3 pt-3 text-black align-middle">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg> -->
+          </svg>
           <!-- <button *ngIf="gruprole === 'ADMIN'" class="btn btn-info rounded-full text-white" (click)="openScan()">
             <ion-icon name="card-outline"></ion-icon>
           </button> -->
-          <button class="btn btn-primary rounded-full bttext-white ml-1" (click)="cekScan()">
+          <!-- <button class="btn btn-primary rounded-full bttext-white ml-1" (click)="cekScan()">
             <ion-icon name="qr-code-outline"></ion-icon>
-          </button>
-
+          </button> -->
         </div>
       </div>
     </div>
@@ -223,7 +222,8 @@
           </div>
         </ion-col>
       </ion-row>
-      <ion-row class="w-full pt-3 justify-center items-center">
+      <!-- <ion-row class="w-full pt-3 justify-center items-center"> -->
+      <ion-row class="w-full pt-3 justify-between">
         <ion-col size="3" sizeMd="2" sizeLg="3">
           <app-badge-stat [count]="count.uploaded + count.unuploaded + count.unscanned" label="Jadwal Scan" theme="info"
             icon="assets/icon/calendar-alt-light.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true"
@@ -242,10 +242,15 @@
           </app-badge-stat>
         </ion-col>
         <ion-col size="3" sizeMd="2" sizeLg="3">
-          <app-badge-stat [count]="count.assets" label="CCTV" theme="success" icon="assets/icon/cctv.svg"
+          <app-badge-stat [count]="count.assets" label="List CCTV" theme="success" icon="assets/icon/cctv.svg"
             type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openPage(['assets'])">
           </app-badge-stat>
         </ion-col>
+
+        <ion-col size="3" sizeMd="2" sizeLg="3">
+          <app-badge-stat label="Prepare CCTV" theme="error" icon="assets/icon/scan.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="cekScan()"></app-badge-stat>
+        </ion-col>
+
         <ion-col size="3" sizeMd="2" sizeLg="3">
           <app-badge-stat [countSudah]="count.sudahtransaksi" [countBelum]="count.unuploaded"  label="Transactions" theme="warning"
             icon="assets/icon/file-invoice-light.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true"
@@ -263,9 +268,10 @@
           > -->
           </app-badge-stat>
         </ion-col>
-        <ion-col size="3" sizeMd="2" sizeLg="3">
+        <!-- <ion-col size="3" sizeMd="2" sizeLg="3">
           <app-badge-stat  [countSudah]="count.sudahlaporan"  [countBelum]="count.belumlaporan" label="Laporan" theme="error" icon="assets/icon/report.svg" type="outline" [ripple]="true" [vertical]="true" [large]="true" (click)="openHarian()"></app-badge-stat>
-        </ion-col>
+        </ion-col> -->
+
       </ion-row>
 
       <ion-row class="pt-6 w-full" >

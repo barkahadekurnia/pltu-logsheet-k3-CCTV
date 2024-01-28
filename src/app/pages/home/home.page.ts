@@ -197,6 +197,8 @@ export class HomePage implements OnInit {
       this.application.logo.light = 'assets/img/s2p-logo.png';
       this.application.logo.dark = 'assets/img/s2p-logo.png';
     });
+
+    this.getAsset();
   }
 
   ionViewWillEnter() {
@@ -236,6 +238,13 @@ export class HomePage implements OnInit {
   // fungsi buka page dinamis
   openPage(commands: any[]) {
     return this.router.navigate(commands);
+  }
+
+  async getAsset(){
+    const result = await this.database.select('asset',{
+      limit : 50
+    });
+    console.log('result asset pada SQL LITE', result)
   }
 
   async openModal() {
@@ -648,12 +657,14 @@ export class HomePage implements OnInit {
 
 
   //nyimpen ke SQLite
-  private async getParameterByAssetId(assetId) {
+  private async getParameterByAssetId
+  (assetId) {
     const loader = await this.utils.presentLoader();
     return this.http.requests({
       requests: [() => this.http.getParameters(assetId)],
       onSuccess: async ([responseParameters]) => {
         console.log('respon blabla', responseParameters)
+        
         if (![200, 201].includes(responseParameters.status)) {
           throw responseParameters;
         }
@@ -1322,6 +1333,7 @@ export class HomePage implements OnInit {
               const payload = { asset: JSON.stringify(val) };
               await this.getParameterByAssetId(payload);
             });
+
             //Jika ada record yang belum di upload
             // if (uploadedSchedules?.length) {
             //   const marks = this.database.marks(uploadedSchedules.length).join(',');
@@ -2493,8 +2505,12 @@ export class HomePage implements OnInit {
         await this.downloadCategory();
         // await this.processResponseAssetTags(responseAssetTags);
 
+        // save data all asset di sql lite
+        await this.getAssetsAll();
+
         this.syncJob.order.assets.status = 'success';
         this.syncJob.order.assets.message = 'Berhasil mendapatkan data lokasi';
+
       },
       onError: (error) => {
         this.shared.addLogActivity({
@@ -2511,6 +2527,244 @@ export class HomePage implements OnInit {
       onComplete: () => this.onProcessFinished(subscriber, loader),
     });
   }
+
+  async getAssetsAll() {
+    const loader = await this.utils.presentLoader();
+    return this.http.requests({
+      requests: [() => this.http.getAssetsAll()],
+      onSuccess: async ([responseAssetAll]) => {
+        console.log('responseAssetAll', responseAssetAll);
+
+        if (![200, 201].includes(responseAssetAll.status)) {
+          throw responseAssetAll;
+        }
+
+        console.log('responseAssetAll data', responseAssetAll.data.data);
+
+        if(responseAssetAll.data?.data?.length > 0) {
+          console.log('masuk looping')
+          const assetAll:any = [];
+          const assetsDetail: any = [] ;
+          let i = 0
+          for(const asset of responseAssetAll?.data?.data) {
+            // for(const asset of assets) {
+              const data = {
+                assetId : asset.assetId,
+                assetCategoryId : asset.assetCategoryId,
+                assetCategoryName : asset.assetCategoryName,
+                assetName : asset.assetName,
+                assetNumber : asset.assetNumber,
+                mediaId : asset.mediaId,
+                mediaName : asset.mediaName,
+                photo : asset.photo,
+                description : asset.description,
+                schManual : asset.schManual,
+                schType : asset.schType,
+                schWeekDays : asset.schWeekDays,
+                schWeeks : asset.schWeeks,
+                supplyDate: asset.supplyDate,
+                schMonthly: asset.schMonthly,
+                schFrequency: asset.schFrequency,
+                schYearly: asset.schYearly,
+                reportPhoto: asset.reportPhoto,
+                assetStatusId: asset.assetStatusId,
+                assetStatusName: asset.assetStatusName,
+                abbreviation: asset.abbreviation,
+                capacityId: asset.capacityId,
+                capacityValue: asset.capacityValue,
+                unitCapacity: asset.unitCapacity,
+                merkName: asset.merkName,
+                typeName: asset.typeName,
+                tagId: asset.tagId,
+                tagNumber: asset.tagNumber,
+                typeTag: asset.typeTag,
+                areaId: asset.areaId,
+                area: asset.area,
+                unit: asset.unit,
+                unitId: asset.unitId,
+                bangunan: asset.bangunan,
+                location: asset.location,
+                detailLocation: asset.detailLocation,
+                latitude: asset.latitude,
+                longitude: asset.longitude,
+                created_at: asset.created_at,
+                cctvIP: '192.168.2.80'
+              };
+              assetAll.push(data);
+            //}
+
+              // 2083 
+
+              // 100
+
+              // i 
+              // y 
+              //disini kita tambahkan detail asset
+              const assetDetail =  await this.getAssetsDetail(asset.assetId);
+              console.log('asset Detail', assetDetail)
+              assetsDetail.push(assetDetail);
+
+              i++
+              if(i === 5) {
+                break;
+              }
+          }
+
+          //disini kita tambahkan detail asset dengan id asset custom untuk testing
+          const assetDetail =  await this.getAssetsDetail('b5fdd272-bcd7-430b-b39e-29b4f38ebc13');
+          console.log('asset Detail', assetDetail)
+          assetsDetail.push(assetDetail);
+          
+
+          console.log( 'data assetsAll sebelum di push SQL' , assetAll)
+          console.log( 'data assetsAll Detail sebelum di push SQL' , assetsDetail)
+          let storeAssets = [];
+         
+          storeAssets = this.utils.chunkArray(assetAll, 250);
+          storeAssets?.map?.(async (val) => {
+            await this.database.insert('assetsCCTV', val);
+          });
+
+          let storeAssetsDetail = [];
+         
+          storeAssetsDetail = this.utils.chunkArray(assetsDetail, 250);
+          storeAssetsDetail?.map?.(async (val) => {
+            await this.database.insert('assetsDetail', val);
+          });
+        }
+      },
+      onError: error => console.error(error),
+      onComplete: () => loader.dismiss()
+    });
+  }
+
+  async getAssetsDetail(idAsset:any) {
+    //const loader = await this.utils.presentLoader();
+    let dataDetail :any 
+    try {
+      // console.log('id asset',idAsset)
+      const response = await this.http.getAssetsDetail(idAsset);
+
+      if (![200, 201].includes(response.status)) {
+        throw response;
+      }
+
+      const bodyResponse = response.data?.data;
+      const asset = response.data.data;
+      if( response.data?.data.length > 0 ) {
+        console.log('masuk log');
+        
+        const data = {
+        id : asset.id  ,
+        asset_number : asset.asset_number  ,
+        supply_date : asset.supply_date  ,
+        expireDate : asset.expireDate  ,
+        photo : asset.photo  ,
+        description : asset.description  ,
+        sch_manual : asset.sch_manual  ,
+        sch_type : asset.sch_type  ,
+        sch_frequency : asset.sch_frequency  ,
+        historyActive : asset.historyActive  ,
+        lastScannedAt : asset.lastScannedAt  ,
+        lastScannedBy : asset.lastScannedBy  ,
+        parameter : asset.parameter  ,
+        assetForm : asset.assetForm  ,
+        more : asset.more  ,
+        qr : asset.qr  ,
+        foto : asset.foto  ,
+        }
+
+      }
+      
+      dataDetail = bodyResponse
+    } catch (err) {
+      console.error(err);
+    } finally {
+      return dataDetail
+     // loader.dismiss();
+
+
+    }
+
+
+    // return this.http.requests({
+    //   requests: [() => this.http.getAssetsAll()],
+    //   onSuccess: async ([responseAssetAll]) => {
+    //     console.log('responseAssetAll', responseAssetAll);
+
+    //     if (![200, 201].includes(responseAssetAll.status)) {
+    //       throw responseAssetAll;
+    //     }
+
+    //     console.log('responseAssetAll data', responseAssetAll.data.data);
+
+    //     if(responseAssetAll.data?.data?.length > 0) {
+    //       console.log('masuk looping')
+    //       const assetAll:any = [];
+
+    //       for(const asset of responseAssetAll?.data?.data) {
+    //         // for(const asset of assets) {
+    //           const data = {
+    //             assetId : asset.assetId,
+    //             assetCategoryId : asset.assetCategoryId,
+    //             assetCategoryName : asset.assetCategoryName,
+    //             assetName : asset.assetName,
+    //             assetNumber : asset.assetNumber,
+    //             mediaId : asset.mediaId,
+    //             mediaName : asset.mediaName,
+    //             photo : asset.photo,
+    //             description : asset.description,
+    //             schManual : asset.schManual,
+    //             schType : asset.schType,
+    //             schWeekDays : asset.schWeekDays,
+    //             schWeeks : asset.schWeeks,
+    //             supplyDate: asset.supplyDate,
+    //             schMonthly: asset.schMonthly,
+    //             schFrequency: asset.schFrequency,
+    //             schYearly: asset.schYearly,
+    //             reportPhoto: asset.reportPhoto,
+    //             assetStatusId: asset.assetStatusId,
+    //             assetStatusName: asset.assetStatusName,
+    //             abbreviation: asset.abbreviation,
+    //             capacityId: asset.capacityId,
+    //             capacityValue: asset.capacityValue,
+    //             unitCapacity: asset.unitCapacity,
+    //             merkName: asset.merkName,
+    //             typeName: asset.typeName,
+    //             tagId: asset.tagId,
+    //             tagNumber: asset.tagNumber,
+    //             typeTag: asset.typeTag,
+    //             areaId: asset.areaId,
+    //             area: asset.area,
+    //             unit: asset.unit,
+    //             unitId: asset.unitId,
+    //             bangunan: asset.bangunan,
+    //             location: asset.location,
+    //             detailLocation: asset.detailLocation,
+    //             latitude: asset.latitude,
+    //             longitude: asset.longitude,
+    //             created_at: asset.created_at,
+    //             cctvIP: '192.168.2.80'
+    //           };
+    //           assetAll.push(data);
+    //         //}
+    //       }
+
+    //       console.log( 'data assetsAll sebelum di push SQL' , assetAll)
+    //       let storeAssets = [];
+         
+    //       storeAssets = this.utils.chunkArray(assetAll, 250);
+    //       storeAssets?.map?.(async (val) => {
+    //         await this.database.insert('asset', val);
+    //       });
+    //     }
+    //   },
+    //   onError: error => console.error(error),
+    //   onComplete: () => console.error('success add assete to SQL Lite')
+    //   //loader.dismiss()
+    // });
+  }
+
   private async getTypeScan(data) {
     //console.log('getTypeScan', data);
 

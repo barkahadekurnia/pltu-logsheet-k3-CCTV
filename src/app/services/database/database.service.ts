@@ -125,7 +125,8 @@ export class DatabaseService {
           detailLocation TEXT,
           latitude TEXT,
           longitude TEXT,
-          created_at TEXT
+          created_at TEXT,
+          cctvIP TEXT
         )
       `,
       tag: `
@@ -266,7 +267,72 @@ export class DatabaseService {
           jumlahNama TEXT NOT NULL,
           jumlahCount INTEGER
         )
-      `
+      `,
+      assetsCCTV: `
+        CREATE TABLE IF NOT EXISTS assetsCCTV(
+          assetId TEXT NOT NULL,
+          assetCategoryId TEXT NOT NULL,
+          assetCategoryName TEXT NOT NULL,
+          assetName TEXT ,
+          assetNumber TEXT ,
+          mediaId TEXT,
+          mediaName TEXT,
+          photo TEXT,
+          description TEXT,
+          schManual TEXT,
+          schType TEXT,
+          schWeekDays TEXT,
+          schWeeks TEXT,
+          supplyDate TEXT,
+          schMonthly TEXT,
+          schFrequency TEXT,
+          schYearly TEXT,
+          reportPhoto TEXT,
+          assetStatusId TEXT,
+          assetStatusName TEXT,
+          abbreviation TEXT,
+          capacityId TEXT,
+          capacityValue TEXT,
+          unitCapacity TEXT,
+          merkName TEXT,
+          typeName TEXT,
+          tagId TEXT,
+          tagNumber TEXT,
+          typeTag TEXT,
+          areaId TEXT,
+          area TEXT,
+          unit TEXT,
+          unitId TEXT,
+          bangunan TEXT,
+          location TEXT,
+          detailLocation TEXT,
+          latitude TEXT,
+          longitude TEXT,
+          created_at TEXT,
+          cctvIP TEXT
+        )
+      `,
+      assetsDetail: `
+      CREATE TABLE IF NOT EXISTS assetsDetail(
+        id TEXT NOT NULL,
+        asset_number TEXT ,
+        supply_date TEXT ,
+        expireDate TEXT ,
+        photo TEXT ,
+        description TEXT,
+        sch_manual TEXT,
+        sch_type TEXT,
+        sch_frequency TEXT,
+        historyActive TEXT,
+        lastScannedAt TEXT,
+        lastScannedBy TEXT,
+        parameter TEXT,
+        assetForm TEXT,
+        more TEXT,
+        qr TEXT,
+        foto TEXT
+      )
+    `,
     };
   }
 

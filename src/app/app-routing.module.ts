@@ -163,6 +163,10 @@ const routes: Routes = [
   },  {
     path: 'laporan-detail-transaction',
     loadChildren: () => import('./pages/laporan-detail-transaction/laporan-detail-transaction.module').then( m => m.LaporanDetailTransactionPageModule)
+  },
+  {
+    path: 'add-cctv',
+    loadChildren: () => import('./pages/add-cctv/add-cctv.module').then( m => m.AddCctvPageModule)
   }
 
 ];

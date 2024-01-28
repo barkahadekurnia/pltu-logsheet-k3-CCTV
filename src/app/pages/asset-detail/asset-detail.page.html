@@ -3,7 +3,7 @@
     <ion-buttons slot="start" mode="md">
       <ion-back-button defaultHref="/assets" color="primary"></ion-back-button>
     </ion-buttons>
-    <ion-title class="text-lg font-semibold">Alat Pemadam</ion-title>
+    <ion-title class="text-lg font-semibold">CCTV</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -15,9 +15,22 @@
   <div class="w-full min-h-full bg-white dark:bg-gray-900">
     <div class="card">
       <h3 class="text-white"><ion-icon name="pricetag-outline"></ion-icon> {{ resultParam?.more.category.name }}</h3>
-      <div *ngIf="resultParam?.photo[0]?.path">
-        <img [src]="resultParam?.photo[0]?.path" (click)="showImageViewer($event)" width="90%" alt="Avatar user"
-          class="w-32 md:w-16  rounded-full mx-auto" />
+      <div *ngIf="resultParam?.photo[0]?.path" class="text-center" >
+        <div class="pt-3 w-40 md:w-20  rounded-2xl mx-auto">
+          <!-- <button class="text-xl text-white static text-right pt-2 pr-2">
+            <ion-icon name="create-outline"></ion-icon>
+          </button> -->
+          <img [src]="resultParam?.photo[0]?.path" (click)="showImageViewer($event)" width="90%" alt="Avatar user"
+            class=" mx-auto rounded-lg border-2" />
+        </div>
+
+        <div class="pt-3 w-40 md:w-20  rounded-2xl mx-auto">
+          <button class="btn btn-sm btn-info rounded-btn text-white no-animation" id="modal-edit-asset"
+          (click)="getDataInputForms()">
+          <ion-icon slot="start" name="create-outline" class="mr-2"></ion-icon>
+          Edit Foto
+        </button>
+        </div>
       </div>
       <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
         <ion-grid class="w-full space-y-4 text-white">
@@ -50,6 +63,12 @@
             <ion-col>{{ resultParam?.lastScannedBy }}</ion-col>
           </ion-row>
         </ion-grid>
+        <!-- <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>CCTV IP</ion-label></ion-col>
+            <ion-col>{{ resultParam?.lastScannedBy }}</ion-col>
+          </ion-row>
+        </ion-grid> -->
         <div class="mt-4 justify-center items-center text-center">
           <button class="btn btn-block btn-sm btn-info rounded-btn text-white no-animation" id="modal-edit-asset"
             (click)="getDataInputForms()">
@@ -131,7 +150,7 @@
     <div class="card mt-2">
       <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
         <h3 class="text-white"><ion-icon name="location-outline"></ion-icon> Lokasi</h3>
-        <ion-grid class="w-full space-y-4 text-white">
+        <ion-grid class="w-full space-y-4 text-white pt-2">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>No TP/Lokasi</ion-label></ion-col>
             <ion-col>{{ resultParam?.more?.tag[0]?.tag_number }}</ion-col>
@@ -357,10 +376,211 @@
       <!-- End modal edit location -->
     </div>
     <br>
+
+
+    <!-- <div class="card mt-2">
+      <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
+        <h3 class="text-white"><ion-icon name="location-outline"></ion-icon> Lokasi</h3>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>No TP/Lokasi</ion-label></ion-col>
+            <ion-col>{{ resultParam?.more?.tag[0]?.tag_number }}</ion-col>
+          </ion-row>
+        </ion-grid>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>Lokasi</ion-label></ion-col>
+            <ion-col>{{ resultParam?.more?.tag[0]?.unit }} <br> {{ resultParam?.more.tag[0].area }} <br> {{
+              resultParam?.more.tag[0].location }}</ion-col>
+          </ion-row>
+        </ion-grid>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>Detail Lokasi</ion-label></ion-col>
+            <ion-col>{{ resultParam?.more?.tag[0]?.detail_location }}</ion-col>
+          </ion-row>
+        </ion-grid>
+       
+
+        <div class="mt-4 justify-center items-center text-center">
+          <button class="btn btn-block btn-sm btn-info rounded-btn text-white no-animation" id="modal-edit-location"
+            (click)="getDataLokasi()">
+            <ion-icon slot="start" name="create-outline" class="mr-2"></ion-icon>
+            Edit Detail Lokasi
+          </button>
+        </div>       
+      </div>
+      
+      <ion-modal #modal_location #swiper trigger="modal-edit-location">
+        <ng-template>
+          <ion-header class="ion-no-border ion-no-shading">
+            <ion-toolbar color="content">
+              <ion-buttons slot="start">
+                <ion-button (click)="modal_location.dismiss()">Batal</ion-button>
+              </ion-buttons>
+              <ion-buttons slot="end">
+                <ion-button color="primary" (click)="submitFormUpdateLocation(modal_location)">
+                  <ion-label class="!font-bold">Simpan</ion-label>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content color="content">
+              <div>
+                <ion-grid>
+                  <ion-row class="my-2 px-2">
+                    <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
+                      <div class="w-full">
+                        <h2 class="text-left text-lg font-semibold">
+                          Edit detail lokasi
+                        </h2>
+                        <span class="text-sm font-semibold text-gray-500">
+                          {{resultParam.asset_number}}
+                        </span>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="px-2 h-full" *ngIf="dataFormDetailLocation">
+                    
+                
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[!dataFormDetailLocation.unit? 'border-error' : 'border-gray-300']">
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                               Unit
+                              </p>
+                            </div>
+                          </div>
+                          <ion-select 
+                          class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
+                          [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
+                          label="Fixed label" label-placement="fixed" placeholder="Pilih" cancelText="Batal" okText="Pilih" 
+                          (ionChange)="getSelectionArea($event)"
+                          [(ngModel)]="dataFormDetailLocation.unitId"
+                          >
+                            <ion-select-option [value]='unit.id' *ngFor="let unit of selectionUnit">
+                              {{unit.deskripsi}}
+                            </ion-select-option>
+                          </ion-select>
+                        </div>
+                      </div>
+                    </ion-col>
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[!dataFormDetailLocation.unit? 'border-error' : 'border-gray-300']">  
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                               Area
+                              </p>
+                            </div>
+                          </div>
+                          <ion-select 
+                          class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
+                          [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
+                          label="Fixed label" label-placement="fixed" placeholder="Pilih" cancelText="Batal" okText="Pilih"
+                          (ionChange)="getSelectionTandaPemasangan($event)"
+                          [(ngModel)]="dataFormDetailLocation.areaId"
+                          >
+                          
+                            <ion-select-option [value]='area.id' *ngFor="let area of selectionArea">
+                              {{area.deskripsi}}
+                            </ion-select-option>
+
+                            <ion-select-option class="text-center" *ngIf="selectionAreaKosong" [disabled]="true">
+                             - Data Kosong -
+                            </ion-select-option>
+                          </ion-select>
+                        </div>
+                      </div>
+                    </ion-col>
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border overflow-hidden rounded-xl">  
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                               Tanda Pemasangan
+                              </p>
+                            </div>
+                          </div>
+                          <ion-select 
+                          class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
+                          [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
+                          label="Fixed label" label-placement="fixed" placeholder="Pilih" cancelText="Batal" okText="Pilih"
+                          (ionChange)="getSelectionIdTandaPemasangan($event)"
+                          [(ngModel)]="dataFormDetailLocation.tag_number"
+                          >
+                            <ion-select-option [value]='tp.tag_number' *ngFor="let tp of selectionTandaPemasangan">
+                              {{tp.tag_number}}
+                            </ion-select-option>
+                            <ion-select-option class="text-center" *ngIf="selectionTandaPemasangan === true" [disabled]="true">
+                              - Data Kosong -
+                             </ion-select-option>
+                          </ion-select>
+                        </div>
+                      </div>
+                    </ion-col>
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[!dataFormDetailLocation.unit? 'border-error' : 'border-gray-300']">
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                               Lokasi
+                              </p>
+                            </div>
+                          </div>
+                          <ion-input type="text" [disabled]="true"
+                            class="ion-no-padding min-w-12 flex-grow text-xs font-normal text-right" *ngIf="selectionLokasiTandaPemasangan"
+                             [(ngModel)]="selectionLokasiTandaPemasangan.location">
+                          </ion-input>
+                        </div>
+                      </div>
+                    </ion-col>
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border rounded-xl" [ngClass]="[!dataFormDetailLocation.unit? 'border-error' : 'border-gray-300']">
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                               Detail Lokasi
+                              </p>
+                            </div>
+                          </div>
+                          <ion-textarea
+                            class="ion-no-padding min-w-12 pl-4 flex-grow text-xs font-light text-right" *ngIf="selectionLokasiTandaPemasangan" 
+                            [(ngModel)]="selectionLokasiTandaPemasangan.detail_location">
+                          </ion-textarea >
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+          </ion-content>
+         
+        </ng-template>
+      </ion-modal>
+    </div> -->
     
     <div class="card mt-2">
       <div class="w-full shadow-lg dark:bg-gray-800 rounded-3xl p-3 ">
-        <h3 class="text-white"><ion-icon name="unlink-outline"></ion-icon> Lainnya</h3>
+        <h3 class="text-white pb-2"><ion-icon class="" name="unlink-outline"></ion-icon> Lainnya</h3>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>Alamat IP CCTV</ion-label></ion-col>
+            <!-- <ion-col>{{ resultParam?.more?.status?.name }}</ion-col> -->
+            <ion-col>192.168.2.80</ion-col>
+          </ion-row>
+        </ion-grid>
         <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>Status</ion-label></ion-col>

@@ -20,6 +20,7 @@ import { UtilsService } from 'src/app/services/utils/utils.service';
 import { HttpService } from 'src/app/services/http/http.service';
 import { environment } from 'src/environments/environment';
 import { AssetDetails, AssetFormDetails, TypeForm } from 'src/app/interfaces/asset-details';
+import { DatabaseService } from 'src/app/services/database/database.service';
 
 type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK';
 
@@ -97,6 +98,8 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     private menuCtrl: MenuController,
     private http: HttpService,
     private cdr: ChangeDetectorRef,
+
+    private database: DatabaseService,
   ) {
     
     this.nfcStatus = 'NO_NFC';
@@ -125,6 +128,7 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       };
     };
     this.showData();
+    //this.showDataOffline();
   }
 
   // async checkStatus() {
@@ -144,7 +148,7 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
 
   async ionViewWillEnter() {
     console.log('ini swiper', this.swiper)
-    this.platform.ready().then(() => this.showData());
+    //this.platform.ready().then(() => this.showData());
 
     this.menuCtrl.enable(true, 'asset-information')
     .then(() => this.menuCtrl.swipeGesture(true, 'asset-information'));
@@ -159,7 +163,11 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
   }
 
   doRefresh(e: any) {
-    this.showData().finally(() => {
+    // this.showData().finally(() => {
+    //   setTimeout(() => e.target.complete(), 100);
+    // });
+
+    this.showDataOffline().finally(() => {
       setTimeout(() => e.target.complete(), 100);
     });
   }
@@ -264,6 +272,54 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       console.log('this response get asset', response);
       //simpen asset id 
       this.assetId = response.data.data.id;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  //new offline mode
+  async showDataOffline() {
+    try {
+      console.log('transition data', this.transitionData)
+      //const response = await this.http.getAssetsDetail(this.transitionData.data);
+
+      const result = await this.database.select('assetsDetail' , {
+        column: [
+        'id' ,
+        'asset_number' ,
+        'supply_date' ,
+        'expireDate' ,
+        'photo' ,
+        'description' ,
+        'sch_manual' ,
+        'sch_type' ,
+        'sch_frequency' ,
+        'historyActive' ,
+        'lastScannedAt' ,
+        'lastScannedBy' ,
+        'parameter' ,
+        'assetForm' ,
+        'more' ,
+        'qr' ,
+        'foto'
+        ],
+        where: {
+          query: 'id=?',
+          params: [this.transitionData.data]
+        },
+      })
+      console.log('result', result)
+  
+      const data : any= this.database.parseResult(result);
+      (this.resultParam as any) = data
+       console.log('this result param', this.resultParam);
+      //simpen asset id 
+      if(data.length >= 1){
+      this.assetId = data[0].id;
+      } else {
+        this.assetId= data.id
+      }
+
+      console.log('asset id', this.assetId)
     } catch (err) {
       console.error(err);
     }
