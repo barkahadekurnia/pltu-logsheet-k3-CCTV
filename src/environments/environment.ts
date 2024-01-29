@@ -14,7 +14,7 @@ export const environment = {
     //base: 'http://114.6.64.2:11244/app/cctv',
     public: 'http://114.6.64.2:11231/',
 
-    get login() { 
+    get login() {
       return this.base + '/api/login';
     },
     get grupoperator() {
@@ -120,19 +120,20 @@ export const environment = {
       return this.base + '/api/tag/index?search=undefined';
     },
     //body tag id  pakai /assetId
-    get updateAssetTag(){
+    get updateAssetTag() {
       return this.base + '/api/asset/updateAssetTag';
     },
     // +/trxparentId/scheduleTrxId
-    get assetParameterTransaksi(){
+    get assetParameterTransaksi() {
       return this.base + '/api/transaction/schedule/view';
     },
     //get all asset 2k++
     get assetsAll() {
       return this.base + '/api/asset/all';
     },
-
-
+    get newAssets() {
+      return this.base + '/api/asset/getAllDataAsset';
+    },
   },
   values: {
     mapbox: 'pk.eyJ1IjoiYXJpc2NhYWJkdWxhaCIsImEiOiJja3Vuamc3eTgyNXMxMndteDI2MTY3NnBlIn0.7M2M8TyoZrrZuN85yrQPTQ',

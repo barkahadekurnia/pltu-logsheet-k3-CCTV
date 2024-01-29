@@ -22,7 +22,7 @@ import {
   UserData,
 } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-import { Subscriber, Observable } from 'rxjs';
+import { Subscriber, Observable, forkJoin, map } from 'rxjs';
 import {
   chain,
   cond,
@@ -46,6 +46,8 @@ import {
 } from '@capacitor-community/barcode-scanner';
 import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
 import { MediaService } from 'src/app/services/media/media.service';
+import { AssetsCategory } from 'src/app/interfaces/assets-category';
+import { AssetDetails } from 'src/app/interfaces/asset-details';
 
 type NfcStatus =
   | 'NO_NFC'
@@ -171,8 +173,8 @@ export class HomePage implements OnInit {
     this.datanonsift = this.shared.userdetail.nonshift;
     this.datalk3 = this.shared.userdetail.lk3;
 
-    console.log(this.shared, this.gruprole, this.datasift, this.datanonsift, this.datalk3);
-    console.log(this.shared.user.group)
+    // console.log(this.shared, this.gruprole, this.datasift, this.datanonsift, this.datalk3);
+    // console.log(this.shared.user.group)
   }
 
   get applicationLogo() {
@@ -240,11 +242,11 @@ export class HomePage implements OnInit {
     return this.router.navigate(commands);
   }
 
-  async getAsset(){
-    const result = await this.database.select('asset',{
-      limit : 50
+  async getAsset() {
+    const result = await this.database.select('asset', {
+      limit: 50
     });
-    console.log('result asset pada SQL LITE', result)
+    // console.log('result asset pada SQL LITE', result)
   }
 
   async openModal() {
@@ -330,7 +332,7 @@ export class HomePage implements OnInit {
     this.application.lastSync = moment(now).from(now);
     this.application.bgSyncButton = 'btn-success';
     this.shared.setLastSynchronize(moment(now).format('YYYY-MM-DDTHH:mm:ss'));
-    
+
     //nambahna men ra refresh
     await this.getLocalAssets();
   }
@@ -344,7 +346,7 @@ export class HomePage implements OnInit {
         }
         this.count.assets = response?.data?.data;
 
-        console.log('data', response?.data?.data);
+        // console.log('data', response?.data?.data);
       },
       onError: (error) => {
         this.shared.addLogActivity({
@@ -361,7 +363,7 @@ export class HomePage implements OnInit {
     const data = JSON.stringify({
       data: this.datalaporan,
     });
-    console.log('data json :', JSON.parse(data));
+    // console.log('data json :', JSON.parse(data));
     return this.router.navigate(['laporan-harian', { data }]);
   }
   private async getLocalAssets() {
@@ -477,21 +479,21 @@ export class HomePage implements OnInit {
       // .filter(schedule => this.filterSchedule(schedule, now, dateInThisMonth, lastWeek));
 
       const unuploadedRecords = await this.getUnuploadedRecords();
-      
+
       console.log('8. belum upload', unuploadedRecords);
 
-      console.log('items of schedules' , schedules);
-      
+      console.log('items of schedules', schedules);
+
       //untuk menghitung data yg sudah transaksi / uploaded . pada bae
-      for(const x of schedules) {
-       // console.log('jumlah sebanyak x' , x.syncAt);
-        if(x.syncAt !== null) {
+      for (const x of schedules) {
+        // console.log('jumlah sebanyak x' , x.syncAt);
+        if (x.syncAt !== null) {
           count.sudahtransaksi++
         }
       }
 
-      console.log('sudah transaksi',count.sudahtransaksi);
-      
+      console.log('sudah transaksi', count.sudahtransaksi);
+
 
       for (const item of schedules) {
         const assetIndex = assets.findIndex(
@@ -513,7 +515,7 @@ export class HomePage implements OnInit {
         } else if (assetIndex >= 0) {
           assets[assetIndex].schedule.unscanned++;
           count.laporan++;
-        } 
+        }
 
 
 
@@ -528,14 +530,14 @@ export class HomePage implements OnInit {
         //   count.unscanned++;
         // }
       }
-      console.log('99. sudah transaksi',count.sudahtransaksi);
-      
+      console.log('99. sudah transaksi', count.sudahtransaksi);
+
       console.log('10. upload', count.uploaded);
       console.log('11. belum upload', count.unuploaded);
       console.log('12. belum scan', count.unscanned);
       console.log('13. data schedules di home', schedules);
       console.log('14. data assets di home', assets);
-      
+
 
       // count.assets = assets.length;
       this.count = count;
@@ -548,9 +550,9 @@ export class HomePage implements OnInit {
           if (responseLaporan.status >= 400) {
             throw responseLaporan;
           }
-          console.log('responseLaporan', responseLaporan);
+          // console.log('responseLaporan', responseLaporan);
           this.jumlahlaporan = responseLaporan?.data?.data?.length
-          console.log('jumlahLaporan', this.jumlahlaporan);
+          // console.log('jumlahLaporan', this.jumlahlaporan);
 
           if (this.jumlahlaporan) {
             const filterdata = responseLaporan?.data?.data?.filter(
@@ -658,13 +660,13 @@ export class HomePage implements OnInit {
 
   //nyimpen ke SQLite
   private async getParameterByAssetId
-  (assetId) {
+    (assetId) {
     const loader = await this.utils.presentLoader();
     return this.http.requests({
       requests: [() => this.http.getParameters(assetId)],
       onSuccess: async ([responseParameters]) => {
         console.log('respon blabla', responseParameters)
-        
+
         if (![200, 201].includes(responseParameters.status)) {
           throw responseParameters;
         }
@@ -706,7 +708,7 @@ export class HomePage implements OnInit {
           console.log('parameter data sebelum di push SQL', parameters);
 
           let storeParameters = [];
-         
+
           // .then(() => this.database.insertbatch('parameter', val);
           storeParameters = this.utils.chunkArray(parameters, 250);
           storeParameters?.map?.(async (val) => {
@@ -733,8 +735,8 @@ export class HomePage implements OnInit {
         groupBy: ['scheduleTrxId'],
       });
 
-      console.log('result di get unuploaded records ',result);
-      
+      console.log('result di get unuploaded records ', result);
+
 
       records.push(
         ...this.database
@@ -1448,7 +1450,7 @@ export class HomePage implements OnInit {
                       splitAssetIdSchedule?.map?.(async val => {
                         const payload = { asset: JSON.stringify(val) };
                         await this.getParameterByAssetId(payload);
-                        
+
                       });
                       this.database.insertbatch('schedule', schedulesnonsift);
                       this.shared.addLogActivity({
@@ -1855,7 +1857,7 @@ export class HomePage implements OnInit {
 
         this.database.update('record', { isUploaded: 1 }, where);
 
-        console.log ( 'where', where)
+        console.log('where', where)
       }
       this.onProcessFinished(subscriber, loader);
     }
@@ -2492,13 +2494,24 @@ export class HomePage implements OnInit {
     subscriber: Subscriber<any>,
     loader: HTMLIonPopoverElement
   ) {
-    return this.http.requests({
-      requests: [() => this.http.getAssetTags()],
-      onSuccess: async ([responseAssetTags]) => {
-        //console.log('responseAssetTags', responseAssetTags);
+    const assetAll: any[] = [];
 
-        if (responseAssetTags.status >= 400) {
+    return this.http.requests({
+      requests: [
+        () => this.http.getAssetTags(),
+        () => this.http.getCategory(),
+      ],
+      onSuccess: async ([
+        responseAssetTags,
+        responseCategory,
+      ]) => {
+        // console.log('responseCategory', responseCategory);
+
+        if (![200, 201].includes(responseAssetTags.status)) {
           throw responseAssetTags;
+        }
+        if (![200, 201].includes(responseCategory.status)) {
+          throw responseCategory;
         }
 
         // await this.prepareDirectory('asset')
@@ -2506,7 +2519,44 @@ export class HomePage implements OnInit {
         // await this.processResponseAssetTags(responseAssetTags);
 
         // save data all asset di sql lite
-        await this.getAssetsAll();
+        const arrCategoryData: AssetsCategory[] = responseCategory?.data?.data;
+        const requests = arrCategoryData
+          .map(async (category: AssetsCategory) => await this.getAssetsByCategoryId(category.id));
+
+        forkJoin(requests).pipe(
+          map((results) => {
+            for (const row of results) {
+              if (![200, 201].includes(row.status)) {
+                throw row;
+              }
+
+              const arrAssets: AssetDetails[] = row.data?.data;
+
+              if (arrAssets?.length > 0) {
+                for (const asset of arrAssets) {
+                  const data = {
+                    assetForm: JSON.stringify(asset.assetForm),
+                    assetNumber: asset.asset_number,
+                    expireDate: asset.expireDate,
+                    assetId: asset.id,
+                    more: JSON.stringify(asset.more),
+                    photo: JSON.stringify(asset.photo),
+                    supplyDate: asset.supply_date,
+                    cctvIP: '192.168.2.80',
+                  };
+                  assetAll.push(data);
+                }
+              }
+            }
+          })
+        ).subscribe(() => {
+          this.database.emptyTable('assetsCCTV');
+          const arrAssetsToStore: any[] = this.utils.chunkArray(assetAll, 250);
+
+          arrAssetsToStore?.map?.(async (val) => {
+            await this.database.insert('assetsCCTV', val);
+          });
+        });
 
         this.syncJob.order.assets.status = 'success';
         this.syncJob.order.assets.message = 'Berhasil mendapatkan data lokasi';
@@ -2528,119 +2578,15 @@ export class HomePage implements OnInit {
     });
   }
 
-  async getAssetsAll() {
-    const loader = await this.utils.presentLoader();
-    return this.http.requests({
-      requests: [() => this.http.getAssetsAll()],
-      onSuccess: async ([responseAssetAll]) => {
-        console.log('responseAssetAll', responseAssetAll);
 
-        if (![200, 201].includes(responseAssetAll.status)) {
-          throw responseAssetAll;
-        }
 
-        console.log('responseAssetAll data', responseAssetAll.data.data);
-
-        if(responseAssetAll.data?.data?.length > 0) {
-          console.log('masuk looping')
-          const assetAll:any = [];
-          const assetsDetail: any = [] ;
-          let i = 0
-          for(const asset of responseAssetAll?.data?.data) {
-            // for(const asset of assets) {
-              const data = {
-                assetId : asset.assetId,
-                assetCategoryId : asset.assetCategoryId,
-                assetCategoryName : asset.assetCategoryName,
-                assetName : asset.assetName,
-                assetNumber : asset.assetNumber,
-                mediaId : asset.mediaId,
-                mediaName : asset.mediaName,
-                photo : asset.photo,
-                description : asset.description,
-                schManual : asset.schManual,
-                schType : asset.schType,
-                schWeekDays : asset.schWeekDays,
-                schWeeks : asset.schWeeks,
-                supplyDate: asset.supplyDate,
-                schMonthly: asset.schMonthly,
-                schFrequency: asset.schFrequency,
-                schYearly: asset.schYearly,
-                reportPhoto: asset.reportPhoto,
-                assetStatusId: asset.assetStatusId,
-                assetStatusName: asset.assetStatusName,
-                abbreviation: asset.abbreviation,
-                capacityId: asset.capacityId,
-                capacityValue: asset.capacityValue,
-                unitCapacity: asset.unitCapacity,
-                merkName: asset.merkName,
-                typeName: asset.typeName,
-                tagId: asset.tagId,
-                tagNumber: asset.tagNumber,
-                typeTag: asset.typeTag,
-                areaId: asset.areaId,
-                area: asset.area,
-                unit: asset.unit,
-                unitId: asset.unitId,
-                bangunan: asset.bangunan,
-                location: asset.location,
-                detailLocation: asset.detailLocation,
-                latitude: asset.latitude,
-                longitude: asset.longitude,
-                created_at: asset.created_at,
-                cctvIP: '192.168.2.80'
-              };
-              assetAll.push(data);
-            //}
-
-              // 2083 
-
-              // 100
-
-              // i 
-              // y 
-              //disini kita tambahkan detail asset
-              const assetDetail =  await this.getAssetsDetail(asset.assetId);
-              console.log('asset Detail', assetDetail)
-              assetsDetail.push(assetDetail);
-
-              i++
-              if(i === 5) {
-                break;
-              }
-          }
-
-          //disini kita tambahkan detail asset dengan id asset custom untuk testing
-          const assetDetail =  await this.getAssetsDetail('b5fdd272-bcd7-430b-b39e-29b4f38ebc13');
-          console.log('asset Detail', assetDetail)
-          assetsDetail.push(assetDetail);
-          
-
-          console.log( 'data assetsAll sebelum di push SQL' , assetAll)
-          console.log( 'data assetsAll Detail sebelum di push SQL' , assetsDetail)
-          let storeAssets = [];
-         
-          storeAssets = this.utils.chunkArray(assetAll, 250);
-          storeAssets?.map?.(async (val) => {
-            await this.database.insert('assetsCCTV', val);
-          });
-
-          let storeAssetsDetail = [];
-         
-          storeAssetsDetail = this.utils.chunkArray(assetsDetail, 250);
-          storeAssetsDetail?.map?.(async (val) => {
-            await this.database.insert('assetsDetail', val);
-          });
-        }
-      },
-      onError: error => console.error(error),
-      onComplete: () => loader.dismiss()
-    });
+  async getAssetsByCategoryId(categoryId: string) {
+    return this.http.getAssetsByCategoryId(categoryId);
   }
 
-  async getAssetsDetail(idAsset:any) {
+  async getAssetsDetail(idAsset: any) {
     //const loader = await this.utils.presentLoader();
-    let dataDetail :any 
+    let dataDetail: any
     try {
       // console.log('id asset',idAsset)
       const response = await this.http.getAssetsDetail(idAsset);
@@ -2651,37 +2597,35 @@ export class HomePage implements OnInit {
 
       const bodyResponse = response.data?.data;
       const asset = response.data.data;
-      if( response.data?.data.length > 0 ) {
-        console.log('masuk log');
-        
+      if (response.data?.data.length > 0) {
         const data = {
-        id : asset.id  ,
-        asset_number : asset.asset_number  ,
-        supply_date : asset.supply_date  ,
-        expireDate : asset.expireDate  ,
-        photo : asset.photo  ,
-        description : asset.description  ,
-        sch_manual : asset.sch_manual  ,
-        sch_type : asset.sch_type  ,
-        sch_frequency : asset.sch_frequency  ,
-        historyActive : asset.historyActive  ,
-        lastScannedAt : asset.lastScannedAt  ,
-        lastScannedBy : asset.lastScannedBy  ,
-        parameter : asset.parameter  ,
-        assetForm : asset.assetForm  ,
-        more : asset.more  ,
-        qr : asset.qr  ,
-        foto : asset.foto  ,
+          id: asset.id,
+          asset_number: asset.asset_number,
+          supply_date: asset.supply_date,
+          expireDate: asset.expireDate,
+          photo: asset.photo,
+          description: asset.description,
+          sch_manual: asset.sch_manual,
+          sch_type: asset.sch_type,
+          sch_frequency: asset.sch_frequency,
+          historyActive: asset.historyActive,
+          lastScannedAt: asset.lastScannedAt,
+          lastScannedBy: asset.lastScannedBy,
+          parameter: asset.parameter,
+          assetForm: asset.assetForm,
+          more: asset.more,
+          qr: asset.qr,
+          foto: asset.foto,
         }
 
       }
-      
+
       dataDetail = bodyResponse
     } catch (err) {
       console.error(err);
     } finally {
       return dataDetail
-     // loader.dismiss();
+      // loader.dismiss();
 
 
     }
@@ -2752,7 +2696,7 @@ export class HomePage implements OnInit {
 
     //       console.log( 'data assetsAll sebelum di push SQL' , assetAll)
     //       let storeAssets = [];
-         
+
     //       storeAssets = this.utils.chunkArray(assetAll, 250);
     //       storeAssets?.map?.(async (val) => {
     //         await this.database.insert('asset', val);
@@ -2860,8 +2804,8 @@ export class HomePage implements OnInit {
 
   private async offlinePhoto(type: string, url: string) {
     let filePath: string;
-    console.log('data lempar', url)
-    console.log('data lempar , types' , type)
+    // console.log('data lempar', url)
+    // console.log('data lempar , types', type)
     try {
       const name = url?.split('/').pop();
 
@@ -2870,14 +2814,14 @@ export class HomePage implements OnInit {
       if (![200, 201].includes(response.status)) {
         return;
       }
-  
+
 
       //const name = row.substr(row.lastIndexOf('/') + 1);
       const mimeType = (response.headers as any)?.['Content-Type'] || this.media.getMimeTypes(url);
       const base64 = `data:${mimeType};base64,${response.data}`;
       const blob = await this.media.convertFileToBlob(base64);
       const fileURI = await this.media.writeBlob(blob, name);
-      
+
       // const { path } = await this.http.download({
       //   url,
       //   filePath: `${name}`,
@@ -2887,13 +2831,13 @@ export class HomePage implements OnInit {
       // console.log('file url',urlfile)
       //console.log('file url',fileURI)
 
-      console.log('fileUrl' , fileURI)
-      console.log('blob' , blob)
+      // console.log('fileUrl', fileURI)
+      // console.log('blob', blob)
       //console.log('base64', base64) 
-      console.log('mimeType', mimeType)
-      console.log('type', type)
+      // console.log('mimeType', mimeType)
+      // console.log('type', type)
 
-     // filePath = urlfile;
+      // filePath = urlfile;
       filePath = fileURI;
     } catch (error) {
       console.error(error);

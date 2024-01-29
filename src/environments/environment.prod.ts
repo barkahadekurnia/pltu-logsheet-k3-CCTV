@@ -105,8 +105,8 @@ export const environment = {
     get selectionUnit() {
       return this.public + '/api/master/lokasi/unit';
     },
-     // + unitId (1)
-     get selectionArea() {
+    // + unitId (1)
+    get selectionArea() {
       return this.public + '/api/master/lokasi/area';
     },
     // + areaId ()
@@ -118,15 +118,16 @@ export const environment = {
       return this.base + '/api/tag/index?search=undefined';
     },
     //body tag id  pakai /assetId
-    get updateAssetTag(){
+    get updateAssetTag() {
       return this.base + '/api/asset/updateAssetTag';
     },
     // +/trxparentId/scheduleTrxId
-    get assetParameterTransaksi(){
+    get assetParameterTransaksi() {
       return this.base + '/api/transaction/schedule/view';
     },
-    
-
+    get newAssets() {
+      return this.base + '/api/asset/getAllDataAsset';
+    },
   },
   values: {
     mapbox: 'pk.eyJ1IjoiYXJpc2NhYWJkdWxhaCIsImEiOiJja3Vuamc3eTgyNXMxMndteDI2MTY3NnBlIn0.7M2M8TyoZrrZuN85yrQPTQ',

@@ -238,9 +238,10 @@ export class HttpService {
     return CapacitorHttp.get(options);
   }
 
-  getAssetsAll() {
+  getAssetsByCategoryId(categoryId: string) {
     const options: HttpOptions = {
-      url: environment.url.assetsAll,
+      url: `${environment.url.newAssets}/${categoryId}`,
+      // url: environment.url.assetsAll,
       headers: {
         Authorization: `Bearer ${this.token}`
       },

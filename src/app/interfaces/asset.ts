@@ -1,3 +1,5 @@
+import { AssetFormDetails } from "./asset-details";
+
 /* eslint-disable @typescript-eslint/naming-convention */
 export interface Asset {
     scheduleTrxId: string;

@@ -4,12 +4,12 @@ import { Router } from '@angular/router';
 import { DatabaseService } from 'src/app/services/database/database.service';
 
 interface CCTV {
-    cctvId : string ,
-    cctvIp : string ,
-    cctvQr : string ,
-    cctvName : string ,
-    cctvLokasi : string ,
-    attachment : string ,
+  cctvId: string,
+  cctvIp: string,
+  cctvQr: string,
+  cctvName: string,
+  cctvLokasi: string,
+  attachment: string,
 }
 
 @Component({
@@ -18,34 +18,34 @@ interface CCTV {
   styleUrls: ['./add-cctv.page.scss'],
 })
 export class AddCctvPage implements OnInit {
-  form : CCTV
-  cctv : CCTV 
-  cctvForm : FormGroup
+  form: CCTV
+  cctv: CCTV
+  cctvForm: FormGroup
   constructor(
-    private database:DatabaseService,
+    private database: DatabaseService,
     private router: Router,
 
-  ) { 
-    
+  ) {
+
     this.form = {
-      cctvId : "" ,
-      cctvIp : "" ,
-      cctvQr : "" ,
-      cctvName : "" ,
-      cctvLokasi : "" ,
-      attachment : "" ,
+      cctvId: "",
+      cctvIp: "",
+      cctvQr: "",
+      cctvName: "",
+      cctvLokasi: "",
+      attachment: "",
     };
   }
 
   ngOnInit() {
   }
 
-  openPage(commands:any[]) {
+  openPage(commands: any[]) {
     return this.router.navigate(commands);
   }
 
-  addCCTV(){
+  addCCTV() {
     console.log('tombol tambah cctv')
-    console.log('cctv form value' , this.form)
+    console.log('cctv form value', this.form)
   }
 }

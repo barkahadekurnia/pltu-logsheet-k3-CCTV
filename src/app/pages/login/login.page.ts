@@ -53,7 +53,7 @@ export class LoginPage implements OnInit {
     this.platform.ready().then(() => {
       if (this.platform.is('capacitor')) {
         App.getInfo().then((appInfo: AppInfo) => this.appVersion = `${appInfo.version}.${appInfo.build}` ?? '1.0.0');
-        console.log('versi aplikasi',this.appVersion)
+        console.log('versi aplikasi', this.appVersion)
       }
     });
   }
@@ -74,18 +74,18 @@ export class LoginPage implements OnInit {
       loader.present();
 
       try {
-        
-        console.log('3,this.form',this.form);
-        
+
+        console.log('3,this.form', this.form);
+
         const response = await this.http.login(this.form);
         console.log('respon login', response)
 
         if (response.data.status !== 200) {
-          console.log('respon tidak 200',response)
+          console.log('respon tidak 200', response)
           const alert = await this.utils.createCustomAlert({
             type: 'error',
             header: 'Error',
-            message: response.data.messages.error+ 'eror',
+            message: response.data.messages.error + 'eror',
             buttons: [{
               text: 'Close',
               handler: () => alert.dismiss()
@@ -112,7 +112,7 @@ export class LoginPage implements OnInit {
         //   // throw response.data;
         // }
 
-        console.log('periksa role',response?.data?.data?.user?.role_group)
+        console.log('periksa role', response?.data?.data?.user?.role_group)
 
         if (upperCase(response?.data?.data?.user?.role_group) == "PETUGAS") {
           this.http.requests({
@@ -120,7 +120,7 @@ export class LoginPage implements OnInit {
               () => this.http.getGroupOperator(response?.data?.data?.user?.id),
             ],
             onSuccess: async ([responseGrup]) => {
-            console.log('respon jika role petugas', responseGrup)
+              console.log('respon jika role petugas', responseGrup)
 
               if (responseGrup.status >= 400) {
                 throw responseGrup;
@@ -134,12 +134,12 @@ export class LoginPage implements OnInit {
               console.log(4);
             },
 
-           
+
             onError: error => console.error(error)
           });
 
 
-        }else{
+        } else {
           this.shared.setUserDetail({
             shift: '',
             nonshift: '',
@@ -233,7 +233,7 @@ export class LoginPage implements OnInit {
     }
 
     this.utils.startMonitor();
-     await this.navCtrl.navigateRoot('tabs');
+    await this.navCtrl.navigateRoot('tabs');
   }
   private async downloadCategory() {
     try {
@@ -282,7 +282,7 @@ export class LoginPage implements OnInit {
   private async offlinePhoto(type: string, url: string) {
     let filePath: string;
     console.log('data lempar', url)
-    console.log('data lempar , types' , type)
+    console.log('data lempar , types', type)
     try {
       const name = url?.split('/').pop();
       console.log('nama', name)
@@ -292,10 +292,10 @@ export class LoginPage implements OnInit {
       if (![200, 201].includes(response.status)) {
         return;
       }
-  
+
 
       //const name = row.substr(row.lastIndexOf('/') + 1);
-      const mimeType = (response.headers as any)?.['Content-Type'] || this.media.getMimeTypes(url); 
+      const mimeType = (response.headers as any)?.['Content-Type'] || this.media.getMimeTypes(url);
       const base64 = `data:${mimeType};base64,${response.data}`;
       const blob = await this.media.convertFileToBlob(base64);
       const fileURI = await this.media.writeBlob(blob, name);
@@ -306,8 +306,8 @@ export class LoginPage implements OnInit {
       //   filePath: `${name}`,
       //   fileDirectory: Directory.Data
       // });
-      console.log('fileUrl' , fileURI)
-      console.log('blob' , blob)
+      console.log('fileUrl', fileURI)
+      console.log('blob', blob)
       //console.log('base64', base64)
       console.log('mimeType', mimeType)
       console.log('type', type)
@@ -316,7 +316,7 @@ export class LoginPage implements OnInit {
       //filePath = urlfile;
       //console.log('file url',urlfile)
       filePath = fileURI;
-      
+
     } catch (error) {
       console.error(error);
     }

@@ -6,12 +6,12 @@ export interface AssetDetails {
     asset_number: string;
     description?: string;
     expireDate: string;
-    historyActive: string;
+    historyActive?: string;
     id: string;
     lastScannedAt?: string;
     lastScannedBy?: string;
     more: AssetCategoryAndStatus;
-    parameter: {
+    parameter?: {
         day: CategoryParameters[];
         lustrum: CategoryParameters[];
         monthly: CategoryParameters[];
@@ -21,11 +21,12 @@ export interface AssetDetails {
         yearly: CategoryParameters[];
     };
     photo: Photo[];
-    qr: string;
+    qr?: string;
     sch_frequency?: string;
     sch_manual?: string;
-    sch_type: string;
+    sch_type?: string;
     supply_date: string;
+    cctvIP?: string;
 }
 
 export interface AssetFormDetails {
