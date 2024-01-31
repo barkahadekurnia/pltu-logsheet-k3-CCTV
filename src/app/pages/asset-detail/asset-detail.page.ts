@@ -320,6 +320,23 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       if (arrAssetAll.length >= 1) {
         this.assetId = arrAssetAll[0].id;
       }
+
+      const resultAll = await this.database.select('assetsCCTV', {
+        column: [
+          'assetId',
+          'assetForm',
+          'assetNumber',
+          'expireDate',
+          'more',
+          'photo',
+          'supplyDate',
+          'cctvIP',
+        ],
+      });
+
+      const parsedAssetsAll = this.database.parseResult(resultAll);
+      console.log(' all data asset', parsedAssetsAll)
+
     } catch (err) {
       console.error(err);
     }
@@ -336,135 +353,9 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     viewer.show();
   }
 
-
-  // async getDataInputForms() {
-  //   const loader = await this.utils.presentLoader();
-
-  //   // //check nfc
-  //   // this.platform.ready().then(() => this.setupNfc());
-  //   // window.addEventListener('keypress', (v) => {
-  //   //   console.log('v', v);
-  //   // })
-  //   // console.log(this.nfcStatus);
-  //   console.log('tes1')
-  //   this.http.requests({
-  //     requests: [
-  //       () => this.http.getAnyData(`${environment.url.formAssetCategory}/${this.resultParam.more.category?.id}`),
-  //       () => this.http.getAnyData(`${environment.url.assetsdetail}/${this.resultParam?.id}`),
-  //     ],
-  //     onSuccess: async (responses) => {
-  //       const [
-  //         responseAssetCategory,
-  //         responseAssetDetail,
-  //       ] = responses;
-  //       console.log('tes2',responseAssetCategory)
-  //       if (![200, 201].includes(responseAssetCategory.status)) {
-  //         throw responseAssetCategory;
-  //       }
-
-  //       console.log('tes3')
-
-  //       if (![200, 201].includes(responseAssetDetail.status)) {
-  //         throw responseAssetDetail;
-  //       }
-
-  //       const bodyformAssetCategory = responseAssetCategory.data?.data;
-  //       const bodyformAssetDetail = responseAssetDetail.data?.data;
-
-  //       console.log('bodyformAssetCategory',bodyformAssetCategory)
-
-  //       console.log('bodyformAssetDetail',bodyformAssetDetail)
-  //       const mappedArray: AssetFormDetails[] = map(bodyformAssetCategory, (form, idx) => {
-  //         const result = intersectionWith(
-  //           this.utils.parseJson(form?.formOption),
-  //           this.resultParam.assetForm,
-  //           (a: any, b: any) => a?.id === b?.formValue
-  //         );
-
-  //         return {
-  //           ...form,
-  //           formOption: this.utils.parseJson(form?.formOption),
-  //           selected: result.length ? true : false,
-  //           value: result[0].id,
-  //           assetFormId: bodyformAssetDetail.assetForm[idx]?.id,
-  //           disabled: (form.assetCategoryCode === 'PH' && (form.formName === 'kapasitas')) ? true :
-  //             (form.assetCategoryCode === 'HB' && (form.formName === 'tipekonektor')) ? true :
-  //               (form.assetCategoryCode === 'DV' && (form.formName === 'diameter' || form.formName === 'jenis')) ? true :
-  //                 (form.assetCategoryCode === 'FT' && (form.formName === 'kapasitas' || form.formName === 'jenis')) ? true :
-  //                   (form.assetCategoryCode === 'PH' && (form.formName === 'merk' || form.formName === 'tipekonektor')) ? true :
-  //                     (form.assetCategoryCode === 'AP' && (form.formName === 'merk' || form.formName === 'kapasitas')) ? true : false
-  //         };
-  //       });
-  //       const initData = mappedArray?.filter?.(
-  //         (item) =>
-  //           item.assetCategoryCode === 'PH' && item.formName === 'jenis' ||
-  //           item.assetCategoryCode === 'HB' && item.formName === 'jenis' ||
-  //           item?.assetCategoryCode === 'DV' && item?.formName === 'merk' ||
-  //           item.assetCategoryCode === 'FT' && item.formName === 'merk' ||
-  //           item.assetCategoryCode === 'PTD' && item.formName === 'jenis' ||
-  //           item.assetCategoryCode === 'AP' && item.formName === 'media'
-  //       );
-
-  //       let dataFormTypeAsset: TypeForm[] = [];
-
-  //       if (mappedArray.length && initData.length && bodyformAssetDetail) {
-  //         const formId = initData[0].value;
-
-  //         const response = await this.http.getAnyData(`${environment.url.formType}/${formId}`);
-
-  //         if (![200, 201].includes(response.status)) {
-  //           throw response;
-  //         }
-
-  //         const bodyResponse = response.data?.data;
-  //         dataFormTypeAsset = bodyResponse;
-
-  //         const mappedAssetDetail: AssetFormDetails = {
-  //           assetCategoryCode: null,
-  //           assetCategoryId: null,
-  //           assetCategoryName: null,
-  //           created_at: null,
-  //           deleted_at: null,
-  //           formId: bodyformAssetDetail.id,
-  //           formLabel: 'Type',
-  //           formName: 'type',
-  //           formOption: dataFormTypeAsset,
-  //           formType: 'select',
-  //           index: (mappedArray.length + 1)?.toString(),
-  //           selected: typeof bodyformAssetDetail.more?.type === 'object' ? true : false,
-  //           updated_at: null,
-  //           value: null,
-  //           disabled: false,
-  //         };
-
-  //         // const idxDataMerk = mappedArray?.findIndex((obj: any) => obj.formName === 'merk');
-  //         const idxDataMerk = findIndex(mappedArray, (obj) => obj.index?.includes('2'));
-
-  //         // add object (mappedAssetDetail) to index (idxDataMerk) of array (mappedArray)
-  //         of(mappedArray)
-  //           .pipe(
-  //             rxjsMap(arr => [...arr.slice(0, idxDataMerk), mappedAssetDetail, ...arr.slice(1)]),
-  //             tap(updatedArray => {
-  //               mappedArray.length = 0;
-  //               Array.prototype.push.apply(mappedArray, updatedArray);
-  //             })
-  //           ).subscribe();
-  //       }
-
-  //       this.dataFormDetailAsset = mappedArray;
-  //       console.log('dataFormDetailAsset', this.dataFormDetailAsset);
-
-  //       //lokasi nih
-  //       this.dataFormDetailLocation = bodyformAssetDetail.more.tag[0];
-  //       console.log('dataFormDetailLocation', this.dataFormDetailLocation);
-  //     },
-  //     onError: (err) => {
-  //       console.error(err);
-  //     },
-  //     onComplete: async () => await loader.dismiss()
-  //   });
-  // }
-
+  async editDetailFoto(){
+    console.log('edit foto lur')
+  }
 
   async getDataInputForms() {
     const loader = await this.utils.presentLoader();

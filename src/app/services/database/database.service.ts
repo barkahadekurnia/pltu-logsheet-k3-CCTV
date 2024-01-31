@@ -271,36 +271,31 @@ export class DatabaseService {
       assetsCCTV: `
         CREATE TABLE IF NOT EXISTS assetsCCTV(
           assetId TEXT NOT NULL,
-          assetForm TEXT,
+          assetForm TEXT ,
           assetNumber TEXT,
           expireDate TEXT,
-          more TEXT,
-          photo TEXT,
+          more TEXT ,
+          photo TEXT ,
           supplyDate TEXT,
           cctvIP TEXT
         )
       `,
-      assetsDetail: `
-      CREATE TABLE IF NOT EXISTS assetsDetail(
-        id TEXT NOT NULL,
-        asset_number TEXT ,
-        supply_date TEXT ,
-        expireDate TEXT ,
-        photo TEXT ,
-        description TEXT,
-        sch_manual TEXT,
-        sch_type TEXT,
-        sch_frequency TEXT,
-        historyActive TEXT,
-        lastScannedAt TEXT,
-        lastScannedBy TEXT,
-        parameter TEXT,
-        assetForm TEXT,
-        more TEXT,
-        qr TEXT,
-        foto TEXT
-      )
-    `,
+      formAssetsCategory:`
+        CREATE TABLE IF NOT EXISTS formAssetsCategory(
+          formId TEXT NOT NULL,
+          index TEXT,
+          formLabel TEXT,
+          formName TEXT,
+          formType TEXT,
+          formOption TEXT ,
+          assetCategoryId TEXT,
+          assetCategoryCode TEXT,
+          assetCategoryName TEXT,
+          created_at TEXT,
+          updated_at TEXT,
+          deleted_at TEXT,
+        )
+      `
     };
   }
 

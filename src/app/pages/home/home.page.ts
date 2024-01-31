@@ -48,6 +48,7 @@ import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
 import { MediaService } from 'src/app/services/media/media.service';
 import { AssetsCategory } from 'src/app/interfaces/assets-category';
 import { AssetDetails } from 'src/app/interfaces/asset-details';
+import { environment } from 'src/environments/environment';
 
 type NfcStatus =
   | 'NO_NFC'
@@ -118,6 +119,8 @@ export class HomePage implements OnInit {
     order: RequestOrder;
     isUploading: boolean;
   };
+
+  assetCategoryId:any = [];
 
   constructor(
     private router: Router,
@@ -2523,12 +2526,15 @@ export class HomePage implements OnInit {
         const requests = arrCategoryData
           .map(async (category: AssetsCategory) => await this.getAssetsByCategoryId(category.id));
 
+        console.log('id category', requests)
         forkJoin(requests).pipe(
-          map((results) => {
+          map(async (results) => {
             for (const row of results) {
               if (![200, 201].includes(row.status)) {
                 throw row;
               }
+
+              console.log('isi dari row habis di fork join', row)
 
               const arrAssets: AssetDetails[] = row.data?.data;
 
@@ -2543,19 +2549,33 @@ export class HomePage implements OnInit {
                     photo: JSON.stringify(asset.photo),
                     supplyDate: asset.supply_date,
                     cctvIP: '192.168.2.80',
+                    
                   };
-                  assetAll.push(data);
+                  assetAll.push(data);                  
                 }
               }
+              //kita save dlu bang untuk id category 
+              if(arrAssets.length > 0 ) {
+                const idCategory = arrAssets[0].more.category.id
+                this.assetCategoryId.push(idCategory);
+              }
+            
             }
+            console.log('cek isi this asset category id', this.assetCategoryId)
+
+            const assetFormCategoryData = await this.assetFormCategory()
+
+            console.log('assetFormCategoryData',assetFormCategoryData)
           })
         ).subscribe(() => {
           this.database.emptyTable('assetsCCTV');
           const arrAssetsToStore: any[] = this.utils.chunkArray(assetAll, 250);
-
+          
           arrAssetsToStore?.map?.(async (val) => {
             await this.database.insert('assetsCCTV', val);
           });
+
+  
         });
 
         this.syncJob.order.assets.status = 'success';
@@ -2578,6 +2598,35 @@ export class HomePage implements OnInit {
     });
   }
 
+  async assetFormCategory(){
+    const requests = this.assetCategoryId
+    .map(async (idCategory:any) => 
+      await this.http.getAnyData(`${environment.url.formAssetCategory}/${idCategory}`));
+    
+    console.log('request', requests)
+
+    forkJoin(requests).pipe(
+      map((results:any) => {
+        console.log('result fork' , results)
+        for (let row of results) {
+          console.log('isi dari row forkjoin asset form', row) 
+
+          if(![200,201].includes(row.status)) {
+            throw row;
+          }
+          
+        
+        }
+      }
+      )
+    ).subscribe(() => {
+      console.log('barkah test fork')
+
+    });
+
+    return 'data complete'
+  
+  }
 
 
   async getAssetsByCategoryId(categoryId: string) {

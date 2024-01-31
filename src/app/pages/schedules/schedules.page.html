@@ -258,7 +258,9 @@
                       <ng-container *ngIf="shift.detailLocationData?.length > 0">
                         <div class="text-sm mb-1.5 font-semibold"
                           *ngFor="let dataLocation of shift.detailLocationData; index as idx;">
-                          <div class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
+                          <div  
+                          *ngIf="dataLocation.assetData.length > 0"
+                          class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
                             (click)="viewAssetsCategory('schedule-lokasi', dataLocation?.assetData, assetCategory)">
                             <div>
                               {{lowerCaseLetter(dataLocation.locationUnitNama)}}
