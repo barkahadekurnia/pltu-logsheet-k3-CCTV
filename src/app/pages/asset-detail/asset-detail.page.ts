@@ -259,6 +259,7 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
   async showData() {
     try {
       console.log('transition data', this.transitionData);
+      //done
       const response = await this.http.getAssetsDetail(this.transitionData.data);
 
       if (![200, 201].includes(response.status)) {
@@ -290,7 +291,8 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
           'more',
           'photo',
           'supplyDate',
-          'cctvIP',
+          'qr',
+          'cctvIP'
         ],
         where: {
           query: 'assetId=?',
@@ -302,14 +304,15 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       const arrAssetAll: AssetDetails[] = parsedAssets
         ?.map(
           (asset: any) => ({
-            assetForm: this.utils.parseJson(asset.assetForm),
             id: asset.assetId,
+            assetForm: this.utils.parseJson(asset.assetForm),
             asset_number: asset.assetNumber,
-            cctvIP: asset.cctvIP,
             expireDate: asset.expireDate,
             more: this.utils.parseJson(asset.more),
             photo: this.utils.parseJson(asset.photo),
             supply_date: asset.supplyDate,
+            qr:asset.qr,
+            cctvIP: asset.cctvIP,
           }));
       console.log('arrAssetAll', arrAssetAll);
 
@@ -321,21 +324,21 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
         this.assetId = arrAssetAll[0].id;
       }
 
-      const resultAll = await this.database.select('assetsCCTV', {
-        column: [
-          'assetId',
-          'assetForm',
-          'assetNumber',
-          'expireDate',
-          'more',
-          'photo',
-          'supplyDate',
-          'cctvIP',
-        ],
-      });
+      // const resultAll = await this.database.select('assetsCCTV', {
+      //   column: [
+      //     'assetId',
+      //     'assetForm',
+      //     'assetNumber',
+      //     'expireDate',
+      //     'more',
+      //     'photo',
+      //     'supplyDate',
+      //     'cctvIP',
+      //   ],
+      // });
 
-      const parsedAssetsAll = this.database.parseResult(resultAll);
-      console.log(' all data asset', parsedAssetsAll)
+      // const parsedAssetsAll = this.database.parseResult(resultAll);
+      // console.log(' all data asset', parsedAssetsAll)
 
     } catch (err) {
       console.error(err);
@@ -360,113 +363,274 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
   async getDataInputForms() {
     const loader = await this.utils.presentLoader();
 
-    this.http.requests({
-      requests: [
-        () => this.http.getAnyData(`${environment.url.formAssetCategory}/${this.resultParam.more.category?.id}`),
-        () => this.http.getAnyData(`${environment.url.assetsdetail}/${this.resultParam?.id}`),
-      ],
-      onSuccess: async (responses) => {
-        const [
-          responseAssetCategory,
-          responseAssetDetail,
-        ] = responses;
+    // const assetDetail = await this.http.getAnyData(`${environment.url.assetsdetail}/${this.resultParam?.id}`)
+    // console.log('AssetDetail',assetDetail)
+    try {
+      const result = await this.database.select('formAssetsCategory', {
+        column: [
+          'formId',
+          'idx',
+          'formLabel',
+          'formName',
+          'formType',
+          'formOption',
+          'assetCategoryId',
+          'assetCategoryCode',
+          'assetCategoryName',
+          'created_at',
+          'updated_at',
+          'deleted_at'
+        ],
+        where: {
+          query: 'assetCategoryId=?',
+          params: [this.resultParam.more.category?.id]
+        },
+      });
 
-        if (![200, 201].includes(responseAssetCategory.status)) {
-          throw responseAssetCategory;
-        }
-        if (![200, 201].includes(responseAssetDetail.status)) {
-          throw responseAssetDetail;
-        }
+      const parsedFormAssetsCategory = this.database.parseResult(result);
 
-        const bodyformAssetCategory = responseAssetCategory.data?.data;
-        const bodyformAssetDetail = responseAssetDetail.data?.data;
+      const assetFormCategoryAllSQL:any[] =[]
+      for (let asset of parsedFormAssetsCategory) {
+        const data = {
+          formId : asset.formId,
+          idx : asset.idx,
+          formLabel : asset.formLabel,
+          formName : asset.formName,
+          formType : asset.formType,
+          formOption : JSON.parse(asset.formOption) ,
+          assetCategoryId : asset.assetCategoryId,
+          assetCategoryCode : asset.assetCategoryCode,
+          assetCategoryName : asset.assetCategoryName,
+          created_at : asset.created_at,
+          updated_at : asset.updated_at,
+          deleted_at : asset.deleted_at,
+        };
 
-        const mappedArray: AssetFormDetails[] = map(bodyformAssetCategory, (form, idx) => {
-          const result = intersectionWith(
-            this.utils.parseJson(form?.formOption),
-            this.resultParam.assetForm,
-            (a: any, b: any) => a?.id === b?.formValue
-          );
+        assetFormCategoryAllSQL.push(data)
+      }
+              
+      console.log('result param category id',this.resultParam.more.category?.id)
 
-          return {
-            ...form,
-            formOption: this.utils.parseJson(form?.formOption),
-            selected: result.length ? true : false,
-            value: result[0].id,
-            assetFormId: bodyformAssetDetail.assetForm[idx]?.id,
-            disabled: (form.assetCategoryCode === 'PH' && (form.formName === 'kapasitas')) ? true :
-              (form.assetCategoryCode === 'HB' && (form.formName === 'tipekonektor')) ? true :
-                (form.assetCategoryCode === 'DV' && (form.formName === 'diameter' || form.formName === 'jenis')) ? true :
-                  (form.assetCategoryCode === 'FT' && (form.formName === 'kapasitas' || form.formName === 'jenis')) ? true :
-                    (form.assetCategoryCode === 'PH' && (form.formName === 'merk' || form.formName === 'tipekonektor')) ? true :
-                      (form.assetCategoryCode === 'AP' && (form.formName === 'merk' || form.formName === 'kapasitas')) ? true : false
-          };
-        });
+      // console.log("formAssetsCategory on SQL Lite",parsedFormAssetsCategory)
+      // console.log("formAssetsCategory on SQL Lite assetFormCategoryAll",assetFormCategoryAllSQL)
+   
+      const bodyformAssetDetail = this.resultParam
 
-        const initData = mappedArray?.filter?.(
-          (item) =>
-            item.assetCategoryCode === 'PH' && item.formName === 'jenis' ||
-            item.assetCategoryCode === 'HB' && item.formName === 'jenis' ||
-            item?.assetCategoryCode === 'DV' && item?.formName === 'merk' ||
-            item.assetCategoryCode === 'FT' && item.formName === 'merk' ||
-            item.assetCategoryCode === 'PTD' && item.formName === 'jenis' ||
-            item.assetCategoryCode === 'AP' && item.formName === 'media'
+      //console.log('isi dari result api online bodyformAssetCategory',bodyformAssetCategory)
+      console.log('isi dari result api online bodyformAssetDetail',bodyformAssetDetail)
+      console.log('isi dari result api online assetFormCategoryAllSQL',assetFormCategoryAllSQL)
+      //const mappedArray: AssetFormDetails[] = map(bodyformAssetCategory, (form, idx) => {
+      const mappedArray: AssetFormDetails[] = map(assetFormCategoryAllSQL, (form, idx) => {
+        const result = intersectionWith(
+          this.utils.parseJson(form?.formOption),
+          this.resultParam.assetForm,
+          (a: any, b: any) => a?.id === b?.formValue
         );
 
-        let dataFormTypeAsset: TypeForm[] = [];
+        console.log('isi dari result api online',result)
 
-        if (mappedArray.length && initData.length && bodyformAssetDetail) {
-          const formId = initData[0].value;
+        return {
+          ...form,
+          formOption: this.utils.parseJson(form?.formOption),
+          selected: result.length ? true : false,
+          value: result[0].id,
+          assetFormId: bodyformAssetDetail.assetForm[idx]?.id,
+          disabled: (form.assetCategoryCode === 'PH' && (form.formName === 'kapasitas')) ? true :
+            (form.assetCategoryCode === 'HB' && (form.formName === 'tipekonektor')) ? true :
+              (form.assetCategoryCode === 'DV' && (form.formName === 'diameter' || form.formName === 'jenis')) ? true :
+                (form.assetCategoryCode === 'FT' && (form.formName === 'kapasitas' || form.formName === 'jenis')) ? true :
+                  (form.assetCategoryCode === 'PH' && (form.formName === 'merk' || form.formName === 'tipekonektor')) ? true :
+                    (form.assetCategoryCode === 'AP' && (form.formName === 'merk' || form.formName === 'kapasitas')) ? true : false
+        };
+      });
 
-          const response = await this.http.getAnyData(`${environment.url.formType}/${formId}`);
+      const initData = mappedArray?.filter?.(
+        (item) =>
+          item.assetCategoryCode === 'PH' && item.formName === 'jenis' ||
+          item.assetCategoryCode === 'HB' && item.formName === 'jenis' ||
+          item?.assetCategoryCode === 'DV' && item?.formName === 'merk' ||
+          item.assetCategoryCode === 'FT' && item.formName === 'merk' ||
+          item.assetCategoryCode === 'PTD' && item.formName === 'jenis' ||
+          item.assetCategoryCode === 'AP' && item.formName === 'media'
+      );
 
-          if (![200, 201].includes(response.status)) {
-            throw response;
-          }
+      let dataFormTypeAsset: TypeForm[] = [];
 
-          const bodyResponse = response.data?.data;
-          dataFormTypeAsset = bodyResponse;
+      if (mappedArray.length && initData.length && bodyformAssetDetail) {
+        const formId = initData[0].value;
+        console.log('formId',formId)
+        const response = await this.http.getAnyData(`${environment.url.formType}/${formId}`);
 
-          const mappedAssetDetail: AssetFormDetails = {
-            assetCategoryCode: null,
-            assetCategoryId: null,
-            assetCategoryName: null,
-            created_at: null,
-            deleted_at: null,
-            formId: bodyformAssetDetail.id,
-            formLabel: 'Type',
-            formName: 'type',
-            formOption: dataFormTypeAsset,
-            formType: 'select',
-            index: (mappedArray.length + 1)?.toString(),
-            selected: typeof bodyformAssetDetail.more?.type === 'object' ? true : false,
-            updated_at: null,
-            value: null,
-            disabled: false,
-          };
+        if (![200, 201].includes(response.status)) {
+          throw response;
+        }
 
-          // const idxDataMerk = mappedArray?.findIndex((obj: any) => obj.formName === 'merk');
-          const idxDataMerk = findIndex(mappedArray, (obj) => obj.index?.includes('2'));
+        const bodyResponse = response.data?.data;
+        dataFormTypeAsset = bodyResponse;
 
-          // add object (mappedAssetDetail) to index (idxDataMerk) of array (mappedArray)
-          of(mappedArray)
-            .pipe(
-              rxjsMap(arr => [...arr.slice(0, idxDataMerk), mappedAssetDetail, ...arr.slice(1)]),
-              tap(updatedArray => {
-                mappedArray.length = 0;
-                Array.prototype.push.apply(mappedArray, updatedArray);
-              })
-            ).subscribe();
+        const mappedAssetDetail: AssetFormDetails = {
+          assetCategoryCode: null,
+          assetCategoryId: null,
+          assetCategoryName: null,
+          created_at: null,
+          deleted_at: null,
+          formId: bodyformAssetDetail.id,
+          formLabel: 'Type',
+          formName: 'type',
+          formOption: dataFormTypeAsset,
+          formType: 'select',
+          index: (mappedArray.length + 1)?.toString(),
+          selected: typeof bodyformAssetDetail.more?.type === 'object' ? true : false,
+          updated_at: null,
+          value: null,
+          disabled: false,
+        };
+
+        // const idxDataMerk = mappedArray?.findIndex((obj: any) => obj.formName === 'merk');
+        let idxDataMerk = findIndex(mappedArray, (obj:any) => obj.idx?.includes('2'));
+        console.log('idxDataMerk',idxDataMerk);
+
+        //idxDataMerk = 1 ;
+        // add object (mappedAssetDetail) to index (idxDataMerk) of array (mappedArray)
+        of(mappedArray)
+          .pipe(
+            rxjsMap(arr => [...arr.slice(0, idxDataMerk), mappedAssetDetail, ...arr.slice(1)]),
+            tap(updatedArray => {
+              mappedArray.length = 0;
+              Array.prototype.push.apply(mappedArray, updatedArray);
+            })
+          ).subscribe();
         }
 
         this.dataFormDetailAsset = mappedArray;
         console.log('dataFormDetailAsset', this.dataFormDetailAsset);
-      },
-      onError: (err) => {
-        console.error(err);
-      },
-      onComplete: async () => await loader.dismiss()
-    });
+      }
+
+
+      
+     catch (err) {
+      console.error(err);
+    } finally {
+      await loader.dismiss()
+    }
+
+    // this.http.requests({
+    //   requests: [
+    //     () => this.http.getAnyData(`${environment.url.formAssetCategory}/${this.resultParam.more.category?.id}`),
+    //     () => this.http.getAnyData(`${environment.url.assetsdetail}/${this.resultParam?.id}`),
+    //   ],
+    //   onSuccess: async (responses) => {
+    //     const [
+    //       responseAssetCategory,
+    //       responseAssetDetail,
+    //     ] = responses;
+
+    //     if (![200, 201].includes(responseAssetCategory.status)) {
+    //       throw responseAssetCategory;
+    //     }
+    //     if (![200, 201].includes(responseAssetDetail.status)) {
+    //       throw responseAssetDetail;
+    //     }
+
+    //     //const bodyformAssetCategory = responseAssetCategory.data?.data;
+    //    // const bodyformAssetDetail = responseAssetDetail.data?.data;
+    //     const bodyformAssetDetail = this.resultParam
+
+
+    //     //console.log('isi dari result api online bodyformAssetCategory',bodyformAssetCategory)
+    //     console.log('isi dari result api online bodyformAssetDetail',bodyformAssetDetail)
+    //     console.log('isi dari result api online assetFormCategoryAllSQL',assetFormCategoryAllSQL)
+    //     //const mappedArray: AssetFormDetails[] = map(bodyformAssetCategory, (form, idx) => {
+    //     const mappedArray: AssetFormDetails[] = map(assetFormCategoryAllSQL, (form, idx) => {
+    //       const result = intersectionWith(
+    //         this.utils.parseJson(form?.formOption),
+    //         this.resultParam.assetForm,
+    //         (a: any, b: any) => a?.id === b?.formValue
+    //       );
+
+    //       console.log('isi dari result api online',result)
+
+    //       return {
+    //         ...form,
+    //         formOption: this.utils.parseJson(form?.formOption),
+    //         selected: result.length ? true : false,
+    //         value: result[0].id,
+    //         assetFormId: bodyformAssetDetail.assetForm[idx]?.id,
+    //         disabled: (form.assetCategoryCode === 'PH' && (form.formName === 'kapasitas')) ? true :
+    //           (form.assetCategoryCode === 'HB' && (form.formName === 'tipekonektor')) ? true :
+    //             (form.assetCategoryCode === 'DV' && (form.formName === 'diameter' || form.formName === 'jenis')) ? true :
+    //               (form.assetCategoryCode === 'FT' && (form.formName === 'kapasitas' || form.formName === 'jenis')) ? true :
+    //                 (form.assetCategoryCode === 'PH' && (form.formName === 'merk' || form.formName === 'tipekonektor')) ? true :
+    //                   (form.assetCategoryCode === 'AP' && (form.formName === 'merk' || form.formName === 'kapasitas')) ? true : false
+    //       };
+    //     });
+
+    //     const initData = mappedArray?.filter?.(
+    //       (item) =>
+    //         item.assetCategoryCode === 'PH' && item.formName === 'jenis' ||
+    //         item.assetCategoryCode === 'HB' && item.formName === 'jenis' ||
+    //         item?.assetCategoryCode === 'DV' && item?.formName === 'merk' ||
+    //         item.assetCategoryCode === 'FT' && item.formName === 'merk' ||
+    //         item.assetCategoryCode === 'PTD' && item.formName === 'jenis' ||
+    //         item.assetCategoryCode === 'AP' && item.formName === 'media'
+    //     );
+
+    //     let dataFormTypeAsset: TypeForm[] = [];
+
+    //     if (mappedArray.length && initData.length && bodyformAssetDetail) {
+    //       const formId = initData[0].value;
+    //       console.log('formId',formId)
+    //       const response = await this.http.getAnyData(`${environment.url.formType}/${formId}`);
+
+    //       if (![200, 201].includes(response.status)) {
+    //         throw response;
+    //       }
+
+    //       const bodyResponse = response.data?.data;
+    //       dataFormTypeAsset = bodyResponse;
+
+    //       const mappedAssetDetail: AssetFormDetails = {
+    //         assetCategoryCode: null,
+    //         assetCategoryId: null,
+    //         assetCategoryName: null,
+    //         created_at: null,
+    //         deleted_at: null,
+    //         formId: bodyformAssetDetail.id,
+    //         formLabel: 'Type',
+    //         formName: 'type',
+    //         formOption: dataFormTypeAsset,
+    //         formType: 'select',
+    //         index: (mappedArray.length + 1)?.toString(),
+    //         selected: typeof bodyformAssetDetail.more?.type === 'object' ? true : false,
+    //         updated_at: null,
+    //         value: null,
+    //         disabled: false,
+    //       };
+
+    //       // const idxDataMerk = mappedArray?.findIndex((obj: any) => obj.formName === 'merk');
+    //       let idxDataMerk = findIndex(mappedArray, (obj:any) => obj.idx?.includes('2'));
+    //       console.log('idxDataMerk',idxDataMerk);
+
+    //       //idxDataMerk = 1 ;
+    //       // add object (mappedAssetDetail) to index (idxDataMerk) of array (mappedArray)
+    //       of(mappedArray)
+    //         .pipe(
+    //           rxjsMap(arr => [...arr.slice(0, idxDataMerk), mappedAssetDetail, ...arr.slice(1)]),
+    //           tap(updatedArray => {
+    //             mappedArray.length = 0;
+    //             Array.prototype.push.apply(mappedArray, updatedArray);
+    //           })
+    //         ).subscribe();
+    //     }
+
+    //     this.dataFormDetailAsset = mappedArray;
+    //     console.log('dataFormDetailAsset', this.dataFormDetailAsset);
+    //   },
+    //   onError: (err) => {
+    //     console.error(err);
+    //   },
+    //   onComplete: async () => await loader.dismiss()
+    // });
   }
 
   async getDataLokasi() {

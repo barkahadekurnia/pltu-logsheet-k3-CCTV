@@ -35,54 +35,54 @@ export class DatabaseService {
     return {
       schedule: `
         CREATE TABLE IF NOT EXISTS schedule(
-                  abbreviation TEXT,
-                  adviceDate TEXT,
-                  approvedAt TEXT,
-                  approvedBy TEXT,
-                  approvedNotes TEXT,
-                  area TEXT,
-                  areaId TEXT,
-                  assetCategoryId TEXT,
-                  assetCategoryName TEXT,
-                  assetForm TEXT,
-                  assetId TEXT,
-                  assetNumber TEXT,
-                  assetStatusId TEXT,
-                  assetStatusName TEXT,
-                  capacityValue TEXT,
-                  condition TEXT,
-                  detailLocation TEXT,
-                  created_at TEXT,
-                  date TEXT,
-                  deleted_at TEXT,
-                  idschedule TEXT,
-                  latitude TEXT,
-                  longitude TEXT,
-                  merk TEXT,
-                  photo TEXT,
-                  reportPhoto TEXT,
-                  scannedAccuration TEXT,
-                  scannedAt TEXT,
-                  scannedBy TEXT,
-                  scannedEnd TEXT,
-                  scannedNotes TEXT,
-                  scannedWith TEXT,
-                  schDays TEXT,
-                  schFrequency TEXT,
-                  schManual TEXT,
-                  schType TEXT,
-                  schWeekDays TEXT,
-                  schWeeks TEXT,
-                  scheduleFrom TEXT,
-                  scheduleTo TEXT,
-                  scheduleTrxId TEXT,
-                  supplyDate TEXT,
-                  syncAt TEXT,
-                  tagId TEXT,
-                  tagNumber TEXT,
-                  unit TEXT,
-                  unitCapacity TEXT,
-                  unitId TEXT
+          abbreviation TEXT,
+          adviceDate TEXT,
+          approvedAt TEXT,
+          approvedBy TEXT,
+          approvedNotes TEXT,
+          area TEXT,
+          areaId TEXT,
+          assetCategoryId TEXT,
+          assetCategoryName TEXT,
+          assetForm TEXT,
+          assetId TEXT,
+          assetNumber TEXT,
+          assetStatusId TEXT,
+          assetStatusName TEXT,
+          capacityValue TEXT,
+          condition TEXT,
+          detailLocation TEXT,
+          created_at TEXT,
+          date TEXT,
+          deleted_at TEXT,
+          idschedule TEXT,
+          latitude TEXT,
+          longitude TEXT,
+          merk TEXT,
+          photo TEXT,
+          reportPhoto TEXT,
+          scannedAccuration TEXT,
+          scannedAt TEXT,
+          scannedBy TEXT,
+          scannedEnd TEXT,
+          scannedNotes TEXT,
+          scannedWith TEXT,
+          schDays TEXT,
+          schFrequency TEXT,
+          schManual TEXT,
+          schType TEXT,
+          schWeekDays TEXT,
+          schWeeks TEXT,
+          scheduleFrom TEXT,
+          scheduleTo TEXT,
+          scheduleTrxId TEXT,
+          supplyDate TEXT,
+          syncAt TEXT,
+          tagId TEXT,
+          tagNumber TEXT,
+          unit TEXT,
+          unitCapacity TEXT,
+          unitId TEXT
         )
       `,
       asset: `
@@ -262,7 +262,7 @@ export class DatabaseService {
         )
       `,
       jumlah: `
-        CREATE TABLE IF NOT EXISTS category(
+        CREATE TABLE IF NOT EXISTS jumlah(
           jumlahId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           jumlahNama TEXT NOT NULL,
           jumlahCount INTEGER
@@ -270,20 +270,21 @@ export class DatabaseService {
       `,
       assetsCCTV: `
         CREATE TABLE IF NOT EXISTS assetsCCTV(
-          assetId TEXT NOT NULL,
           assetForm TEXT ,
           assetNumber TEXT,
           expireDate TEXT,
+          assetId TEXT NOT NULL,
           more TEXT ,
           photo TEXT ,
+          qr TEXT,
           supplyDate TEXT,
           cctvIP TEXT
         )
       `,
-      formAssetsCategory:`
+      formAssetsCategory: `
         CREATE TABLE IF NOT EXISTS formAssetsCategory(
-          formId TEXT NOT NULL,
-          index TEXT,
+          formId TEXT,
+          idx TEXT,
           formLabel TEXT,
           formName TEXT,
           formType TEXT,
@@ -293,10 +294,43 @@ export class DatabaseService {
           assetCategoryName TEXT,
           created_at TEXT,
           updated_at TEXT,
-          deleted_at TEXT,
+          deleted_at TEXT
         )
-      `
+      `,
+      type: `
+        CREATE TABLE IF NOT EXISTS type(
+          id TEXT NOT NULL,
+          type_name TEXT,
+          description TEXT,
+          code TEXT,
+          assetCategory TEXT,
+          merk TEXT,
+          media TEXT,
+          kapasitas TEXT,
+          more TEXT   
+        )
+      `,
+      unit: `
+        CREATE TABLE IF NOT EXISTS unit(
+          id TEXT NOT NULL,
+          unit TEXT,
+          kode TEXT,
+          deskripsi TEXT,
+          updated_at TEXT
+        )
+      `,
+      area: `
+        CREATE TABLE IF NOT EXISTS area(
+          id TEXT NOT NULL,
+          area TEXT,
+          kode TEXT,
+          deskripsi TEXT,
+          updated_at TEXT
+        )
+      `,
     };
+
+
   }
 
   async executeSQL(querySet: QuerySet) {

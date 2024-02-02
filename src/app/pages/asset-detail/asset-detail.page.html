@@ -90,7 +90,7 @@
                 </ion-button>
               </ion-buttons>
             </ion-toolbar>
-          </ion-header>
+          </ion-header> 
           <ion-content color="content">
             <ion-grid>
               <ion-row class="my-2 px-2">
@@ -144,6 +144,163 @@
         </ng-template>
       </ion-modal>
       <!-- End modal edit asset -->
+
+      <!-- Begin modal edit location -->
+      <ion-modal #modal_location #swiper trigger="modal-edit-location">
+        <ng-template>
+          <ion-header class="ion-no-border ion-no-shading">
+            <ion-toolbar color="content">
+              <ion-buttons slot="start">
+                <ion-button (click)="modal_location.dismiss()">Batal</ion-button>
+              </ion-buttons>
+              <ion-buttons slot="end">
+                <ion-button color="primary" (click)="submitFormUpdateLocation(modal_location)">
+                  <ion-label class="!font-bold">Simpan</ion-label>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content color="content">
+              <div>
+                <ion-grid>
+                  <ion-row class="my-2 px-2">
+                    <ion-col size="12" sizeMd="10" sizeLg="8" sizeXl="6">
+                      <div class="w-full">
+                        <h2 class="text-left text-lg font-semibold">
+                          Edit detail lokasi
+                        </h2>
+                        <span class="text-sm font-semibold text-gray-500">
+                          {{resultParam.asset_number}}
+                        </span>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="px-2 h-full" *ngIf="dataFormDetailLocation">
+                    <ion-col size="12">
+                      <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[!dataFormDetailLocation.unit? 'border-error' : 'border-gray-300']">
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                                Unit
+                              </p>
+                            </div>
+                          </div>
+                          <ion-select 
+                          class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
+                          [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
+                          label="Fixed label" label-placement="fixed" placeholder="Pilih" cancelText="Batal" okText="Pilih" 
+                          (ionChange)="getSelectionArea($event)"
+                          [(ngModel)]="dataFormDetailLocation.unitId"
+                          >
+                            <ion-select-option [value]='unit.id' *ngFor="let unit of selectionUnit">
+                              {{unit.deskripsi}}
+                            </ion-select-option>
+                          </ion-select>
+                        </div>
+                      </div>
+                    </ion-col>
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[!dataFormDetailLocation.unit? 'border-error' : 'border-gray-300']">  
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                                Area
+                              </p>
+                            </div>
+                          </div>
+                          <ion-select 
+                          class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
+                          [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
+                          label="Fixed label" label-placement="fixed" placeholder="Pilih" cancelText="Batal" okText="Pilih"
+                          (ionChange)="getSelectionTandaPemasangan($event)"
+                          [(ngModel)]="dataFormDetailLocation.areaId"
+                          >
+                          
+                            <ion-select-option [value]='area.id' *ngFor="let area of selectionArea">
+                              {{area.deskripsi}}
+                            </ion-select-option>
+
+                            <ion-select-option class="text-center" *ngIf="selectionAreaKosong" [disabled]="true">
+                              - Data Kosong -
+                            </ion-select-option>
+                          </ion-select>
+                        </div>
+                      </div>
+                    </ion-col>
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border overflow-hidden rounded-xl">  
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                                Tanda Pemasangan
+                              </p>
+                            </div>
+                          </div>
+                          <ion-select 
+                          class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
+                          [interfaceOptions]="{header: 'Pilih', mode: 'ios'}"
+                          label="Fixed label" label-placement="fixed" placeholder="Pilih" cancelText="Batal" okText="Pilih"
+                          (ionChange)="getSelectionIdTandaPemasangan($event)"
+                          [(ngModel)]="dataFormDetailLocation.tag_number"
+                          >
+                            <ion-select-option [value]='tp.tag_number' *ngFor="let tp of selectionTandaPemasangan">
+                              {{tp.tag_number}}
+                            </ion-select-option>
+                            <ion-select-option class="text-center" *ngIf="selectionTandaPemasangan === true" [disabled]="true">
+                              - Data Kosong -
+                              </ion-select-option>
+                          </ion-select>
+                        </div>
+                      </div>
+                    </ion-col>
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[!dataFormDetailLocation.unit? 'border-error' : 'border-gray-300']">
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                                Lokasi
+                              </p>
+                            </div>
+                          </div>
+                          <ion-input type="text" [disabled]="true"
+                            class="ion-no-padding min-w-12 flex-grow text-xs font-normal text-right" *ngIf="selectionLokasiTandaPemasangan"
+                              [(ngModel)]="selectionLokasiTandaPemasangan.location">
+                            </ion-input>
+                        </div>
+                      </div>
+                    </ion-col>
+
+                    <ion-col size="12">
+                      <div class="w-full bg-white border rounded-xl" [ngClass]="[!dataFormDetailLocation.unit? 'border-error' : 'border-gray-300']">
+                        <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                          <div class="flex justify-start items-center space-x-2">
+                            <div class="flex-grow flex flex-col justify-start items-start">
+                              <p class="text-sm font-semibold">
+                                Detail Lokasi
+                              </p>
+                            </div>
+                          </div>
+                          <ion-textarea
+                            class="ion-no-padding min-w-12 pl-4 flex-grow text-xs font-light text-right" *ngIf="selectionLokasiTandaPemasangan" 
+                            [(ngModel)]="selectionLokasiTandaPemasangan.detail_location">
+                          </ion-textarea >
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+      <!-- End modal edit Foto -->
       </div>
     </div>
     <br>

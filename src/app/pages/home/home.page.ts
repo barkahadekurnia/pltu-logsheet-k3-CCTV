@@ -2498,6 +2498,8 @@ export class HomePage implements OnInit {
     loader: HTMLIonPopoverElement
   ) {
     const assetAll: any[] = [];
+    this.assetCategoryId = [];
+    let assetFormCategoryData : any = []
 
     return this.http.requests({
       requests: [
@@ -2523,18 +2525,57 @@ export class HomePage implements OnInit {
 
         // save data all asset di sql lite
         const arrCategoryData: AssetsCategory[] = responseCategory?.data?.data;
+
+        console.log('arrCategoryData',arrCategoryData)
         const requests = arrCategoryData
           .map(async (category: AssetsCategory) => await this.getAssetsByCategoryId(category.id));
 
-        console.log('id category', requests)
+      //   let i = 0
+      //  if (arrCategoryData.length > 0 ) {
+      //     for (let category of arrCategoryData)  {
+      //       let result = await this.http.getAssetsByCategoryId(category.id)
+
+      //       if(![200,201].includes(result.status)) {
+      //         throw result;
+      //       }
+
+      //       const arrAssets: AssetDetails[] = result.data?.data;
+
+      //         if (arrAssets?.length > 0) {
+      //           for (const asset of arrAssets) {
+      //             const data = {
+      //               assetForm: JSON.stringify(asset.assetForm),
+      //               assetNumber: asset.asset_number,
+      //               expireDate: asset.expireDate,  
+      //               assetId: asset.id,
+      //               more: JSON.stringify(asset.more),
+      //               photo: JSON.stringify(asset.photo),
+      //               qr: asset.qr,
+      //               supplyDate: asset.supply_date,
+      //               cctvIP: '192.168.2.80',
+                    
+      //             };
+      //             assetAll.push(data);                  
+      //           }
+      //         }
+
+      //       console.log('result ' + i, result)
+            
+      //       i++
+      //     }
+      //   }
+
+         console.log('id category', requests)
+
         forkJoin(requests).pipe(
-          map(async (results) => {
+          map(async (results : any) => {
             for (const row of results) {
+              console.log('1. isi dari row habis di fork join', row)
               if (![200, 201].includes(row.status)) {
                 throw row;
               }
 
-              console.log('isi dari row habis di fork join', row)
+              console.log('2. isi dari row habis di fork join', row)
 
               const arrAssets: AssetDetails[] = row.data?.data;
 
@@ -2543,10 +2584,11 @@ export class HomePage implements OnInit {
                   const data = {
                     assetForm: JSON.stringify(asset.assetForm),
                     assetNumber: asset.asset_number,
-                    expireDate: asset.expireDate,
+                    expireDate: asset.expireDate,  
                     assetId: asset.id,
                     more: JSON.stringify(asset.more),
                     photo: JSON.stringify(asset.photo),
+                    qr: asset.qr,
                     supplyDate: asset.supply_date,
                     cctvIP: '192.168.2.80',
                     
@@ -2563,20 +2605,19 @@ export class HomePage implements OnInit {
             }
             console.log('cek isi this asset category id', this.assetCategoryId)
 
-            const assetFormCategoryData = await this.assetFormCategory()
-
-            console.log('assetFormCategoryData',assetFormCategoryData)
+            //ini kita nambah data asset form category
+            await this.assetFormCategory()
           })
-        ).subscribe(() => {
+        ).subscribe(async () => {
           this.database.emptyTable('assetsCCTV');
+          console.log('10. asset all sebelum di push ke SQL lite' , assetAll)
           const arrAssetsToStore: any[] = this.utils.chunkArray(assetAll, 250);
           
           arrAssetsToStore?.map?.(async (val) => {
             await this.database.insert('assetsCCTV', val);
           });
 
-  
-        });
+        })
 
         this.syncJob.order.assets.status = 'success';
         this.syncJob.order.assets.message = 'Berhasil mendapatkan data lokasi';
@@ -2599,33 +2640,86 @@ export class HomePage implements OnInit {
   }
 
   async assetFormCategory(){
-    const requests = this.assetCategoryId
-    .map(async (idCategory:any) => 
-      await this.http.getAnyData(`${environment.url.formAssetCategory}/${idCategory}`));
+    console.log('cek isi this asset category id', this.assetCategoryId)
+
+    const assetFormCategoryAll: any[] = []
+    // const requests = this.assetCategoryId
+    // .map(async (idCategory:any) => 
+      
+    //   await this.http.getAnyData(`${environment.url.formAssetCategory}/${idCategory}`));
     
+
+    const requests = await this.http.getAnyData(`${environment.url.formAssetCategoryAll}`);
     console.log('request', requests)
-
-    forkJoin(requests).pipe(
-      map((results:any) => {
-        console.log('result fork' , results)
-        for (let row of results) {
-          console.log('isi dari row forkjoin asset form', row) 
-
-          if(![200,201].includes(row.status)) {
-            throw row;
-          }
-          
-        
-        }
+    const arrAssets = requests.data.data
+    if(arrAssets?.length > 0 ) {
+      for ( const asset of arrAssets){
+        const data = {
+          formId : asset.formId,
+          idx : asset.index,
+          formLabel : asset.formLabel,
+          formName : asset.formName,
+          formType : asset.formType,
+          formOption : JSON.stringify(asset.formOption) ,
+          assetCategoryId : asset.assetCategoryId,
+          assetCategoryCode : asset.assetCategoryCode,
+          assetCategoryName : asset.assetCategoryName,
+          created_at : asset.created_at,
+          updated_at : asset.updated_at,
+          deleted_at : asset.deleted_at,
+        };
+      assetFormCategoryAll.push(data)
       }
-      )
-    ).subscribe(() => {
-      console.log('barkah test fork')
+    }
 
-    });
+    console.log('assetFormCategoryAll',assetFormCategoryAll)
 
-    return 'data complete'
-  
+    //simpan form asset category di sql lite
+    this.database.emptyTable('formAssetsCategory');
+    await this.database.insert('formAssetsCategory' , assetFormCategoryAll)
+
+    // forkJoin(requests).pipe(
+    //   map((results:any) => {
+    //     console.log('result fork' , results)
+    //     for (let row of results) {
+    //       console.log('isi dari row forkjoin asset form', row) 
+
+    //       if(![200,201].includes(row.status)) {
+    //         throw row;
+    //       }
+          
+    //       const arrAssets: any[] = row.data?.data;
+
+    //       if(arrAssets?.length > 0 ) {
+    //         for ( const asset of arrAssets){
+    //           const data = {
+    //             formId : asset.formId,
+    //             idx : asset.index,
+    //             formLabel : asset.formLabel,
+    //             formName : asset.formName,
+    //             formType : asset.formType,
+    //             formOption : JSON.stringify(asset.formOption) ,
+    //             assetCategoryId : asset.assetCategoryId,
+    //             assetCategoryCode : asset.assetCategoryCode,
+    //             assetCategoryName : asset.assetCategoryName,
+    //             created_at : asset.created_at,
+    //             updated_at : asset.updated_at,
+    //             deleted_at : asset.deleted_at,
+    //           };
+    //         assetFormCategoryAll.push(data)
+    //         }
+    //       }
+        
+    //     }
+    //   }
+    //   )
+    // ).subscribe(async () => {
+    //   console.log('barkah test fork', assetFormCategoryAll)
+    //    //simpan form asset category di sql lite
+    //    this.database.emptyTable('formAssetsCategory');
+
+    //    await this.database.insert('formAssetsCategory' , assetFormCategoryAll)
+    // }).unsubscribe();
   }
 
 
