@@ -322,10 +322,38 @@ export class DatabaseService {
       area: `
         CREATE TABLE IF NOT EXISTS area(
           id TEXT NOT NULL,
+          idUnit TEXT,
           area TEXT,
           kode TEXT,
           deskripsi TEXT,
           updated_at TEXT
+        )
+      `,
+      // areaByUnit: `
+      //   CREATE TABLE IF NOT EXISTS area(
+      //     id TEXT NOT NULL,
+      //     idUnit TEXT,
+      //     area TEXT,
+      //     kode TEXT,
+      //     deskripsi TEXT,
+      //     updated_at TEXT
+      //   )
+      // `,
+      selectionTandaPemasangan: `
+        CREATE TABLE IF NOT EXISTS selectionTandaPemasangan(
+          id TEXT,  
+          idArea TEXT, 
+          tag_number TEXT,   
+          unit TEXT, 
+          area TEXT,  
+          type_tag TEXT,   
+          location TEXT,   
+          detail_location TEXT,   
+          latitude TEXT,   
+          longitude TEXT,  
+          tagCategory TEXT,   
+          more TEXT ,   
+          photos TEXT  
         )
       `,
     };
@@ -447,7 +475,7 @@ export class DatabaseService {
   parseResult(res: any): any[] {
     const result = [];
 
-    for (let i = 0; i < res.rows.length; i++) {
+    for (let i = 0; i < res?.rows?.length; i++) {
       result.push(res.rows.item(i));
     }
 

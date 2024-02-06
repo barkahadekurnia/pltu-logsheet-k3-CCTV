@@ -668,6 +668,21 @@ export class HttpService {
   selectionTandaPemasangan(areaId:any) {
     const options: HttpOptions = {
       url: `${environment.url.selectionArea}${areaId}`,
+      //url: `${environment.url.selectionArea}${areaId}`,
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type' :'application/json'
+      },
+      responseType: 'json'
+    }
+
+    return CapacitorHttp.get(options);
+  }
+  
+  selectionTandaPemasanganId(areaId:any) {
+    const options: HttpOptions = {
+      url: `${environment.url.selectionTandaPemasangan}${areaId}`,
+      //url: `${environment.url.selectionArea}${areaId}`,
       headers: {
         Authorization: `Bearer ${this.token}`,
         'Content-Type' :'application/json'

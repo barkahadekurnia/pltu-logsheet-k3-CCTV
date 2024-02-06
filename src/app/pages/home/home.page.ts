@@ -49,6 +49,7 @@ import { MediaService } from 'src/app/services/media/media.service';
 import { AssetsCategory } from 'src/app/interfaces/assets-category';
 import { AssetDetails } from 'src/app/interfaces/asset-details';
 import { environment } from 'src/environments/environment';
+//import { env } from 'process';
 
 type NfcStatus =
   | 'NO_NFC'
@@ -121,6 +122,8 @@ export class HomePage implements OnInit {
   };
 
   assetCategoryId:any = [];
+  idArea:any = []
+  idUnit:any = []
 
   constructor(
     private router: Router,
@@ -721,7 +724,9 @@ export class HomePage implements OnInit {
         }
       },
       onError: error => console.error(error),
-      onComplete: () => loader.dismiss()
+      onComplete: () => 
+      //console.log('get parameter') 
+          loader.dismiss()
     });
   }
 
@@ -2515,31 +2520,81 @@ export class HomePage implements OnInit {
         if (![200, 201].includes(responseAssetTags.status)) {
           throw responseAssetTags;
         }
-        if (![200, 201].includes(responseCategory.status)) {
-          throw responseCategory;
-        }
+        // if (![200, 201].includes(responseCategory.status)) {
+        //   throw responseCategory;
+        // }
 
         // await this.prepareDirectory('asset')
         await this.downloadCategory();
         // await this.processResponseAssetTags(responseAssetTags);
 
         // save data all asset di sql lite
-        const arrCategoryData: AssetsCategory[] = responseCategory?.data?.data;
+      //   const arrCategoryData: AssetsCategory[] = responseCategory?.data?.data;
 
-        console.log('arrCategoryData',arrCategoryData)
-        const requests = arrCategoryData
-          .map(async (category: AssetsCategory) => await this.getAssetsByCategoryId(category.id));
+      //   let testRequests:any[] = [{data:['tes']}]
 
-      //   let i = 0
-      //  if (arrCategoryData.length > 0 ) {
-      //     for (let category of arrCategoryData)  {
-      //       let result = await this.http.getAssetsByCategoryId(category.id)
+      //   console.log('arrCategoryData',arrCategoryData)
+      //   const requests =await arrCategoryData
+      //     .map(async (category: AssetsCategory) => await this.getAssetsByCategoryId(category.id));
 
-      //       if(![200,201].includes(result.status)) {
-      //         throw result;
-      //       }
+      // //   let i = 0
+      // //  if (arrCategoryData.length > 0 ) {
+      // //     for (let category of arrCategoryData)  {
+      // //       let result = await this.http.getAssetsByCategoryId(category.id)
 
-      //       const arrAssets: AssetDetails[] = result.data?.data;
+      // //       if(![200,201].includes(result.status)) {
+      // //         throw result;
+      // //       }
+
+      // //       const arrAssets: AssetDetails[] = result.data?.data;
+
+      // //         if (arrAssets?.length > 0) {
+      // //           for (const asset of arrAssets) {
+      // //             const data = {
+      // //               assetForm: JSON.stringify(asset.assetForm),
+      // //               assetNumber: asset.asset_number,
+      // //               expireDate: asset.expireDate,  
+      // //               assetId: asset.id,
+      // //               more: JSON.stringify(asset.more),
+      // //               photo: JSON.stringify(asset.photo),
+      // //               qr: asset.qr,
+      // //               supplyDate: asset.supply_date,
+      // //               cctvIP: '192.168.2.80',
+                    
+      // //             };
+      // //             assetAll.push(data);                  
+      // //           }
+      // //         }
+
+      // //       console.log('result ' + i, result)
+            
+      // //       i++
+      // //     }
+      // //   }
+
+
+      
+      //    console.log('id category', requests)
+
+      //    for(const row of requests) {
+      //     row.then(data => testRequests.push(data.data))
+      //     }
+          
+      //    console.log('id testRequests category', testRequests)
+
+    
+
+      //   forkJoin(requests).pipe(
+      //     map(async (results : any) => {
+      //       for (const row of results) {
+      //         //console.log('1. isi dari row habis di fork join', row)
+      //         if (![200, 201].includes(row.status)) {
+      //           throw row;
+      //         }
+
+      //         console.log('2. isi dari row habis di fork join', row)
+
+      //         const arrAssets: AssetDetails[] = row.data?.data;
 
       //         if (arrAssets?.length > 0) {
       //           for (const asset of arrAssets) {
@@ -2550,7 +2605,7 @@ export class HomePage implements OnInit {
       //               assetId: asset.id,
       //               more: JSON.stringify(asset.more),
       //               photo: JSON.stringify(asset.photo),
-      //               qr: asset.qr,
+      //               // qr: asset.qr,
       //               supplyDate: asset.supply_date,
       //               cctvIP: '192.168.2.80',
                     
@@ -2558,70 +2613,43 @@ export class HomePage implements OnInit {
       //             assetAll.push(data);                  
       //           }
       //         }
-
-      //       console.log('result ' + i, result)
+      //         //kita save dlu bang untuk id category 
+      //         if(arrAssets.length > 0 ) {
+      //           const idCategory = arrAssets[0].more.category.id
+      //           this.assetCategoryId.push(idCategory);
+      //         }
             
-      //       i++
-      //     }
-      //   }
+      //       }
+      //       console.log('cek isi this asset category id', this.assetCategoryId)
 
-         console.log('id category', requests)
-
-        forkJoin(requests).pipe(
-          map(async (results : any) => {
-            for (const row of results) {
-              console.log('1. isi dari row habis di fork join', row)
-              if (![200, 201].includes(row.status)) {
-                throw row;
-              }
-
-              console.log('2. isi dari row habis di fork join', row)
-
-              const arrAssets: AssetDetails[] = row.data?.data;
-
-              if (arrAssets?.length > 0) {
-                for (const asset of arrAssets) {
-                  const data = {
-                    assetForm: JSON.stringify(asset.assetForm),
-                    assetNumber: asset.asset_number,
-                    expireDate: asset.expireDate,  
-                    assetId: asset.id,
-                    more: JSON.stringify(asset.more),
-                    photo: JSON.stringify(asset.photo),
-                    qr: asset.qr,
-                    supplyDate: asset.supply_date,
-                    cctvIP: '192.168.2.80',
-                    
-                  };
-                  assetAll.push(data);                  
-                }
-              }
-              //kita save dlu bang untuk id category 
-              if(arrAssets.length > 0 ) {
-                const idCategory = arrAssets[0].more.category.id
-                this.assetCategoryId.push(idCategory);
-              }
-            
-            }
-            console.log('cek isi this asset category id', this.assetCategoryId)
-
-            //ini kita nambah data asset form category
-            await this.assetFormCategory()
-          })
-        ).subscribe(async () => {
-          this.database.emptyTable('assetsCCTV');
-          console.log('10. asset all sebelum di push ke SQL lite' , assetAll)
-          const arrAssetsToStore: any[] = this.utils.chunkArray(assetAll, 250);
+      //       //ini kita nambah data asset form category
+      //       await this.assetDetailCCTV()
+      //       await this.assetFormCategory()
+      //       await this.selectionUnit()
+      //       await this.selectionArea()
+      //     })
+      //   ).subscribe(async () => {
+      //     this.database.emptyTable('assetsCCTV');
+      //     console.log('10. asset all sebelum di push ke SQL lite' , assetAll)
+      //     const arrAssetsToStore: any[] = this.utils.chunkArray(assetAll, 250);
           
-          arrAssetsToStore?.map?.(async (val) => {
-            await this.database.insert('assetsCCTV', val);
-          });
+      //     arrAssetsToStore?.map?.(async (val) => {
+      //       await this.database.insert('assetsCCTV', val);
+      //     });
 
-        })
+      //   })
+
+        // // // metode offline
+        await this.assetDetailCCTV();
+        await this.assetFormCategory();
+        await this.selectionUnit();
+       // await this.selectionArea();
+        await this.selectionAreaByUnit();
+        await this.selectionTandaPemasangan();
+
 
         this.syncJob.order.assets.status = 'success';
         this.syncJob.order.assets.message = 'Berhasil mendapatkan data lokasi';
-
       },
       onError: (error) => {
         this.shared.addLogActivity({
@@ -2638,6 +2666,81 @@ export class HomePage implements OnInit {
       onComplete: () => this.onProcessFinished(subscriber, loader),
     });
   }
+  
+  async assetDetailCCTV() {
+    const assetAll: any[] = [];
+    this.assetCategoryId = [];
+
+    const responseCategory = await this.http.getCategory()
+    const arrCategoryData: AssetsCategory[] = responseCategory?.data?.data;
+
+    if (![200, 201].includes(responseCategory.status)) {
+      throw responseCategory;
+    }
+
+    console.log('arrCategoryData',arrCategoryData)
+    const requests =await arrCategoryData
+      .map(async (category: AssetsCategory) => await this.getAssetsByCategoryId(category.id));
+
+    console.log('isi request asset detail category', requests)
+    forkJoin(requests).pipe(
+      map(async (results : any) => {
+        for (const row of results) {
+          //console.log('1. isi dari row habis di fork join', row)
+          if (![200, 201].includes(row.status)) {
+            throw row;
+          }
+
+          console.log('isi dari row habis di fork join', row)
+
+          const arrAssets: AssetDetails[] = row.data?.data;
+
+          if (arrAssets?.length > 0) {
+            for (const asset of arrAssets) {
+              const data = {
+                assetForm: JSON.stringify(asset.assetForm),
+                assetNumber: asset.asset_number,
+                expireDate: asset.expireDate,  
+                assetId: asset.id,
+                more: JSON.stringify(asset.more),
+                photo: JSON.stringify(asset.photo),
+                // qr: asset.qr,
+                supplyDate: asset.supply_date,
+                cctvIP: '192.168.2.80',
+                
+              };
+              assetAll.push(data);                  
+            }
+          }
+          //kita save dlu bang untuk id category 
+          if(arrAssets.length > 0 ) {
+            const idCategory = arrAssets[0].more.category.id
+            this.assetCategoryId.push(idCategory);
+          }
+        
+        }
+        console.log('cek isi this asset category id', this.assetCategoryId)
+
+      })
+    ).subscribe(async () => {
+      this.database.emptyTable('assetsCCTV');
+      console.log('10. asset all sebelum di push ke SQL lite' , assetAll)
+      const arrAssetsToStore: any[] = this.utils.chunkArray(assetAll, 250);
+      
+      arrAssetsToStore?.map?.(async (val) => {
+        await this.database.insert('assetsCCTV', val);
+      });
+
+    })
+
+  }
+
+  async getAssetsByCategoryId(categoryId: string) {
+    const result = this.http.getAssetsByCategoryId(categoryId) ;
+    return result
+  }
+
+ 
 
   async assetFormCategory(){
     console.log('cek isi this asset category id', this.assetCategoryId)
@@ -2648,7 +2751,6 @@ export class HomePage implements OnInit {
       
     //   await this.http.getAnyData(`${environment.url.formAssetCategory}/${idCategory}`));
     
-
     const requests = await this.http.getAnyData(`${environment.url.formAssetCategoryAll}`);
     console.log('request', requests)
     const arrAssets = requests.data.data
@@ -2675,7 +2777,7 @@ export class HomePage implements OnInit {
     console.log('assetFormCategoryAll',assetFormCategoryAll)
 
     //simpan form asset category di sql lite
-    this.database.emptyTable('formAssetsCategory');
+    await this.database.emptyTable('formAssetsCategory');
     await this.database.insert('formAssetsCategory' , assetFormCategoryAll)
 
     // forkJoin(requests).pipe(
@@ -2722,11 +2824,233 @@ export class HomePage implements OnInit {
     // }).unsubscribe();
   }
 
+  async selectionUnit(){
+    const unitAll : any[] = []
+    const requests = await this.http.getAnyData(`${environment.url.selectionUnit}`)
 
-  async getAssetsByCategoryId(categoryId: string) {
-    return this.http.getAssetsByCategoryId(categoryId);
+    if(![200,201].includes(requests.status)) {
+      throw requests 
+    }
+
+    this.idUnit = []
+    console.log('request ambil data unit ', requests)
+    const units = requests.data.responds.results
+    if(units.length > 0){
+      for( const unit of units) {
+        const data = {
+          id : unit.id,
+          unit : unit.unit,
+          kode : unit.kode,
+          deskripsi : unit.deskripsi,
+          updated_at : unit.updated_at,
+        }
+        unitAll.push(data)
+        this.idUnit.push(data.id)
+      }
+    }
+
+    console.log( 'data all units' , unitAll)
+
+    await this.database.emptyTable('unit') ;
+    await this.database.insert('unit' , unitAll)
   }
 
+  // async selectionArea(){
+  //   const areaAll : any[] = []
+  //   const requests = await this.http.getAnyData(`${environment.url.selectionArea}`)
+
+  //   if(![200,201].includes(requests.status)) {
+  //     throw requests 
+  //   }
+
+  //   console.log('request ambil data area ', requests)
+  //   const areas = requests.data.responds.results
+  //   if(areas.length > 0){
+  //     for( const area of areas) {
+  //       const data = {
+  //         id : area.id,
+  //         area : area.area,
+  //         kode : area.kode,
+  //         deskripsi : area.deskripsi,
+  //         updated_at : area.updated_at,
+  //       }
+  //       areaAll.push(data)
+  //       this.idArea.push(data.id)
+  //     }
+  //   }
+
+  //   console.log( 'data all areas' , areaAll);
+  //   console.log( 'this id area ',  this.idArea);
+  //   await this.database.emptyTable('area') ;
+  //   await this.database.insert('area' , areaAll)
+  // }
+
+  async selectionAreaByUnit(){
+    const areaAll : any[] = []
+    console.log('idUnit selection area by unit', this.idUnit)
+    const idUnit = this.idUnit
+
+    for(const id of idUnit) {
+      const requests = await this.http.getAnyData(`${environment.url.selectionArea}/${id}`)
+
+      if(![200,201].includes(requests.status)) {
+        throw requests 
+      }
+      console.log('id dari selection area by unit',id)
+      console.log('request ambil data area ', requests)
+      const areas = requests.data.responds.results
+      if(areas.length > 0){
+        for( const area of areas) {
+          const data = {
+            id : area.id,
+            idUnit : id,
+            area : area.area,
+            kode : area.kode,
+            deskripsi : area.deskripsi,
+            updated_at : area.updated_at,
+          }
+          areaAll.push(data)
+          this.idArea.push(data.id)
+        }
+      }
+    }
+    
+
+    console.log( 'data all areas' , areaAll);
+    await this.database.insert('area' , areaAll)
+    await this.database.emptyTable('area') ;
+    await this.database.insert('area' , areaAll)
+  }
+
+  async selectionTandaPemasangan() {
+    const assetAll: any[] = [];
+
+    const responseCategory = await this.http.getCategory()
+
+    if (![200, 201].includes(responseCategory.status)) {
+      throw responseCategory;
+    }
+
+    console.log('this id area  pada selection tanda pemasangan' , this.idArea)
+    const idAreaTP = this.idArea
+
+    for(const idArea of idAreaTP) {
+      const requests = await this.http.selectionTandaPemasanganId(idArea)
+
+      if(![200,201].includes(requests.status)) {
+        throw requests
+      }
+
+      console.log('id dari id Area' , idArea);
+      console.log('request ambil data tanda Pemasangan by Area' , requests)
+
+      const arrAssets: any[] = requests.data?.data;
+
+      if (arrAssets?.length > 0) {
+        for (const asset of arrAssets) {
+          const data = {
+            id: asset.id,   
+            idArea: idArea,
+            tag_number: asset.tag_number,   
+            unit: asset.unit, 
+            area: asset.area,  
+            type_tag: asset.type_tag,   
+            location: asset.location,   
+            detail_location: asset.detail_location,   
+            latitude: asset.latitude,   
+            longitude: asset.longitude,  
+            tagCategory: asset.tagCategory,   
+            more: JSON.stringify(asset.more) ,   
+            photos: JSON.stringify(asset.photos),
+          };
+          assetAll.push(data);                  
+        }
+      }
+      // //kita save dlu bang untuk id category 
+      // if(arrAssets.length > 0 ) {
+      //   const idCategory = arrAssets[0].more?.category?.id
+      //   this.assetCategoryId.push(idCategory);
+      // }
+
+    }
+
+    this.database.emptyTable('selectionTandaPemasangan');
+    console.log('10. selectionTandaPemasangan all sebelum di push ke SQL lite' , assetAll)
+    const selectionTandaPemasanganStore: any[] = this.utils.chunkArray(assetAll, 250);
+    
+    selectionTandaPemasanganStore?.map?.(async (val) => {
+      await this.database.insert('selectionTandaPemasangan', val);
+    });
+
+
+     // const requests =await idAreaTP
+    //   .map(async (idArea: any) => await this.selectionTandaPemasanganId(idArea));
+
+    // console.log('isi request asset detail category', requests)
+    // forkJoin(requests).pipe(
+    //   map(async (results : any) => {
+    //     for (const row of results) {
+    //       //console.log('1. isi dari row habis di fork join', row)
+    //       if (![200, 201].includes(row.status)) {
+    //         throw row;
+    //       }
+
+    //       console.log('isi dari row habis di fork join selection tanda pemasangan', row)
+
+    //       const arrAssets: any[] = row.data?.data;
+
+    //       if (arrAssets?.length > 0) {
+    //         for (const asset of arrAssets) {
+    //           const data = {
+    //             id: asset.id,   
+    //             idArea: idArea,
+    //             tag_number: asset.tag_number,   
+    //             unit: asset.unit, 
+    //             area: asset.area,  
+    //             type_tag: asset.type_tag,   
+    //             location: asset.location,   
+    //             detail_location: asset.detail_location,   
+    //             latitude: asset.latitude,   
+    //             longitude: asset.longitude,  
+    //             tagCategory: asset.tagCategory,   
+    //             more: JSON.stringify(asset.more) ,   
+    //             photos: asset.photos,
+    //           };
+    //           assetAll.push(data);                  
+    //         }
+    //       }
+    //       //kita save dlu bang untuk id category 
+    //       if(arrAssets.length > 0 ) {
+    //         const idCategory = arrAssets[0].more?.category?.id
+    //         this.assetCategoryId.push(idCategory);
+    //       }
+
+    //       //console.log('cek isi this aarrAssets', arrAssets)
+        
+    //     }
+    //     console.log('cek isi this asset category id', this.assetCategoryId)
+       
+
+    //   })
+    // ).subscribe(async () => {
+    //   this.database.emptyTable('assetsCCTV');
+    //   console.log('10. asset all sebelum di push ke SQL lite' , assetAll)
+    //   const selectionTandaPemasanganStore: any[] = this.utils.chunkArray(assetAll, 250);
+      
+    //   selectionTandaPemasanganStore?.map?.(async (val) => {
+    //     await this.database.insert('selectionTandaPemasangan', val);
+    //   });
+
+    // })
+
+  }
+
+  async selectionTandaPemasanganId(idArea: any) {
+    const result = this.http.selectionTandaPemasanganId(idArea) ;
+    console.log('selectionTandaPemasanganId',result)
+    return result
+  }
+ 
   async getAssetsDetail(idAsset: any) {
     //const loader = await this.utils.presentLoader();
     let dataDetail: any
@@ -3008,6 +3332,8 @@ export class HomePage implements OnInit {
         } else if (typeof data.data === 'object' && data.data !== null) {
           data.assetId = data.data?.assetId || null;
         }
+
+        console.log('update activity log done')
 
         return data;
       }
@@ -3345,4 +3671,4 @@ export class HomePage implements OnInit {
     }
     return this.nfcStatus;
   }
-}
+  }
