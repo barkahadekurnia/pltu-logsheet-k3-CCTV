@@ -98,7 +98,6 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     private menuCtrl: MenuController,
     private http: HttpService,
     private cdr: ChangeDetectorRef,
-
     private database: DatabaseService,
   ) {
 
@@ -112,7 +111,6 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     this.transitionData = this.utils.parseJson(
       this.activatedRoute.snapshot.paramMap.get('data')
     );
-
     console.log('transition data', this.transitionData);
     if (!this.transitionData) {
       return this.utils.back();
