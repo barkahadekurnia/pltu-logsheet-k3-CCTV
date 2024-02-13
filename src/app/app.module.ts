@@ -48,7 +48,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
       echarts: () => import('echarts')
     }),
     IonicModule.forRoot({
-      mode: 'ios',
+      // mode: 'ios',
       navAnimation: iosTransitionAnimation,
       swipeBackEnabled: true,
       backButtonIcon: 'chevron-back-outline',

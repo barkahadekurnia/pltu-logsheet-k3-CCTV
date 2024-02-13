@@ -11,6 +11,7 @@ export const environment = {
     // base: 'http://app.logsheet.digital',
     // base: 'http://45.77.45.6/logsheet',
     public: 'http://114.6.64.2:11231/',
+    baseUrl: 'http://103.250.10.4/app/cctv',
 
     get login() {
       return this.base + '/api/login';

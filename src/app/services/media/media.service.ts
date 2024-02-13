@@ -1,24 +1,28 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Injectable, Injector } from '@angular/core';
 import { Platform, LoadingController } from '@ionic/angular';
+
 import { Capacitor } from '@capacitor/core';
 import { Camera, ImageOptions, CameraResultType, CameraSource } from '@capacitor/camera';
 import { ForegroundService } from '@awesome-cordova-plugins/foreground-service/ngx';
-
-import {Directory} from "@capacitor/filesystem";
-import write_blob from "capacitor-blob-writer";
+import { Directory } from '@capacitor/filesystem';
+import write_blob from 'capacitor-blob-writer';
 import {
   MediaCapture,
   CaptureAudioOptions,
   CaptureVideoOptions,
   MediaFile
 } from '@awesome-cordova-plugins/media-capture/ngx';
-
-import { Media, MediaObject } from '@awesome-cordova-plugins/media/ngx';
+import { Media } from '@awesome-cordova-plugins/media/ngx';
 import { PhotoViewer } from '@awesome-cordova-plugins/photo-viewer/ngx';
-import { VideoPlayer, VideoOptions } from '@awesome-cordova-plugins/video-player/ngx';
+import { FilePicker, PickFilesResult } from '@capawesome/capacitor-file-picker';
+import { StreamingMedia, StreamingVideoOptions } from '@awesome-cordova-plugins/streaming-media/ngx';
+
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-import { StreamingAudioOptions, StreamingMedia, StreamingVideoOptions } from '@awesome-cordova-plugins/streaming-media/ngx';
+
+export type PictureSource = 'gallery' | 'files';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,7 +35,6 @@ export class MediaService {
     private mediaCapture: MediaCapture,
     private media: Media,
     private photoViewer: PhotoViewer,
-    private videoPlayer: VideoPlayer,
     private stream: StreamingMedia
   ) { }
 
@@ -94,6 +97,22 @@ export class MediaService {
     return path;
   }
 
+  public async getPictureBySource(source: PictureSource): Promise<PickFilesResult> {
+    let result: PickFilesResult;
+
+    if (source === 'gallery') {
+      result = await FilePicker.pickImages({
+        multiple: false,
+      });
+    } else if (source === 'files') {
+      result = await FilePicker.pickFiles({
+        multiple: false,
+      });
+    }
+
+    return result;
+  }
+
   async captureAudio() {
 
     await this.platform.ready();
@@ -119,7 +138,7 @@ export class MediaService {
       // }
 
       const [result] = await this.mediaCapture.captureAudio(options) as MediaFile[];
-      console.log('plugin audio ', [result])
+      console.log('plugin audio ', [result]);
       return result;
     } catch (error) {
       const message = this.getCaptureMediaError('audio', error.code);
@@ -146,7 +165,6 @@ export class MediaService {
     //     this.foregroundService.stop();
     //   }
     // }
-
   }
 
   async captureVideo() {
@@ -243,11 +261,11 @@ export class MediaService {
       file.release();
       loader.dismiss();
     });
-console.log('file',file)
+    console.log('file', file);
     file.onError.subscribe(async error => {
-      console.log('error', error)
+      console.log('error', error);
       const message = this.getMediaError(error);
-      console.log('message', message)
+      console.log('message', message);
 
       if (message) {
         const utils = this.injector.get(UtilsService);
@@ -437,7 +455,7 @@ console.log('file',file)
     return 'An error occurred while playing audio';
   }
 
-  
+
   getMimeTypes(path: string) {
     if (path.endsWith('.jpg')) {
       return 'image/jpeg';

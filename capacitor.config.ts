@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.ssp.logsheet.k3.CCTV',
   appName: 'CCTV Logsheet',
   webDir: 'www',
-  bundledWebRuntime: false,
   plugins: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     LocalNotifications: {

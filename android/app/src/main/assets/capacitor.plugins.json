@@ -60,6 +60,10 @@
 		"classpath": "com.capacitorjs.plugins.textzoom.TextZoomPlugin"
 	},
 	{
+		"pkg": "@capawesome/capacitor-file-picker",
+		"classpath": "io.capawesome.capacitorjs.plugins.filepicker.FilePickerPlugin"
+	},
+	{
 		"pkg": "@hiloenergie/capacitor-plugin-safe-area",
 		"classpath": "com.getcapacitor.community.plugins.safearea.SafeAreaPlugin"
 	},

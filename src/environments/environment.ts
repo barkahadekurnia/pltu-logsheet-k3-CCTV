@@ -13,6 +13,7 @@ export const environment = {
     // CCTV
     //base: 'http://114.6.64.2:11244/app/cctv',
     public: 'http://114.6.64.2:11231/',
+    baseUrl: 'http://103.250.10.4/app/cctv',
 
     get login() {
       return this.base + '/api/login';

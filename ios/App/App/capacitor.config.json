@@ -2,7 +2,6 @@
 	"appId": "com.ssp.logsheet.k3.CCTV",
 	"appName": "CCTV Logsheet",
 	"webDir": "www",
-	"bundledWebRuntime": false,
 	"plugins": {
 		"LocalNotifications": {
 			"smallIcon": "ic_stat_icon_config_sample",

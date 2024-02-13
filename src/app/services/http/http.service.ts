@@ -25,7 +25,7 @@ import { timeout, retry } from 'rxjs/operators';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService, MyAlertOptions } from 'src/app/services/utils/utils.service';
 import { environment } from 'src/environments/environment';
-''
+
 export type LoginData = {
   username: string;
   password: string;
@@ -167,38 +167,18 @@ export class HttpService {
 
   postAnyDataNative(url: string, data) {
     const options = {
-      url, 
-      data, 
+      url,
+      data,
       headers: {
         Authorization: `Bearer ${this.token}`
       }
-    }
+    };
     const observable = CapacitorHttp.post(options);
 
     return observable;
   }
 
-
-
-  // login(data: LoginData) {
-
-  //   const observable:any = this.httpClient
-  //   .post(environment.url.login, data, {
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     },
-  //     observe: 'response',
-  //     responseType: 'json'
-  //   })
-  //   .pipe(timeout(this.timeout), retry(this.retry));
-
-  // //return observable.toPromise();
-  // return observable.toPromise();
-
-  // }
-
   login(data: LoginData) {
-
     const options: HttpOptions = {
       url: environment.url.login,
       headers: {
@@ -210,6 +190,7 @@ export class HttpService {
 
     return CapacitorHttp.post(options);
   }
+
   kirimlaporan(id: string, data: LaporanData) {
 
     const options: HttpOptions = {
@@ -400,12 +381,12 @@ export class HttpService {
 
   getParameters(data: AssetIdToType) {
     console.log(data);
-    
+
     const options: HttpOptions = {
       url: environment.url.parameters,
       headers: {
         Authorization: `Bearer ${this.token}`,
-       // 'Content-Type': 'multipart/form-data'
+        // 'Content-Type': 'multipart/form-data'
         'Content-Type': 'application/json',
       },
       data,
@@ -430,7 +411,7 @@ export class HttpService {
 
   getSchedulesShift(params) {
     const options: HttpOptions = {
-      url: environment.url.schedulesShift + '/'+ params,
+      url: environment.url.schedulesShift + '/' + params,
       headers: {
         Authorization: `Bearer ${this.token}`
       },
@@ -439,7 +420,7 @@ export class HttpService {
 
     return CapacitorHttp.get(options);
   }
-  
+
   getSchedulesnonsift(params: { userId?: string } = {}) {
     const options: HttpOptions = {
       url: environment.url.schedulesnonsift,
@@ -640,55 +621,54 @@ export class HttpService {
 
   //upgrade buat edit lokasi
   selectionUnit() {
-    const options: HttpOptions = { 
+    const options: HttpOptions = {
       url: `${environment.url.selectionUnit}`,
       headers: {
         Authorization: `Bearer ${this.token}`,
         'Content-Type': 'application/json'
       },
       responseType: 'json'
-    }
+    };
 
     return CapacitorHttp.get(options);
   }
 
-  selectionArea(unitId:any) {
+  selectionArea(unitId: any) {
     const options: HttpOptions = {
       url: `${environment.url.selectionArea}${unitId}`,
       headers: {
         Authorization: `Bearer ${this.token}`,
-        'Content-Type' :'application/json'
+        'Content-Type': 'application/json'
       },
       responseType: 'json'
-    }
+    };
 
     return CapacitorHttp.get(options);
   }
 
-  selectionTandaPemasangan(areaId:any) {
+  selectionTandaPemasangan(areaId: any) {
     const options: HttpOptions = {
       url: `${environment.url.selectionArea}${areaId}`,
       //url: `${environment.url.selectionArea}${areaId}`,
       headers: {
         Authorization: `Bearer ${this.token}`,
-        'Content-Type' :'application/json'
+        'Content-Type': 'application/json'
       },
       responseType: 'json'
-    }
+    };
 
     return CapacitorHttp.get(options);
   }
-  
-  selectionTandaPemasanganId(areaId:any) {
+
+  selectionTandaPemasanganId(areaId: any) {
     const options: HttpOptions = {
       url: `${environment.url.selectionTandaPemasangan}${areaId}`,
-      //url: `${environment.url.selectionArea}${areaId}`,
       headers: {
         Authorization: `Bearer ${this.token}`,
-        'Content-Type' :'application/json'
+        'Content-Type': 'application/json'
       },
       responseType: 'json'
-    }
+    };
 
     return CapacitorHttp.get(options);
   }
@@ -757,7 +737,7 @@ export class HttpService {
   }
 
   requests(options: RequestSet) {
-    let retry = 1;
+    let reqRetry = 1;
 
     const doRequest = async (withFinally = true) => {
       try {
@@ -770,8 +750,8 @@ export class HttpService {
 
         await options?.onSuccess?.(responses);
       } catch (error) {
-        if (error?.status === 401 && retry > 0) {
-          retry--;
+        if (error?.status === 401 && reqRetry > 0) {
+          reqRetry--;
 
           await this.refreshToken();
           await doRequest(false);
