@@ -108,10 +108,15 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
   }
 
   async ngOnInit() {
-    this.transitionData = this.utils.parseJson(
+    let transitionData = this.utils.parseJson(
       this.activatedRoute.snapshot.paramMap.get('data')
     );
+    
+    const splitData = transitionData.data.split("/")
+    transitionData.data = splitData[7]
 
+    this.transitionData = transitionData
+      
     console.log('transition data', this.transitionData);
     if (!this.transitionData) {
       return this.utils.back();

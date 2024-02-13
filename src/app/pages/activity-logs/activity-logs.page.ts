@@ -33,11 +33,12 @@ export class ActivityLogsPage {
     // this.shared.setBackButtonVisible = true;
   }
 
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     // if (this.router.url.includes('tabs')) {
     //   this.shared.setBackButtonVisible = false;
     // }
     this.platform.ready().then(() => this.getActivityLogs());
+
   }
 
   doRefresh(e: any) {

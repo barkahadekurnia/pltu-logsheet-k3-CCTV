@@ -66,6 +66,10 @@ export class ProfilePage implements OnInit {
     //     }
     //   });
     // }
+
+    this.mainanString()
+
+    console.log('testing')
   }
 
   async getTags() {
@@ -213,5 +217,14 @@ export class ProfilePage implements OnInit {
 
     await this.navCtrl.navigateRoot('login');
     loader.dismiss();
+  }
+
+  mainanString(){
+    const url = "http://114.6.64.2:11241/fire/#/landing/c3777b68-ba7e-11ec-adb0-a8ea9c4fb59f/b5fdd272-bcd7-430b-b39e-29b4f38ebc13"
+
+    const urlSplit = url.split("/")
+
+    console.log('url split', urlSplit)
+    console.log('url ', url)
   }
 }
