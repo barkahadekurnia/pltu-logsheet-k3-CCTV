@@ -283,6 +283,39 @@
               </div>
           </ion-row>
 
+          <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full px-3 justify-center items-center">  
+              <div class="rounded-xl w-full p-2 bg-slate-200">  
+                    <div class="text-black">
+                      <h4 class="text-base font-semibold mb-2">
+                        <ion-icon slot="icon-only" size="40px" name="location-outline" class="mr-1 pt-1"></ion-icon>
+                        Daftar Lokasi
+                      </h4>
+                      <ng-container>
+                        <div class="text-sm mb-1.5 font-semibold"
+                        *ngFor="let schedule of schedulesGroup; index as idx;">
+                          <div
+                          class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
+                            (click)="viewAssetsCategory('schedule-lokasi', schedule, assetCategory)">
+                            <div>
+                              {{lowerCaseLetter(schedule[0].unit)}}
+                              - {{schedule[0].area}}
+                             
+                            </div>
+                            <div class="align-middle flex place-items-center">
+                                <div class="p-1 w-max h-5 flex justify-center items-center rounded-full bg-error "> {{schedule.length}} </div>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-container>
+                      <ng-container *ngIf="selectedDate.schedules.length === 0">
+                        <div class="p-4 text-center">
+                          <h4 class="font-light text-gray-400">- Tidak ada data -</h4>
+                        </div>
+                      </ng-container>
+                    </div>
+            </div>
+          </ion-row>
+
 
           <ion-row *ngIf="!selectedDate.schedules?.length">
             <ion-col size="12">

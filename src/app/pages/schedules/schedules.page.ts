@@ -5,7 +5,7 @@ import { Platform, NavController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
 
-import { reduce, uniq, uniqBy } from 'lodash';
+import { groupBy, reduce, uniq, uniqBy } from 'lodash';
 import * as moment from 'moment';
 
 import { DatabaseService } from 'src/app/services/database/database.service';
@@ -38,6 +38,7 @@ export class SchedulesPage implements OnInit {
   selectedDate: any;
 
   usersData: any;
+  schedulesGroup: any;
 
   constructor(
     private platform: Platform,
@@ -95,10 +96,11 @@ export class SchedulesPage implements OnInit {
     }
   }
 
-  selectDate(item: any) {
+  async selectDate(item: any) {
+    console.log('isi dari item selected date',item)
     this.selectedDate.selected = false;
 
-    this.scheduleShift(item);
+    //this.scheduleShift(item);
 
     this.selectedDate = item;
     this.selectedDate.selected = true;
@@ -109,8 +111,35 @@ export class SchedulesPage implements OnInit {
       this.selectedDate.date
     );
 
+    
     const dataSchedulePerDay = this.selectedDate.schedules;
+
+    console.log('isi dari schedule ', this.selectedDate.schedules)
     const dataGroupByAreaId = uniqBy(dataSchedulePerDay, 'areaId');
+    let dataGroupByArea : any  =  [] 
+    dataGroupByArea = groupBy(dataSchedulePerDay, 'area');
+    const dataSchedulesByArea : any =[]
+    console.log('isi data group by area', dataGroupByArea)
+
+
+    const data = Object.values(dataGroupByArea)
+    console.log('data:', data)
+    // for(let datas in dataGroupByArea) {
+    //   //console.log('data n' , datas)
+
+    //   //console.log('isi data datas',dataGroupByArea[datas])
+    //     // for(let data of datas){
+    //     //   console.log('isi dari data',data)
+    //     // }
+    //   dataSchedulesByArea.push(dataGroupByArea[datas])
+    // } 
+
+    //this.selectedDate.schedules = data
+    this.schedulesGroup = data
+
+    console.log('isi dari schedule group', this.schedulesGroup)
+    //console.log('isi dari data schedule by area', dataSchedulesByArea)
+
     this.selectedDate.lokasi = dataGroupByAreaId;
 
     console.log('this selected date lokasi', this.selectedDate.lokasi)
@@ -195,6 +224,12 @@ export class SchedulesPage implements OnInit {
   }
 
   viewAssetsCategory(routerPath: string, schedulePerDay: any[], assetCategory: any[]) {
+    console.log('schedule per day ', schedulePerDay)
+    // const schedule=[]
+
+    // schedule.push(schedulePerDay)
+    // schedulePerDay = []
+    // schedulePerDay = schedule
     this.navCtrl.navigateForward(routerPath, {
       state: {
         schedulePerDay,
