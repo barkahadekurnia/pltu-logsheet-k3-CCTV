@@ -1,0 +1,19 @@
+asset detail go offline
+
+- formAssetCategory > /api/assetform/assetCategory OK
+- assetsdetail > /api/asset/show OK
+- allTandaPemasangan > /api/tag/index?search=undefined
+- selectionUnit > /api/master/lokasi/unit OK
+- selectionArea > /api/master/lokasi/area OK
+- selectionTandaPemasangan > /api/tag/getTagByArea?area= OK
+- 
+
+http://114.6.64.2:11241/api/logsheet_new/uploads/historyAsset/1680149350_951073954ba6b3287499.jpg
+
+Notulen CCTV (17-02-24)
+- upload transaction dikasih notes dan mengirim notif telegram
+- pilihan unit, area dibuat search
+- notif scan setiap hari jam 8, klik > schedule (actived date)
+- status bisa diedit
+- tagging bisa diedit
+- scan bisa di tanggal berapapun dlm 1 bulan

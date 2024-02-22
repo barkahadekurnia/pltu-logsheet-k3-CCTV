@@ -260,6 +260,11 @@ export class HomePage implements OnInit {
     this.syncJob.counter = 0;
     this.syncJob.isUploading = false;
     this.syncJob.order = {
+      // holdAssets: {
+      //   label: 'Assets',
+      //   status: 'loading',
+      //   message: 'Periksa data assets...',
+      // },
       // records: {
       //   label: 'Records',
       //   status: 'loading',
@@ -296,6 +301,9 @@ export class HomePage implements OnInit {
         options: {
           complexMessage: Object.values(this.syncJob.order),
           observable: new Observable((subscriber) => {
+            // this.syncJob.order.holdAssets.request = () =>
+            //   this.uploadAssets(subscriber, loader);
+
             // this.syncJob.order.records.request = () =>
             //   this.uploadRecords(subscriber, loader);
 
@@ -330,6 +338,7 @@ export class HomePage implements OnInit {
     //nambahna men ra refresh
     await this.getLocalAssets();
   }
+
   // pengecekan jumlah alat pemadam
   private async getCountAssets() {
     return this.http.requests({
@@ -571,7 +580,7 @@ export class HomePage implements OnInit {
   }
 
   private async prepareDirectory(
-    type: 'asset' | 'parameter',
+    type: 'asset' | 'parameter' | 'recordAssetsCCTV',
     exceptions: string[] = []
   ) {
     try {
@@ -589,7 +598,7 @@ export class HomePage implements OnInit {
         });
       }
     } catch (error) {
-      // //console.log(error)
+      console.log(error);
       await Filesystem.mkdir({
         path: type,
         directory: Directory.Data,
@@ -916,7 +925,7 @@ export class HomePage implements OnInit {
     });
   }
 
-  private async getPreviousPhotos(table: 'schedule' | 'asset' | 'parameter') {
+  private async getPreviousPhotos(table: 'schedule' | 'asset' | 'parameter' | 'recordAssetsCCTV') {
     const photos: any = {};
 
     try {
@@ -937,6 +946,119 @@ export class HomePage implements OnInit {
     }
 
     return photos;
+  }
+
+  private async uploadAssets(
+    subscriber: Subscriber<any>,
+    loader: HTMLIonPopoverElement
+  ) {
+    try {
+      const resAssets = await this.database.select('recordAssetsCCTV', {
+        column: [
+          'assetForm',
+          'assetNumber',
+          'expireDate',
+          'assetId',
+          'more',
+          'photo',
+          'supplyDate',
+          'cctvIP'
+        ]
+      });
+
+      const parsedAssets = this.database.parseResult(resAssets);
+      const records: any[] = parsedAssets
+        .map(
+          (asset) => ({
+            assetForm: this.utils.parseJson(asset.assetForm),
+            assetNumber: asset.assetNumber,
+            expireDate: asset.expireDate,
+            assetId: asset.assetId,
+            more: this.utils.parseJson(asset.more),
+            photo: this.utils.parseJson(asset.photo),
+            supplyDate: asset.supplyDate,
+            cctvIP: asset.cctvIP,
+          })
+        );
+
+      console.log('records', records);
+
+      if (records.length) {
+        this.syncJob.isUploading = true;
+        this.syncJob.order.holdAssets.message = 'Uploading data assets...';
+
+        subscriber.next({
+          complexMessage: Object.values(this.syncJob.order),
+        });
+
+        const assetRecordsIds = uniq(
+          records.map((record) => record.assetId)
+        );
+        console.log('assetRecordsIds', assetRecordsIds);
+
+        const respUploadAssetForm = this.uploadDataAssetForm(records);
+        const respUploadMarkSign = this.uploadTagPemasangan(records);
+        const resUploadDetailLocation = this.uploadDetailLocation(records);
+
+        const responseAll = [...respUploadAssetForm, ...respUploadMarkSign, ...resUploadDetailLocation];
+        console.log('responseAll', responseAll);
+
+        forkJoin(responseAll).pipe(
+          map(async (results) => {
+            console.log('results', results);
+
+            // for (const row of results) {
+
+            // }
+          })
+        ).subscribe();
+
+        const activityLogs = {
+          id: Math.floor(Math.random() * 1000) + 1,
+          status: 'success',
+          message: 'Success add data'
+        };
+
+        if (records.length < assetRecordsIds.length) {
+          this.database.delete('recordAssetsCCTV', {
+            query: '',
+            params: []
+          });
+
+          this.syncJob.order.holdAssets.status = 'success';
+          this.syncJob.order.holdAssets.message = 'Success upload data assets';
+        }
+
+        this.shared.addLogActivity({
+          activity: 'User upload data ke server',
+          data: activityLogs,
+        });
+
+      } else {
+        delete this.syncJob.order.holdAssets;
+
+        subscriber.next({
+          complexMessage: Object.values(this.syncJob.order),
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      const activityLogs = {
+        id: Math.floor(Math.random() * 1000) + 1,
+        status: 'failed',
+        message: this.http.getErrorMessage(err),
+      };
+
+      this.shared.addLogActivity({
+        activity: 'User upload data ke server',
+        data: activityLogs,
+      });
+
+      this.syncJob.order.holdAssets.status = 'failed';
+      this.syncJob.order.holdAssets.message = 'gagal upload data';
+    } finally {
+      this.onProcessFinished(subscriber, loader);
+    }
   }
 
   private async uploadRecords(
@@ -1226,7 +1348,6 @@ export class HomePage implements OnInit {
 
   private async getSchedules(subscriber: Subscriber<any>, loader: HTMLIonPopoverElement) {
     const shared = this.injector.get(SharedService);
-    console.log('get schedule di eksekusi')
     if (shared.user.group === 'ADMIN') {
       return this.http.requests({
         requests: [() => this.http.getSchedules()],
@@ -1346,7 +1467,7 @@ export class HomePage implements OnInit {
                 this.http.requests({
                   requests: [() => this.http.getSchedulesnonsiftadmin()],
                   onSuccess: async ([response]) => {
-                    if (response.status >= 400) {
+                    if (![200, 201].includes(response.status)) {
                       throw response;
                     }
 
@@ -2516,6 +2637,8 @@ export class HomePage implements OnInit {
         this.syncJob.order.assets.message = 'Berhasil mendapatkan data lokasi';
       },
       onError: (error) => {
+        console.log('error', error);
+
         this.shared.addLogActivity({
           activity: 'User synchronizes lokasi dari server',
           data: {
@@ -2529,6 +2652,72 @@ export class HomePage implements OnInit {
       },
       onComplete: () => this.onProcessFinished(subscriber, loader),
     });
+  }
+
+  uploadDataAssetForm(records: any[]) {
+    const body = new FormData();
+
+    const requests = records
+      .map(async (record) => {
+        const dataFormType = record.more.type;
+
+        if (dataFormType) {
+          body.append('typeId', dataFormType.id);
+        } else {
+          throw record;
+        }
+
+        body.append('assetForm', JSON.stringify(record.assetForm));
+
+        const response = await this.http.postAnyData(`${environment.url.uploadFormType}/${record.assetId}`, body);
+
+        if (![200, 201].includes(response.status)) {
+          throw response;
+        }
+
+        return response.body;
+      });
+
+    return requests;
+  }
+
+  uploadTagPemasangan(records: any[]) {
+    const requests = records
+      .map(async (record) => {
+        const body = {
+          tagId: record.more.tag[0].id
+        };
+
+        const response = await this.http.postAnyDataJson(`${environment.url.updateAssetTag}/${record.assetId}`, body);
+
+        if (![200, 201].includes(response.status)) {
+          throw response;
+        }
+
+        return response.body;
+      });
+
+    return requests;
+  }
+
+  uploadDetailLocation(records: any[]) {
+    const requests = records
+      .map(async (record) => {
+        const body = {
+          tagId: record.more.tag[0].id,
+          detailLocation: record.more.tag[0].detail_location,
+        };
+
+        const response = await this.http.uploadDetailLocation(body.tagId, body.detailLocation);
+
+        if (![200, 201].includes(response.status)) {
+          throw response;
+        }
+
+        return response.data?.data;
+      });
+
+    return requests;
   }
 
   async assetDetailCCTV() {
@@ -2591,8 +2780,8 @@ export class HomePage implements OnInit {
   }
 
   async getAssetsByCategoryId(categoryId: string) {
-    const result = this.http.getAssetsByCategoryId(categoryId);
-    return result;
+    const response = await this.http.getAssetsByCategoryId(categoryId);
+    return response;
   }
 
   async assetFormCategory() {
@@ -2634,6 +2823,8 @@ export class HomePage implements OnInit {
     const unitAll: any[] = [];
 
     const requests = await this.http.getAnyData(`${environment.url.selectionUnit}`);
+    console.log('requests', requests);
+
 
     if (![200, 201].includes(requests.status)) {
       throw requests;
@@ -2641,7 +2832,7 @@ export class HomePage implements OnInit {
 
     this.idUnit = [];
 
-    const units = requests.data.responds.results
+    const units = requests.data.responds.results;
     if (units.length > 0) {
       for (const unit of units) {
         const data = {
@@ -2660,36 +2851,6 @@ export class HomePage implements OnInit {
     await this.database.insert('unit', unitAll);
   }
 
-  // async selectionArea(){
-  //   const areaAll : any[] = []
-  //   const requests = await this.http.getAnyData(`${environment.url.selectionArea}`)
-
-  //   if(![200,201].includes(requests.status)) {
-  //     throw requests
-  //   }
-
-  //   console.log('request ambil data area ', requests)
-  //   const areas = requests.data.responds.results
-  //   if(areas.length > 0){
-  //     for( const area of areas) {
-  //       const data = {
-  //         id : area.id,
-  //         area : area.area,
-  //         kode : area.kode,
-  //         deskripsi : area.deskripsi,
-  //         updated_at : area.updated_at,
-  //       }
-  //       areaAll.push(data)
-  //       this.idArea.push(data.id)
-  //     }
-  //   }
-
-  //   console.log( 'data all areas' , areaAll);
-  //   console.log( 'this id area ',  this.idArea);
-  //   await this.database.emptyTable('area') ;
-  //   await this.database.insert('area' , areaAll)
-  // }
-
   async selectionAreaByUnit() {
     const areaAll: any[] = [];
     const idUnit = this.idUnit;
@@ -2697,9 +2858,9 @@ export class HomePage implements OnInit {
     for (const id of idUnit) {
       const requests = await this.http.getAnyData(`${environment.url.selectionArea}/${id}`);
 
-      if (![200, 201].includes(requests.status)) {
-        throw requests;
-      }
+      // if (![200, 201].includes(requests.status)) {
+      //   throw requests;
+      // }
 
       const areas: any[] = requests.data.responds.results;
 
@@ -2725,25 +2886,14 @@ export class HomePage implements OnInit {
 
   async selectionTandaPemasangan() {
     const assetAll: any[] = [];
-
-    const responseCategory = await this.http.getCategory();
-
-    if (![200, 201].includes(responseCategory.status)) {
-      throw responseCategory;
-    }
-
-    console.log('this id area  pada selection tanda pemasangan', this.idArea);
     const idAreaTP = this.idArea;
 
     for (const idArea of idAreaTP) {
       const requests = await this.http.selectionTandaPemasanganId(idArea);
 
       if (![200, 201].includes(requests.status)) {
-        throw requests
+        throw requests;
       }
-
-      console.log('id dari id Area', idArea);
-      console.log('request ambil data tanda Pemasangan by Area', requests);
 
       const arrAssets: any[] = requests.data?.data;
 

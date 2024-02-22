@@ -5,13 +5,8 @@
 export const environment = {
   production: false,
   url: {
-     base: 'http://114.6.64.2:11241/api/logsheet_dev',
+    base: 'http://114.6.64.2:11241/api/logsheet_dev',
     // base: 'http://114.6.64.2:11241/api/logsheet_new',
-    // base: 'http://192.168.4.99',
-    // base: 'http://app.logsheet.digital',
-    // base: 'http://45.77.45.6/logsheet',
-    // CCTV
-    //base: 'http://114.6.64.2:11244/app/cctv',
     public: 'http://114.6.64.2:11231/',
     baseUrl: 'http://103.250.10.4/app/cctv',
 
@@ -106,11 +101,11 @@ export const environment = {
       return this.base + `/api/schedule/getTeamSchedule`;
     },
     get selectionUnit() {
-      return this.public + '/api/master/lokasi/unit';
+      return this.baseUrl + '/api/unit';
     },
     // + unitId (1)
     get selectionArea() {
-      return this.public + '/api/master/lokasi/area';
+      return this.baseUrl + '/api/area/show';
     },
     // + areaId ()
     get selectionTandaPemasangan() {

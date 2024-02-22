@@ -1,27 +1,27 @@
 /* eslint-disable @typescript-eslint/member-delimiter-style */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/member-ordering */
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
-import { AlertController, MenuController, IonModal, IonContent, NavController, ActionSheetController } from '@ionic/angular';
-
-import { BarcodeScanner, ScanOptions, SupportedFormat } from '@capacitor-community/barcode-scanner';
+import { MenuController, IonModal, IonContent, ActionSheetController, IonPopover } from '@ionic/angular';
 
 import { Subscription, of } from 'rxjs';
 import Viewer from 'viewerjs';
-import { find, findIndex, intersectionWith, map, merge } from 'lodash';
+import { filter, find, findIndex, flow, intersectionWith, map, merge, partialRight, property, result, some } from 'lodash';
 import { map as rxjsMap, tap } from 'rxjs/operators';
 
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { HttpService } from 'src/app/services/http/http.service';
 import { environment } from 'src/environments/environment';
-import { AssetDetails, AssetFormDetails, TypeForm } from 'src/app/interfaces/asset-details';
+import { AssetDetails, AssetFormDetails, DetailAssetTags, TypeForm } from 'src/app/interfaces/asset-details';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { MediaService, PictureSource } from 'src/app/services/media/media.service';
 import { Capacitor } from '@capacitor/core';
+import { Directory, Filesystem } from '@capacitor/filesystem';
 
 type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK';
+
 
 @Component({
   selector: 'app-asset-detail',
@@ -29,11 +29,13 @@ type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK'
   styleUrls: ['./asset-detail.page.scss'],
 })
 
-export class AssetDetailPage implements OnInit, AfterViewInit {
+export class AssetDetailPage implements OnInit {
   @ViewChild(IonContent, { static: true }) ionContent?: IonContent;
   @ViewChild('swiper') swiper: ElementRef | undefined;
+  @ViewChild('imageViewer') imageViewer: ElementRef;
 
   @ViewChild(IonModal) modal: IonModal;
+  @ViewChild(IonPopover) popover: IonPopover;
 
   subscription: Subscription;
 
@@ -68,13 +70,12 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
   };
 
   dataFormDetailAsset: AssetFormDetails[];
-  dataFormDetailLocation: any;
-  selectionUnit: any;
-  selectionArea: any;
+  dataFormDetailLocation: DetailAssetTags;
+  selectionUnit: any[] = [];
+  selectionArea: any[] = [];
   selectionAreaKosong = false;
-  idArea: any;
-  selectionTandaPemasangan: any;
-  selectionLokasiTandaPemasangan: any;
+  areaId: any;
+  selectionTandaPemasangan: any[] = [];
   selectionTandaPemasanganKosong = false;
   idTandaPemasangan: any;
   currentDetailLokasi: any;
@@ -89,21 +90,20 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
   private assetId: any;
   public databaseArea: any;
 
+  isOpen = false;
+  searchTerm = '';
+
   constructor(
     private activatedRoute: ActivatedRoute,
-    private router: Router,
-    private alertCtrl: AlertController,
     public utils: UtilsService,
     private menuCtrl: MenuController,
     private http: HttpService,
-    private navCtrl: NavController,
     private database: DatabaseService,
     private actionSheetCtrl: ActionSheetController,
     private media: MediaService,
   ) {
     this.nfcStatus = 'NO_NFC';
     this.dataFormDetailAsset = [];
-
     this.isBeginning = true;
   }
 
@@ -112,48 +112,19 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       this.activatedRoute.snapshot.paramMap.get('data')
     );
 
-    console.log('transition data', this.transitionData);
     if (!this.transitionData) {
       return this.utils.back();
     }
-    this.checkOnly = this.utils.parseJson(
-      this.activatedRoute.snapshot.paramMap.get('checkOnly')
-    );
-    if (!this.checkOnly) {
-      this.scanQrButton = {
-        text: 'Scan with QR Code',
-        icon: 'qr-code-outline',
-        handler: () => this.scanQrCode()
-      };
-    };
+
     this.showDataOffline();
   }
 
-  // async checkStatus() {
-  //   if (this.platform.is('capacitor')) {
-  //     try {
-  //       this.nfcStatus = await this.nfc1.enabled();
-  //     } catch (error) {
-  //       this.nfcStatus = error;
-  //     }
-  //   }
-
-  //   return this.nfcStatus;
-  // }
-
-  async ngAfterViewInit() {
-    //await this.nfc.changesetup();
-  }
-
-  async ionViewWillEnter() {
+  ionViewWillEnter() {
     this.menuCtrl.enable(true, 'asset-information')
       .then(() => this.menuCtrl.swipeGesture(true, 'asset-information'));
   }
 
   async ionViewWillLeave() {
-    // this.nfc.invalidateTagListener();
-    // this.subscription?.unsubscribe?.();
-
     await this.menuCtrl.enable(false, 'asset-information');
     await this.menuCtrl.swipeGesture(false, 'asset-information');
   }
@@ -164,101 +135,11 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     });
   }
 
-  cancel() {
-    // this.modal.dismiss(null, 'cancel');
-    this.navCtrl.pop();
-  }
-
-  async showDetails() {
-    // this.shared.asset = asset;
-    await this.menuCtrl.enable(true, 'asset-information');
-    return this.menuCtrl.open('asset-information');
-  }
-
-  scanQrCode() {
-    BarcodeScanner.hideBackground();
-    document.body.classList.add('qrscanner');
-
-    const options: ScanOptions = {
-      targetedFormats: [SupportedFormat.QR_CODE]
-    };
-
-    BarcodeScanner.startScan(options).then(async result => {
-      this.utils.overrideBackButton();
-      document.body.classList.remove('qrscanner');
-
-      if (result.hasContent) {
-        const key = 'assetId=';
-        const startIndex = result.content.indexOf(key) + key.length;
-
-        const assetId = result.content;
-        const data = JSON.stringify({
-          type: 'qr',
-          data: assetId
-        });
-
-        this.router.navigate(['scan-form', { data }]);
-      }
-    });
-
-    this.utils.overrideBackButton(() => {
-      this.utils.overrideBackButton();
-      document.body.classList.remove('qrscanner');
-      BarcodeScanner.showBackground();
-      BarcodeScanner.stopScan();
-    });
-  }
-  // private async setupNfc() {
-  //   await this.nfc.checkStatus();
-  //   console.log('cek status', this.checkOnly);
-
-  //   await this.nfc.setTagListener(async (event: any) => {
-  //     // console.log('cek event', event);
-  //     console.log('checkOnly', this.checkOnly);
-  //     console.log('tag', event?.tag?.id);
-  //     if (this.checkOnly && event?.tag?.id) {
-  //       const data = await this.nfc.getTagString(event.tag.id);
-
-  //       const alert = await this.alertCtrl.create({
-  //         header: 'Result',
-  //         message: data,
-  //         mode: 'ios',
-  //         cssClass: 'dark:ion-bg-gray-800',
-  //         buttons: [
-  //           {
-  //             text: 'Cancel',
-  //             role: 'cancel'
-  //           },
-  //           {
-  //             text: 'Copy',
-  //             handler: () => {
-  //               Clipboard.write({
-  //                 // eslint-disable-next-line id-blacklist
-  //                 string: data
-  //               });
-  //             }
-  //           }
-  //         ]
-  //       });
-
-  //       this.utils.back();
-  //       alert.present();
-  //     } else if (event?.tag?.id) {
-  //       const data = JSON.stringify({
-  //         type: 'rfid',
-  //         data: await this.nfc.getTagString(event.tag.id)
-  //       });
-
-  //       // this.router.navigate(['scan-form', { data }]);
-  //     }
-  //   });
-  // }
-
   async showDataOffline() {
     try {
       console.log('transition data', this.transitionData);
 
-      const result = await this.database.select('assetsCCTV', {
+      const resAssets = await this.database.select('assetsCCTV', {
         column: [
           'assetId',
           'assetForm',
@@ -275,7 +156,7 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
         },
       });
 
-      const parsedAssets = this.database.parseResult(result);
+      const parsedAssets = this.database.parseResult(resAssets);
       const arrAssetAll: AssetDetails[] = parsedAssets
         ?.map(
           (asset: any) => ({
@@ -287,7 +168,8 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
             photo: this.utils.parseJson(asset.photo),
             supply_date: asset.supplyDate,
             cctvIP: asset.cctvIP,
-          }));
+          })
+        );
 
       console.log('parsed result arr AssetAll', parsedAssets);
       console.log('arrAssetAll', arrAssetAll);
@@ -313,10 +195,6 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
 
     const viewer = new Viewer(target as HTMLElement, options);
     viewer.show();
-  }
-
-  async editDetailFoto() {
-
   }
 
   async selectMedia() {
@@ -350,11 +228,16 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     actionSheet.present();
   }
 
+  getDataEditForms() {
+    this.getDataInputForms();
+    this.getDataLokasi();
+  }
+
   async getDataInputForms() {
     const loader = await this.utils.presentLoader();
 
     try {
-      const result = await this.database.select('formAssetsCategory', {
+      const resFormAssetsCategory = await this.database.select('formAssetsCategory', {
         column: [
           'formId',
           'idx',
@@ -375,7 +258,7 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
         },
       });
 
-      const parsedFormAssetsCategory = this.database.parseResult(result);
+      const parsedFormAssetsCategory = this.database.parseResult(resFormAssetsCategory);
       const assetFormCategoryAllSQL: any[] = [];
 
       for (const asset of parsedFormAssetsCategory) {
@@ -393,29 +276,17 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
           updated_at: asset.updated_at,
           deleted_at: asset.deleted_at,
         };
-
         assetFormCategoryAllSQL.push(data);
       }
 
-      console.log('result param category id', this.resultParam.more.category?.id);
-
-      // console.log("formAssetsCategory on SQL Lite",parsedFormAssetsCategory)
-      // console.log("formAssetsCategory on SQL Lite assetFormCategoryAll",assetFormCategoryAllSQL)
-
       const bodyformAssetDetail = this.resultParam;
 
-      //console.log('isi dari result api online bodyformAssetCategory',bodyformAssetCategory)
-      console.log('isi dari result api online bodyformAssetDetail', bodyformAssetDetail);
-      console.log('isi dari result api online assetFormCategoryAllSQL', assetFormCategoryAllSQL);
-      //const mappedArray: AssetFormDetails[] = map(bodyformAssetCategory, (form, idx) => {
-      const mappedArray: any[] = map(assetFormCategoryAllSQL, (form, idx) => {
+      let mappedArray: any[] = map(assetFormCategoryAllSQL, (form, idx) => {
         const resultX = intersectionWith(
           this.utils.parseJson(form?.formOption),
           this.resultParam.assetForm,
           (a: any, b: any) => a?.id === b?.formValue
         );
-
-        console.log('isi dari result api online', resultX);
 
         return {
           ...form,
@@ -446,7 +317,6 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
 
       if (mappedArray.length && initData.length && bodyformAssetDetail) {
         const formValue = initData[0].value;
-        console.log('formValue', formValue);
         const response = await this.http.getAnyData(`${environment.url.formType}/${formValue}`);
 
         if (![200, 201].includes(response.status)) {
@@ -456,7 +326,6 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
         const bodyResponse = response.data?.data;
         dataFormTypeAsset = bodyResponse;
 
-        console.log('bodyResponse formType', bodyResponse);
         const mappedAssetDetail: AssetFormDetails = {
           assetCategoryCode: null,
           assetCategoryId: null,
@@ -471,15 +340,14 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
           index: (mappedArray.length + 1)?.toString(),
           selected: typeof bodyformAssetDetail.more?.type === 'object' ? true : false,
           updated_at: null,
-          value: null,
+          value: this.resultParam.more.type.id || null,
           disabled: false,
         };
 
-        // const idxDataMerk = mappedArray?.findIndex((obj: any) => obj.formName === 'merk');
         const idxDataMerk = findIndex(mappedArray, (obj: any) => obj.idx?.includes('2'));
-        console.log('idxDataMerk', idxDataMerk);
 
-        //idxDataMerk = 1;
+        mappedArray = mappedArray.sort((a, b) => a.idx - b.idx);
+
         // add object (mappedAssetDetail) to index (idxDataMerk) of array (mappedArray)
         of(mappedArray)
           .pipe(
@@ -492,141 +360,12 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       }
 
       this.dataFormDetailAsset = mappedArray;
-      const sortFormDetailAsset: any = (this.dataFormDetailAsset as any).sort((s1, s2) => {
-        console.log('s1', s1.idx);
-        console.log('s2', s2.idx);
-        return s1.idx - s2.idx;
-      });
-
-      // const sortFormDetailAsset = this.dataFormDetailAsset.sort()
-
-      console.log('sortFormDetailAsset', sortFormDetailAsset);
-      console.log('dataFormDetailAsset', this.dataFormDetailAsset);
     }
-
     catch (err) {
       console.error(err);
     } finally {
       await loader.dismiss();
     }
-
-    // this.http.requests({
-    //   requests: [
-    //     () => this.http.getAnyData(`${environment.url.formAssetCategory}/${this.resultParam.more.category?.id}`),
-    //     () => this.http.getAnyData(`${environment.url.assetsdetail}/${this.resultParam?.id}`),
-    //   ],
-    //   onSuccess: async (responses) => {
-    //     const [
-    //       responseAssetCategory,
-    //       responseAssetDetail,
-    //     ] = responses;
-
-    //     if (![200, 201].includes(responseAssetCategory.status)) {
-    //       throw responseAssetCategory;
-    //     }
-    //     if (![200, 201].includes(responseAssetDetail.status)) {
-    //       throw responseAssetDetail;
-    //     }
-
-    //     //const bodyformAssetCategory = responseAssetCategory.data?.data;
-    //    // const bodyformAssetDetail = responseAssetDetail.data?.data;
-    //     const bodyformAssetDetail = this.resultParam
-
-
-    //     //console.log('isi dari result api online bodyformAssetCategory',bodyformAssetCategory)
-    //     console.log('isi dari result api online bodyformAssetDetail',bodyformAssetDetail)
-    //     console.log('isi dari result api online assetFormCategoryAllSQL',assetFormCategoryAllSQL)
-    //     //const mappedArray: AssetFormDetails[] = map(bodyformAssetCategory, (form, idx) => {
-    //     const mappedArray: AssetFormDetails[] = map(assetFormCategoryAllSQL, (form, idx) => {
-    //       const result = intersectionWith(
-    //         this.utils.parseJson(form?.formOption),
-    //         this.resultParam.assetForm,
-    //         (a: any, b: any) => a?.id === b?.formValue
-    //       );
-
-    //       console.log('isi dari result api online',result)
-
-    //       return {
-    //         ...form,
-    //         formOption: this.utils.parseJson(form?.formOption),
-    //         selected: result.length ? true : false,
-    //         value: result[0].id,
-    //         assetFormId: bodyformAssetDetail.assetForm[idx]?.id,
-    //         disabled: (form.assetCategoryCode === 'PH' && (form.formName === 'kapasitas')) ? true :
-    //           (form.assetCategoryCode === 'HB' && (form.formName === 'tipekonektor')) ? true :
-    //             (form.assetCategoryCode === 'DV' && (form.formName === 'diameter' || form.formName === 'jenis')) ? true :
-    //               (form.assetCategoryCode === 'FT' && (form.formName === 'kapasitas' || form.formName === 'jenis')) ? true :
-    //                 (form.assetCategoryCode === 'PH' && (form.formName === 'merk' || form.formName === 'tipekonektor')) ? true :
-    //                   (form.assetCategoryCode === 'AP' && (form.formName === 'merk' || form.formName === 'kapasitas')) ? true : false
-    //       };
-    //     });
-
-    //     const initData = mappedArray?.filter?.(
-    //       (item) =>
-    //         item.assetCategoryCode === 'PH' && item.formName === 'jenis' ||
-    //         item.assetCategoryCode === 'HB' && item.formName === 'jenis' ||
-    //         item?.assetCategoryCode === 'DV' && item?.formName === 'merk' ||
-    //         item.assetCategoryCode === 'FT' && item.formName === 'merk' ||
-    //         item.assetCategoryCode === 'PTD' && item.formName === 'jenis' ||
-    //         item.assetCategoryCode === 'AP' && item.formName === 'media'
-    //     );
-
-    //     let dataFormTypeAsset: TypeForm[] = [];
-
-    //     if (mappedArray.length && initData.length && bodyformAssetDetail) {
-    //       const formId = initData[0].value;
-    //       console.log('formId',formId)
-    //       const response = await this.http.getAnyData(`${environment.url.formType}/${formId}`);
-
-    //       if (![200, 201].includes(response.status)) {
-    //         throw response;
-    //       }
-
-    //       const bodyResponse = response.data?.data;
-    //       dataFormTypeAsset = bodyResponse;
-
-    //       const mappedAssetDetail: AssetFormDetails = {
-    //         assetCategoryCode: null,
-    //         assetCategoryId: null,
-    //         assetCategoryName: null,
-    //         created_at: null,
-    //         deleted_at: null,
-    //         formId: bodyformAssetDetail.id,
-    //         formLabel: 'Type',
-    //         formName: 'type',
-    //         formOption: dataFormTypeAsset,
-    //         formType: 'select',
-    //         index: (mappedArray.length + 1)?.toString(),
-    //         selected: typeof bodyformAssetDetail.more?.type === 'object' ? true : false,
-    //         updated_at: null,
-    //         value: null,
-    //         disabled: false,
-    //       };
-
-    //       // const idxDataMerk = mappedArray?.findIndex((obj: any) => obj.formName === 'merk');
-    //       let idxDataMerk = findIndex(mappedArray, (obj:any) => obj.idx?.includes('2'));
-    //       console.log('idxDataMerk',idxDataMerk);
-
-    //       //idxDataMerk = 1 ;
-    //       // add object (mappedAssetDetail) to index (idxDataMerk) of array (mappedArray)
-    //       of(mappedArray)
-    //         .pipe(
-    //           rxjsMap(arr => [...arr.slice(0, idxDataMerk), mappedAssetDetail, ...arr.slice(1)]),
-    //           tap(updatedArray => {
-    //             mappedArray.length = 0;
-    //             Array.prototype.push.apply(mappedArray, updatedArray);
-    //           })
-    //         ).subscribe();
-    //     }
-
-    //     this.dataFormDetailAsset = mappedArray;
-    //     console.log('dataFormDetailAsset', this.dataFormDetailAsset);
-    //   },
-    //   onError: (err) => {
-    //     console.error(err);
-    //   },
-    //   onComplete: async () => await loader.dismiss()
-    // });
   }
 
   async getDataLokasi() {
@@ -644,8 +383,6 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       });
 
       const parsedUnit = this.database.parseResult(resultUnit);
-      console.log('resultUnit', resultUnit);
-      console.log('parsedUnit', parsedUnit);
 
       const resultArea = await this.database.select('area', {
         column: [
@@ -659,8 +396,6 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       });
 
       const parsedArea = this.database.parseResult(resultArea);
-      console.log('resultArea', resultArea);
-      console.log('parsedArea', parsedArea);
 
       this.databaseArea = parsedArea;
 
@@ -669,144 +404,34 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
 
       this.dataFormDetailLocation = this.resultParam.more.tag[0];
 
-      console.log('dataFormDetailLocation', this.dataFormDetailLocation);
-      console.log('selection unit', this.selectionUnit);
+      this.areaId = this.dataFormDetailLocation.areaId;
+      this.idTandaPemasangan = this.dataFormDetailLocation.id;
     } catch (err) {
-      console.log('error', err);
+      console.error(err);
     } finally {
       await loader.dismiss();
+      this.getSelectionTandaPemasangan();
     }
-
-    // this.http.requests({
-    //   requests: [
-    //     // () => this.http.getAnyData(`${environment.url.allTandaPemasangan}`),
-    //     () => this.http.getAnyData(`${environment.url.assetsdetail}/${this.resultParam?.id}`),
-    //     () => this.http.getAnyData(`${environment.url.selectionUnit}`),
-    //     () => this.http.getAnyData(`${environment.url.selectionArea}`),
-    //     //() => this.http.getAnyData(`${environment.url.selectionTandaPemasangan}${this.dataFormDetailLocation.unitId}`)
-
-    //   ],
-    //   onSuccess: async (responses) => {
-    //     const [
-    //       // responseAllTP,
-    //       responseAssetDetail,
-    //       responseunitDetail,
-    //       responseunitArea,
-    //       responseTandaPemasangan,
-    //     ] = responses;
-
-    //     if (![200, 201].includes(responseAssetDetail.status)) {
-    //       throw responseAssetDetail;
-    //     }
-
-    //     if (![200, 201].includes(responseunitDetail.status)) {
-    //       throw responseunitDetail;
-    //     }
-
-    //     if (![200, 201].includes(responseunitArea.status)) {
-    //       throw responseunitArea;
-    //     }
-
-    //     // if (![200, 201].includes(responseAllTP.status)) {
-    //     //   throw responseAllTP;
-    //     // }
-
-    //     // if (![200, 201].includes(responseTandaPemasangan.status)) {
-    //     //   throw responseTandaPemasangan;
-    //     // }
-
-    //     console.log('responseunitArea', responseunitArea);
-    //     // console.log('responseunitAllTP' , responseAllTP)
-
-    //     console.log('responseunitAssetDetail', responseAssetDetail)
-
-    //     const bodyformAssetDetail = responseAssetDetail.data?.data;
-
-    //     //unit
-    //     this.selectionUnit = responseunitDetail.data.responds.results;
-
-    //     console.log('selection unit', this.selectionUnit);
-
-    //     this.dataFormDetailLocation = bodyformAssetDetail.more.tag[0];
-    //     console.log('dataFormDetailLocation', this.dataFormDetailLocation);
-
-    //     //area
-    //     this.selectionArea = responseunitArea.data.responds.results;
-
-    //     console.log('selection unit', this.selectionUnit);
-
-
-
-    //     this.http.requests({
-    //       requests: [
-    //         () => this.http.getAnyData(`${environment.url.selectionTandaPemasangan}${this.dataFormDetailLocation.areaId}`)
-    //       ],
-    //       onSuccess: async (responses) => {
-    //         const [
-    //           responseTandaPemasangan,
-    //         ] = responses;
-    //         if (![200, 201].includes(responseTandaPemasangan.status)) {
-    //           throw responseTandaPemasangan;
-    //         }
-
-    //         console.log('response tanda pemasangan', responseTandaPemasangan)
-    //         //TP
-    //         // this.selectionTandaPemasangan = responseAllTP.data.data;
-    //         this.selectionTandaPemasangan = responseTandaPemasangan.data.data;
-
-    //         console.log('selection Tanda Pemasangan 1', this.selectionTandaPemasangan)
-
-    //         this.selectionTandaPemasanganKosong = false
-
-    //         console.log('selection Area', this.selectionTandaPemasangan)
-    //         if (this.selectionTandaPemasangan.length === 0) {
-    //           this.selectionTandaPemasanganKosong = true
-    //         }
-
-    //         this.idTandaPemasangan = this.dataFormDetailLocation.tag_number
-    //         console.log('id tanda pemasangan', this.idTandaPemasangan)
-    //         this.idArea = this.dataFormDetailLocation.areaId
-    //         // cari lokasi berdasarkan TP
-    //         const lokasi = responseTandaPemasangan.data.data.find((el) => el.tag_number === this.idTandaPemasangan)
-
-    //         console.log('lokasi', lokasi)
-
-    //         this.selectionLokasiTandaPemasangan = lokasi
-
-    //         //simpat data lokasi sementara buat logic if else update
-    //         this.currentDetailLokasi = this.selectionLokasiTandaPemasangan.detail_location;
-    //         this.currentTandaPemasangan = this.idTandaPemasangan;
-    //       }
-    //     })
-    //   },
-    //   onError: (err) => {
-    //     console.error(err);
-    //   },
-    //   onComplete: async () => await loader.dismiss()
-    // });
   }
 
-  // filterselectionArea(unitId:any) {
-  //     return this.databaseArea.id = unitId
+  async getSelectionArea(event?: any) {
+    let unitId = null;
 
-  // }
+    if (event) {
+      unitId = event.detail.value;
+    } else {
+      unitId = this.dataFormDetailLocation.unitId;
+    }
 
-  async getSelectionArea(event: any) {
-    // const loader = await this.utils.presentLoader();
-    const unitId = event.detail.value;
     const selectionArea: any = [];
 
     try {
-      console.log('unit ID', unitId);
-      console.log('this.databaseArea', this.databaseArea);
-
       for (const data of this.databaseArea) {
         if (data.idUnit === unitId) {
           selectionArea.push(data);
         }
       }
 
-      console.log('get selection Area', selectionArea);
       this.selectionArea = selectionArea;
 
       if (unitId === '4') {
@@ -817,77 +442,20 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       if (this.selectionArea?.length === 0) {
         this.selectionAreaKosong = true;
       }
+
+      console.log('selectionArea', this.selectionArea);
+
     } catch (err) {
-      console.log('error selection Area', err);
-    } finally {
-      console.log('done select area');
-      //async () => loader.dismiss()
+      console.error(err);
     }
-
-    // const request:any = this.database.select('area', {
-    //   column: [
-    //     'id ',
-    //     'area ',
-    //     'kode ',
-    //     'deskripsi ',
-    //     'updated_at '
-    //   ],
-    //   where:  {
-    //     query : 'id=?' ,
-    //     params : [unitId]
-    //   }
-    // })
-
-
-    // const parsedRequest = this.database.parseResult(request)
-
-    // console.log('parsed request responseAreaDetail',parsedRequest)
-
-
-    // console.log('isi request selection unit', request)
-    // if(request) {
-    //   const parsedRequest = this.database.parseResult(request)
-
-    //   console.log('parsed request responseAreaDetail',parsedRequest)
-
-    //}
-
-    // this.http.requests({
-    //   requests: [
-    //     () => this.http.getAnyData(`${environment.url.selectionArea}/${unitId}`)
-    //   ],
-    //   onSuccess: async (responses) => {
-    //     const [
-    //       responseAreaDetail
-    //     ] = responses;
-
-    //     if (![200, 201].includes(responseAreaDetail.status)) {
-    //       throw responseAreaDetail;
-    //     }
-
-    //     this.selectionArea = responseAreaDetail.data.responds.results;
-    //     this.selectionAreaKosong = false
-
-    //     console.log('selection Area http', this.selectionArea)
-    //     if (this.selectionArea.length === 0) {
-    //       this.selectionAreaKosong = true
-    //     }
-    //   },
-    //   onError: (err) => {
-    //     console.error(err);
-    //   },
-    //   onComplete: async () => await loader.dismiss()
-    // });
   }
 
-  async getSelectionTandaPemasangan(event: any) {
-    console.log('isi event', event);
-    console.log('isi event value', event.detail.value);
-    this.idArea = event.detail.value;
-
-    console.log('this id area get selection tanda pemasangan', this.idArea);
+  async getSelectionTandaPemasangan(event?: any) {
     const loader = await this.utils.presentLoader();
-    //let  unitId = event.detail.value
+
+    if (event) {
+      this.areaId = event.detail.value;
+    }
 
     try {
       const selectionTandaPemasangan = await this.database.select('selectionTandaPemasangan', {
@@ -908,19 +476,16 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
         ],
         where: {
           query: 'idArea=?',
-          params: [this.idArea]
+          params: [this.areaId]
         },
       });
 
-      console.log('data selectionTandaPemasangan', selectionTandaPemasangan);
-      const parsedSelectionTandaPemasangan = this.database.parseResult(selectionTandaPemasangan);
+      const parsedSelectionTandaPemasangan: any[] = this.database.parseResult(selectionTandaPemasangan);
 
-      console.log('data parsed Selection Tanda Pemasangan', parsedSelectionTandaPemasangan);
-
-      const selectionTandaPemasanganAll: any = parsedSelectionTandaPemasangan?.map(
+      const selectionTandaPemasanganAll: any[] = parsedSelectionTandaPemasangan?.map(
         (asset: any) => ({
           id: asset.id,
-          idArea: asset.idArea,
+          areaId: asset.idArea,
           tag_number: asset.tag_number,
           unit: asset.unit,
           area: asset.area,
@@ -935,116 +500,48 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
         })
       );
 
-      console.log('data parsed selectionTandaPemasanganAll', selectionTandaPemasanganAll);
-
       this.selectionTandaPemasangan = selectionTandaPemasanganAll;
-
-      console.log('selection Tanda Pemasangan', this.selectionTandaPemasangan);
 
       this.selectionTandaPemasanganKosong = false;
 
-      console.log('selection Area', this.selectionTandaPemasangan);
       if (this.selectionTandaPemasangan.length === 0) {
         this.selectionTandaPemasanganKosong = true;
+      } else {
+        const resArea = selectionTandaPemasanganAll.find((el) => el.areaId === this.areaId);
+        this.dataFormDetailLocation.tag_number = resArea?.tag_number;
+        this.dataFormDetailLocation.id = resArea?.id;
+        this.idTandaPemasangan = resArea?.id;
       }
-
     } catch (err) {
-      console.log('error pada saat pengambilan selectionTandaPemasangan', err);
+      console.error(err);
+    } finally {
+      await loader.dismiss();
+      this.getSelectionIdTandaPemasangan();
+    }
+  }
+
+  async getSelectionIdTandaPemasangan(event?: any) {
+    const loader = await this.utils.presentLoader();
+
+    if (event) {
+      this.idTandaPemasangan = event.detail.value;
+    }
+
+    try {
+      const lokasi = this.selectionTandaPemasangan.find((el) => el.id === this.idTandaPemasangan);
+      this.dataFormDetailLocation.location = lokasi.location;
+      this.dataFormDetailLocation.detail_location = lokasi.detail_location;
+    } catch (err) {
+      console.error(err);
     } finally {
       await loader.dismiss();
     }
-
-    // this.http.requests({
-    //   requests: [
-    //     () => this.http.getAnyData(`${environment.url.selectionTandaPemasangan}${this.idArea}`)
-    //   ],
-    //   onSuccess: async (responses) => {
-    //     const [
-    //       responseTandaPemasangan
-    //     ] = responses;
-
-    //     if (![200, 201].includes(responseTandaPemasangan.status)) {
-    //       throw responseTandaPemasangan;
-    //     }
-
-    //     this.selectionTandaPemasangan = responseTandaPemasangan.data.data;
-
-    //     console.log('selection Tanda Pemasangan', this.selectionTandaPemasangan)
-
-    //     this.selectionTandaPemasanganKosong = false
-
-    //     console.log('selection Area', this.selectionTandaPemasangan)
-    //     if (this.selectionTandaPemasangan.length === 0) {
-    //       this.selectionTandaPemasanganKosong = true
-    //     }
-
-    //   },
-    //   onError: (err) => {
-    //     console.error(err);
-    //   },
-    //   onComplete: async () => await loader.dismiss()
-    // });
   }
-
-  async getSelectionIdTandaPemasangan(event: any) {
-    // console.log('isi event',event)
-    console.log('id Tanda Pemasangan', event.detail.value)
-    this.idTandaPemasangan = event.detail.value
-    console.log('this. id area', this.idArea)
-    const loader = await this.utils.presentLoader();
-    //let  unitId = event.detail.value
-
-    try {
-      console.log('respon tanda TandaPemasangan', this.selectionTandaPemasangan)
-
-      const lokasi = this.selectionTandaPemasangan.find((el) => el.tag_number == this.idTandaPemasangan)
-
-      console.log('lokasi', lokasi)
-
-      this.selectionLokasiTandaPemasangan = lokasi
-    } catch (err) {
-      console.log('error', err)
-    } finally {
-
-      await loader.dismiss()
-    }
-
-    // this.http.requests({
-    //   requests: [
-    //     () => this.http.getAnyData(`${environment.url.selectionTandaPemasangan}${this.idArea}`)
-    //   ],
-    //   onSuccess: async (responses) => {
-    //     const [
-    //       responseTandaPemasangan
-    //     ] = responses;
-
-    //     if (![200, 201].includes(responseTandaPemasangan.status)) {
-    //       throw responseTandaPemasangan;
-    //     }
-
-    //     console.log('2 respon tanda TandaPemasangan', responseTandaPemasangan.data.data)
-    //     const lokasi = responseTandaPemasangan.data.data.find((el) => el.tag_number === this.idTandaPemasangan)
-
-    //     console.log('2  lokasi', lokasi)
-
-    //     this.selectionLokasiTandaPemasangan = lokasi
-
-    //   },
-    //   onError: (err) => {
-    //     console.error(err);
-    //   },
-    //   onComplete: async () => await loader.dismiss()
-    // });
-  }
-
 
   async fetchFormType(ev) {
     if (!ev) {
       return null;
     }
-
-    console.log('fetchFormType', ev);
-
 
     const loader = await this.utils.presentLoader();
     const formValue = ev.detail?.value;
@@ -1057,7 +554,6 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
       }
 
       const bodyFormType = response.data?.data;
-      console.log('bodyFormType', bodyFormType);
 
       const updatedArray = this.dataFormDetailAsset
         ?.map?.((obj) => {
@@ -1100,17 +596,30 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     }
   }
 
-  async confirmSubmitForm() {
+  selectUnit(ev: Event) {
+    this.popover.event = ev;
+    this.getSelectionArea();
+    this.isOpen = true;
+    console.log('selectionUnit', this.selectionUnit);
+
+  }
+
+  selectItemUnit(item) {
+    console.log('selectItemUnit', item);
+    this.isOpen = false;
+  }
+
+  async confirmSubmitForm(modal?: IonModal) {
     const alert = await this.utils.createCustomAlert({
       type: 'warning',
       header: 'Konfirmasi',
-      message: `Apakah Anda yakin untuk mengubah data nomor asset ${this.resultParam.asset_number} ?`,
+      message: `Apakah Anda yakin untuk menyimpan data asset ${this.resultParam.asset_number} ?`,
       buttons: [
         {
-          text: 'Konfirmasi',
+          text: 'Simpan',
           handler: () => {
             alert.dismiss();
-            this.submitFormUpdate();
+            this.submitFormUpdate(modal);
           }
         }, {
           text: 'Batal',
@@ -1118,48 +627,112 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
         }
       ]
     });
-
     await alert.present();
-  }
-
-  async submitFoto(modal?: IonModal) {
-    console.log('submit Foto');
-    await modal.dismiss();
   }
 
   async submitFormUpdate(modal?: IonModal) {
     const loader = await this.utils.presentLoader();
-    const body = new FormData();
 
-    const dataFormType = this.dataFormDetailAsset?.filter(item => item.formName === 'type');
+    const body = new FormData();
+    const dataFormType = this.dataFormDetailAsset?.filter(item => item.formName === 'type')[0];
 
     try {
-      const dataExcludeFormType = this.dataFormDetailAsset
+      // const dataExcludeFormType = this.dataFormDetailAsset
+      //   ?.filter(item => item.formName !== 'type')
+      //   ?.map((obj) => {
+      //     if (obj.assetCategoryCode && obj.formId) {
+      //       const { disabled, selected, value, ...rest } = obj;
+      //       return { ...rest, formValue: obj.value, formOption: JSON.stringify(obj.formOption) };
+      //     } else {
+      //       throw new Error('Data yang Anda masukkan tidak valid, silahkan dicoba kembali.');
+      //     }
+      //   });
+
+      const dataFormTypeToStore = this.dataFormDetailAsset
         ?.filter(item => item.formName !== 'type')
         ?.map((obj) => {
           if (obj.assetCategoryCode && obj.formId) {
             const { disabled, selected, value, ...rest } = obj;
-            return { ...rest, formValue: obj.value, formOption: JSON.stringify(obj.formOption) };
+            const filteredFormOption = result(find(obj.formOption, { id: obj.value }), 'optionName');
+            return { ...rest, formValue: obj.value, optionName: filteredFormOption, formOption: JSON.stringify(obj.formOption) };
           } else {
             throw new Error('Data yang Anda masukkan tidak valid, silahkan dicoba kembali.');
           }
         });
 
-      console.log('data formtype', dataFormType);
-
-      if (dataFormType[0].value) {
-        body.append('typeId', dataFormType[0].value);
+      if (dataFormType.value) {
+        body.append('typeId', dataFormType.value);
       } else {
         throw new Error('Data yang Anda masukkan tidak valid, silahkan dicoba kembali.');
       }
 
-      body.append('assetForm', JSON.stringify(dataExcludeFormType));
+      // console.log('resultParam', this.resultParam);
+      // console.log('dataFormDetailLocation', this.dataFormDetailLocation);
+      // console.log('selectionArea', this.selectionArea);
 
-      const response = await this.http.postAnyData(`${environment.url.uploadFormType}/${this.resultParam.id}`, body);
+      const findArea = find(this.selectionArea, { id: this.dataFormDetailLocation.areaId });
+      this.dataFormDetailLocation.area = findArea.deskripsi;
 
-      if (![200, 201].includes(response.status)) {
-        throw response;
-      }
+      const filteredObject = find(dataFormType.formOption, { id: dataFormType.value });
+
+      const storedType = {
+        id: dataFormType.value,
+        name: filteredObject.type_name,
+      };
+
+      const storedMore = {
+        category: this.resultParam.more.category,
+        status: this.resultParam.more.status,
+        tag: [this.dataFormDetailLocation],
+        tagging: this.resultParam.more.tagging,
+        type: storedType,
+      };
+
+      const updatedRow = {
+        assetForm: dataFormTypeToStore,
+        assetNumber: this.resultParam.asset_number,
+        expireDate: this.resultParam.expireDate,
+        assetId: this.resultParam.id,
+        more: storedMore,
+        photo: this.resultParam.photo,
+        supplyDate: this.resultParam.supply_date,
+        cctvIP: this.resultParam.cctvIP,
+      };
+
+      console.log('updatedRow', updatedRow);
+
+      this.database.update(
+        'assetsCCTV',
+        {
+          assetForm: JSON.stringify(dataFormTypeToStore),
+          assetNumber: this.resultParam.asset_number,
+          expireDate: this.resultParam.expireDate,
+          assetId: this.resultParam.id,
+          more: JSON.stringify(storedMore),
+          photo: JSON.stringify(this.resultParam.photo),
+          supplyDate: this.resultParam.supply_date,
+          cctvIP: this.resultParam.cctvIP,
+        },
+        {
+          query: 'assetId=?',
+          params: [this.resultParam.id]
+        }
+      );
+
+      this.database.insert(
+        'recordAssetsCCTV', [
+        {
+          assetForm: JSON.stringify(dataFormTypeToStore),
+          assetNumber: this.resultParam.asset_number,
+          expireDate: this.resultParam.expireDate,
+          assetId: this.resultParam.id,
+          more: JSON.stringify(storedMore),
+          photo: JSON.stringify(this.resultParam.photo),
+          supplyDate: this.resultParam.supply_date,
+          cctvIP: this.resultParam.cctvIP,
+        }
+      ]
+      );
 
       const success = await this.utils.createCustomAlert({
         type: 'success',
@@ -1190,242 +763,58 @@ export class AssetDetailPage implements OnInit, AfterViewInit {
     } finally {
       await loader.dismiss();
       await modal.dismiss();
+      this.showDataOffline();
     }
-  }
-
-  async submitFormUpdateLocation(modal?: IonModal) {
-    // const loader = await this.utils.presentLoader();
-    // const body = new FormData();
-
-    console.log('isi dari form', this.dataFormDetailLocation);
-    console.log('tanda pemasangan', this.dataFormDetailLocation.tag_number);
-    const dataTandaPemasangan = this.selectionTandaPemasangan.find((el) => el.tag_number === this.dataFormDetailLocation.tag_number);
-    console.log('id tanda pemasangan', dataTandaPemasangan);
-
-    // const idTandaPemasangan = JSON.stringify(dataTandaPemasangan.id);
-    const idTandaPemasangan = dataTandaPemasangan.id;
-    console.log('idTandaPemasnagan', idTandaPemasangan);
-
-    console.log('isi dari detail lokasi', this.selectionLokasiTandaPemasangan.detail_location);
-    console.log('asset id  ', this.assetId);
-
-    try {
-      if (this.currentTandaPemasangan !== idTandaPemasangan) {
-        const body = {
-          tagId: idTandaPemasangan
-        };
-        //ini buat edit asset tag
-        const response = await this.http.postAnyDataJson(`${environment.url.updateAssetTag}/${this.assetId}`, body);
-
-        if (![200, 201].includes(response.status)) {
-          throw response;
-        }
-      }
-
-      if (this.currentDetailLokasi !== this.selectionLokasiTandaPemasangan.detail_location) {
-        const body = {
-          detailLocation: this.selectionLokasiTandaPemasangan.detail_location
-        };
-        //ini buat edit detail lokasi
-        const responseDetailLokasi = await this.http.uploadDetailLocation(idTandaPemasangan, body);
-
-        if (![200, 201].includes(responseDetailLokasi.status)) {
-          throw responseDetailLokasi;
-        }
-      }
-
-      //   const alert = await this.utils.createCustomAlert({
-      //     type: 'success',
-      //     color: 'success',
-      //     header: 'Update Detail Lokasi Berhasil',
-      //     message: `${(response.data as any)?.message}. Perubahan efektif terjadi setelah dilakukan sinkronisasi.`,
-      //     backdropDismiss: false,
-      //     buttons: [
-      //       {
-      //         text: 'Tutup',
-      //         handler: () => alert.dismiss()
-      //       }
-      //     ]
-      //   });
-
-      //   await alert.present();
-      // } catch (err) {
-      //   console.error(err);
-      //   const alert = await this.utils.createCustomAlert({
-      //     type: 'error',
-      //     color: 'danger',
-      //     header: 'Kesalahan',
-      //     message: this.http.getErrorMessage(err),
-      //     backdropDismiss: false,
-      //     buttons: [
-      //       {
-      //         text: 'Tutup',
-      //         handler: () => alert.dismiss()
-      //       }
-      //     ]
-      //   });
-
-      //   await alert.present();
-      // } finally {
-
-      //   await modal.dismiss();
-      // }
-
-      console.log('mengupdate data assetTag');
-      const success = await this.utils.createCustomAlert({
-        type: 'success',
-        header: 'Berhasil',
-        message: 'Data berhasil diubah, silahkan periksa kembali data tersebut.',
-        buttons: [
-          {
-            text: 'Tutup',
-            handler: () => success.dismiss()
-            // handler: () => modal.dismiss()
-          }
-        ]
-      });
-      await success.present();
-    } catch (err) {
-      console.error(err);
-      const error = await this.utils.createCustomAlert({
-        type: 'error',
-        header: 'Kesalahan',
-        message: this.http.getErrorMessage(err),
-        buttons: [
-          {
-            text: 'Tutup',
-            handler: () => error.dismiss()
-          }
-        ]
-      });
-      await error.present();
-    } finally {
-      await modal.dismiss();
-      this.doRefresh(event);
-    }
-  }
-
-  //gakpke file lama pnya hamjah
-  async editDetailLocation() {
-    const alert = await this.alertCtrl.create({
-      header: 'Form Edit',
-      message: 'Edit detail lokasi',
-      backdropDismiss: false,
-      mode: 'ios',
-      inputs: [
-        {
-          type: 'textarea',
-          label: 'Detail lokasi',
-          value: this.resultParam.more.tag[0].detail_location,
-          placeholder: 'Isikan detail lokasi baru...'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Batal',
-          role: 'cancel',
-          handler: () => alert.dismiss()
-        }, {
-          text: 'Submit',
-          handler: (res) => {
-            this.putDetailLocation(this.resultParam?.more?.tag[0].id, {
-              detailLocation: res['0']
-            });
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-  //gakepke file lama pnya hamjah
-  private async putDetailLocation(tagId, body) {
-    try {
-      const response = await this.http.uploadDetailLocation(tagId, body);
-
-      if (![200, 201].includes(response.status)) {
-        throw response;
-      }
-
-      const alert = await this.utils.createCustomAlert({
-        type: 'success',
-        color: 'success',
-        header: 'Update Berhasil',
-        message: `${(response.data as any)?.message}. Perubahan efektif terjadi setelah dilakukan sinkronisasi.`,
-        backdropDismiss: false,
-        buttons: [
-          {
-            text: 'Tutup',
-            handler: () => alert.dismiss()
-          }
-        ]
-      });
-
-      await alert.present();
-    } catch (err) {
-      console.error(err);
-      const alert = await this.utils.createCustomAlert({
-        type: 'error',
-        color: 'danger',
-        header: 'Kesalahan',
-        message: this.http.getErrorMessage(err),
-        backdropDismiss: false,
-        buttons: [
-          {
-            text: 'Tutup',
-            handler: () => alert.dismiss()
-          }
-        ]
-      });
-
-      await alert.present();
-    }
-  }
-
-  editRFID() {
-    const data = JSON.stringify({
-      type: 'qr',
-      data: this.assetId
-    });
-    this.router.navigate(['change-rfid', { data }]);
   }
 
   private async getPicture() {
-    const filePath = await this.media.getPicture();
+    const file = await this.media.getPictureBase64();
 
-    if (filePath) {
+    if (file) {
       const attachment = {
-        name: filePath?.split?.('/')?.pop?.(),
-        type: 'image/jpeg',
-        filePath,
+        name: `${Date.now()}.${file.format}`,
+        type: `image/${file.format}`,
+        filePath: `data:image/${file.format};base64,${file.base64String}`,
       };
 
-      console.log('attachment', attachment);
-      this.resultParam.photo[0].path = Capacitor.convertFileSrc(attachment.filePath);
+      this.updatePictures(attachment);
     }
   }
 
   private async getPictureBySource(source: PictureSource) {
-    const result = await this.media.getPictureBySource(source);
-    const file = result.files[0];
+    const media = await this.media.getPictureBySource(source);
+    const file = media.files[0];
 
     if (file.path) {
       const attachment = {
         name: file.name,
         type: file.mimeType,
-        filePath: file.path,
+        filePath: `data:${file.mimeType};base64,${file.data}`,
       };
 
-      console.log('attachment', attachment);
-      this.resultParam.photo[0].path = Capacitor.convertFileSrc(attachment.filePath);
+      this.updatePictures(attachment);
     }
   }
 
-  private async updatePictures() {
-    
+  private async updatePictures(attachment) {
     try {
-      
+      const { uri } = await Filesystem.writeFile({
+        path: `recordAssetsCCTV/${attachment.name}`,
+        data: attachment.filePath,
+        directory: Directory.Data,
+        recursive: true,
+      });
+
+      if (uri) {
+        this.resultParam.photo[0].path = Capacitor.convertFileSrc(uri);
+        this.resultParam.photo[0].photo = attachment.name;
+      }
     } catch (err) {
       console.error(err);
+      await Filesystem.mkdir({
+        path: 'recordAssetsCCTV',
+        directory: Directory.Data,
+      });
     }
   }
 

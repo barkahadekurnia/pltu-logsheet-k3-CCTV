@@ -3,7 +3,7 @@ import { Injectable, Injector } from '@angular/core';
 import { Platform, LoadingController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
-import { Camera, ImageOptions, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Camera, ImageOptions, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { ForegroundService } from '@awesome-cordova-plugins/foreground-service/ngx';
 import { Directory } from '@capacitor/filesystem';
 import write_blob from 'capacitor-blob-writer';
@@ -97,15 +97,76 @@ export class MediaService {
     return path;
   }
 
+  async getPictureBase64() {
+    let path: Photo;
+
+    try {
+      const shared = this.injector.get(SharedService);
+
+      const {
+        imageMaxWidth,
+        imageMaxHeight,
+        imageQuality
+      } = shared.attachmentConfig;
+
+      const options: ImageOptions = {
+        width: imageMaxWidth,
+        height: imageMaxHeight,
+        quality: imageQuality,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+        correctOrientation: true,
+        saveToGallery: false,
+        allowEditing: false
+      };
+
+      if (this.platform.is('android')) {
+        this.foregroundService.start(
+          'Mobile Scanner',
+          'Taking a picture...',
+          'ic_notification_camera',
+          3
+        );
+      }
+
+      const result = await Camera.getPhoto(options);
+      path = result;
+    } catch (error) {
+      if (error.message !== 'User cancelled photos app') {
+        const utils = this.injector.get(UtilsService);
+
+        const alert = await utils.createCustomAlert({
+          type: 'error',
+          header: 'Error',
+          message: error.message,
+          buttons: [{
+            text: 'Close',
+            handler: () => alert.dismiss()
+          }]
+        });
+
+        alert.present();
+      }
+    } finally {
+      if (this.platform.is('android')) {
+        this.foregroundService.stop();
+      }
+    }
+
+    return path;
+  }
+
   public async getPictureBySource(source: PictureSource): Promise<PickFilesResult> {
     let result: PickFilesResult;
 
     if (source === 'gallery') {
       result = await FilePicker.pickImages({
+        readData: true,
         multiple: false,
       });
     } else if (source === 'files') {
       result = await FilePicker.pickFiles({
+        readData: true,
         multiple: false,
       });
     }

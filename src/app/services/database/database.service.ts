@@ -90,8 +90,8 @@ export class DatabaseService {
           assetId TEXT NOT NULL,
           assetCategoryId TEXT NOT NULL,
           assetCategoryName TEXT NOT NULL,
-          assetName TEXT ,
-          assetNumber TEXT ,
+          assetName TEXT,
+          assetNumber TEXT,
           mediaId TEXT,
           mediaName TEXT,
           photo TEXT,
@@ -270,13 +270,25 @@ export class DatabaseService {
       `,
       assetsCCTV: `
         CREATE TABLE IF NOT EXISTS assetsCCTV(
-          assetForm TEXT ,
+          assetForm TEXT,
           assetNumber TEXT,
           expireDate TEXT,
           assetId TEXT NOT NULL,
-          more TEXT ,
-          photo TEXT ,
+          more TEXT,
+          photo TEXT,
           qr TEXT,
+          supplyDate TEXT,
+          cctvIP TEXT
+        )
+      `,
+      recordAssetsCCTV: `
+        CREATE TABLE IF NOT EXISTS recordAssetsCCTV(
+          assetForm TEXT,
+          assetNumber TEXT,
+          expireDate TEXT,
+          assetId TEXT NOT NULL,
+          more TEXT,
+          photo TEXT,
           supplyDate TEXT,
           cctvIP TEXT
         )
@@ -288,7 +300,7 @@ export class DatabaseService {
           formLabel TEXT,
           formName TEXT,
           formType TEXT,
-          formOption TEXT ,
+          formOption TEXT,
           assetCategoryId TEXT,
           assetCategoryCode TEXT,
           assetCategoryName TEXT,
@@ -352,7 +364,7 @@ export class DatabaseService {
           latitude TEXT,   
           longitude TEXT,  
           tagCategory TEXT,   
-          more TEXT ,   
+          more TEXT,
           photos TEXT  
         )
       `,

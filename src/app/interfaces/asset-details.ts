@@ -103,9 +103,10 @@ interface AssetTags {
     value?: string;
 }
 
-interface DetailAssetTags {
+export interface DetailAssetTags {
     area: string;
     areaId: string;
+    bangunanId: string;
     detail_location: string;
     id: string;
     location: string;
