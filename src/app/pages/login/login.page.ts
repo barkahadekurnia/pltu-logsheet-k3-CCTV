@@ -1,22 +1,16 @@
-import { UserData } from 'src/app/services/shared/shared.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Platform, LoadingController, NavController } from '@ionic/angular';
 import { App, AppInfo } from '@capacitor/app';
-import write_blob from 'capacitor-blob-writer';
 import { Device } from '@capacitor/device';
 import { Preferences } from '@capacitor/preferences';
-import { AppUpdate, AppUpdateAvailability } from '@robingenz/capacitor-app-update';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { HttpService, LoginData } from 'src/app/services/http/http.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { environment } from 'src/environments/environment';
 import * as moment from 'moment';
-import { Filesystem, Directory } from '@capacitor/filesystem';
-import { lowerCase, upperCase } from 'lodash';
-import { Capacitor } from '@capacitor/core';
 import { MediaService } from 'src/app/services/media/media.service';
 
 @Component({
@@ -40,7 +34,6 @@ export class LoginPage implements OnInit {
     private utils: UtilsService,
     private media: MediaService
   ) {
-
     this.form = {
       username: '',
       password: ''
@@ -49,20 +42,19 @@ export class LoginPage implements OnInit {
     this.isPasswordVisible = false;
   }
 
-  ngOnInit() {
-    this.platform.ready().then(() => {
-      if (this.platform.is('capacitor')) {
-        App.getInfo().then((appInfo: AppInfo) => this.appVersion = `${appInfo.version}.${appInfo.build}` ?? '1.0.0');
-        console.log('versi aplikasi', this.appVersion)
-      }
-    });
+  async ngOnInit() {
+    this.platform.ready();
+    const appInfo: AppInfo = await App.getInfo();
+    this.appVersion = `${appInfo.version}.${appInfo.build}` ?? '1.0.0';
   }
+
   openSettings() {
     return this.router.navigate(['settings']);
   }
+
   async login() {
     const formValidationResult = this.validateForm();
-    console.log(1);
+
     if (formValidationResult.ok) {
       const loader = await this.loadingCtrl.create({
         message: 'Harap Tunggu...',
@@ -70,84 +62,19 @@ export class LoginPage implements OnInit {
         cssClass: 'dark:ion-bg-gray-800',
         mode: 'ios',
       });
-      console.log(2);
-      loader.present();
+
+      await loader.present();
 
       try {
-
-        console.log('3,this.form', this.form);
-
         const response = await this.http.login(this.form);
-        console.log('respon login', response)
 
-        if (response.data.status !== 200) {
-          console.log('respon tidak 200', response)
-          const alert = await this.utils.createCustomAlert({
-            type: 'error',
-            header: 'Error',
-            message: response.data.messages.error + 'eror',
-            buttons: [{
-              text: 'Close',
-              handler: () => alert.dismiss()
-            }]
-          }
-          )
-          alert.present();
-          // throw response.data;
+        if (![200, 201].includes(response.data?.status)) {
+          throw response;
         }
 
-        // else if
-        // (response.body.status === 200) {
-        //   console.log('login sukses')
-        //   const alert = await this.utils.createCustomAlert({
-        //     type: 'error',
-        //     header: 'Error',
-        //     message: 'Login Sukses',
-        //     buttons: [{
-        //       text: 'Close',
-        //       handler: () => alert.dismiss()
-        //     }]
-        //   })
-        //   alert.present();
-        //   // throw response.data;
-        // }
-
-        console.log('periksa role', response?.data?.data?.user?.role_group)
-
-        if (upperCase(response?.data?.data?.user?.role_group) == "PETUGAS") {
-          this.http.requests({
-            requests: [
-              () => this.http.getGroupOperator(response?.data?.data?.user?.id),
-            ],
-            onSuccess: async ([responseGrup]) => {
-              console.log('respon jika role petugas', responseGrup)
-
-              if (responseGrup.status >= 400) {
-                throw responseGrup;
-              }
-              this.shared.setUserDetail({
-                shift: responseGrup?.data?.data?.shift,
-                nonshift: responseGrup?.data?.data?.nonShift,
-                lk3: responseGrup?.data?.data?.lk3
-              });
-              console.log('session userdetail', this.shared.userdetail)
-              console.log(4);
-            },
-
-
-            onError: error => console.error(error)
-          });
-
-
-        } else {
-          this.shared.setUserDetail({
-            shift: '',
-            nonshift: '',
-            lk3: ''
-          });
-        }
         await this.onSuccessLogin(response.data);
       } catch (error) {
+        console.error(error);
         const alert = await this.utils.createCustomAlert({
           type: 'error',
           header: 'Error',
@@ -158,7 +85,7 @@ export class LoginPage implements OnInit {
           }]
         });
 
-        alert.present();
+        await alert.present();
       } finally {
         loader.dismiss();
       }
@@ -180,7 +107,6 @@ export class LoginPage implements OnInit {
   private async onSuccessLogin(response: any) {
     await this.database.initTables();
     await this.downloadCategory();
-    console.log('parameter onsuccess login', response)
 
     const parameter = {
       tag: '',
@@ -188,7 +114,6 @@ export class LoginPage implements OnInit {
       tagLocation: '',
       firstLogin: '1'
     };
-    console.log('variable parameter before', parameter)
 
     this.shared.setUserData({
       id: response?.data?.user?.id,
@@ -204,7 +129,6 @@ export class LoginPage implements OnInit {
         .format('YYYY-MM-DDTHH:mm:ss'),
       localTimeAtLogin: this.utils.getTime()
     });
-    console.log('session userdata', this.shared.user)
 
     const password = await this.utils.encrypt(this.form.password);
 
@@ -235,6 +159,7 @@ export class LoginPage implements OnInit {
     this.utils.startMonitor();
     await this.navCtrl.navigateRoot('tabs');
   }
+
   private async downloadCategory() {
     try {
       this.http.requests({
@@ -242,15 +167,15 @@ export class LoginPage implements OnInit {
           () => this.http.getCategory(),
         ],
         onSuccess: async ([responseCategory]) => {
-          console.log('response get kategori', responseCategory)
-
-          if (responseCategory.status >= 400) {
+          if (![200, 201].includes(responseCategory.status)) {
             throw responseCategory;
           }
+
           const kategori = [];
+
           for (const category of responseCategory?.data?.data) {
-            console.log('online', category.assetCategoryIconUrl)
-            const offlinePhoto = await this.offlinePhoto('category', category.assetCategoryIconUrl);
+            const offlinePhoto = category.assetCategoryIconUrl ? await this.offlinePhoto('category', category.assetCategoryIconUrl) : null;
+
             const data = {
               assetCategoryId: category.id,
               kode: category.code,
@@ -263,65 +188,37 @@ export class LoginPage implements OnInit {
             };
             kategori.push(data);
           }
-          console.log('kategori data', kategori)
 
-          await this.database.emptyTable('category')
-            .then(() => this.database.insert('category', kategori));
-
+          await this.database.emptyTable('category');
+          await this.database.insert('category', kategori);
         },
         onError: error => console.error(error)
       });
-
-
     } catch (error) {
       console.error(error);
     }
-
   }
 
   private async offlinePhoto(type: string, url: string) {
-    let filePath: string;
-    console.log('data lempar', url)
-    console.log('data lempar , types', type)
     try {
       const name = url?.split('/').pop();
-      console.log('nama', name)
-
       const response = await this.http.nativeGetBlob(url);
 
       if (![200, 201].includes(response.status)) {
-        return;
+        return response;
       }
 
-
-      //const name = row.substr(row.lastIndexOf('/') + 1);
       const mimeType = (response.headers as any)?.['Content-Type'] || this.media.getMimeTypes(url);
       const base64 = `data:${mimeType};base64,${response.data}`;
       const blob = await this.media.convertFileToBlob(base64);
       const fileURI = await this.media.writeBlob(blob, name);
 
-
-      // const { path } = await this.http.download({
-      //   url,
-      //   filePath: `${name}`,
-      //   fileDirectory: Directory.Data
-      // });
-      console.log('fileUrl', fileURI)
-      console.log('blob', blob)
-      //console.log('base64', base64)
-      console.log('mimeType', mimeType)
-      console.log('type', type)
-
-      //const urlfile = fileURI.replace('///','/')
-      //filePath = urlfile;
-      //console.log('file url',urlfile)
-      filePath = fileURI;
-
+      return fileURI;
     } catch (error) {
       console.error(error);
     }
 
-    return filePath;
+    return null;
   }
 
   private validateForm() {

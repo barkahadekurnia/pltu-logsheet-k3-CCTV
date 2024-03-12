@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Platform, AlertController, LoadingController, NavController } from '@ionic/angular';
+import { Platform, LoadingController, NavController } from '@ionic/angular';
 import { App, AppInfo } from '@capacitor/app';
-import { Clipboard } from '@capacitor/clipboard';
 import { Device } from '@capacitor/device';
 import { TextZoom } from '@capacitor/text-zoom';
 import { BarcodeScanner, ScanOptions, SupportedFormat } from '@capacitor-community/barcode-scanner';
@@ -10,8 +9,6 @@ import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService, UserData } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { Subscription } from 'rxjs';
-import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
-type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK';
 
 @Component({
   selector: 'app-admin',
@@ -23,22 +20,20 @@ export class AdminPage implements OnInit {
   imageQuality: number;
   offlinePhotos: boolean;
   autoUpload: boolean;
-  private tagListener: Subscription;
 
   isHeaderVisible: boolean;
   isAuthenticated: boolean;
   user: UserData;
-  private nfcStatus: NfcStatus;
+
+  private tagListener: Subscription;
 
   constructor(
     private router: Router,
     private platform: Platform,
-    private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private navCtrl: NavController,
     private database: DatabaseService,
     public shared: SharedService,
-    private nfc1: NFC,
     private utils: UtilsService
   ) {
     this.textZoom = 10;
@@ -49,15 +44,9 @@ export class AdminPage implements OnInit {
     this.isHeaderVisible = false;
     this.isAuthenticated = false;
     this.user = {};
-    this.nfcStatus = 'NO_NFC';
-
-  }
-  get status() {
-    return this.nfcStatus;
   }
 
   ngOnInit() {
-
     this.platform.ready().then(() => {
       this.isAuthenticated = this.shared.isAuthenticated;
       this.user = this.shared.user;
@@ -149,122 +138,99 @@ export class AdminPage implements OnInit {
     });
   }
   async openScan() {
+    const permission = await BarcodeScanner.checkPermission({ force: true });
+    if (permission.granted) {
+      BarcodeScanner.hideBackground();
+      document.body.classList.add('qrscanner');
 
-    const stat = await this.checkStatus();
-    console.log('cek status nfc', stat)
-    if (stat == 'NO_NFC') {
+      const options: ScanOptions = {
+        targetedFormats: [SupportedFormat.QR_CODE]
+      };
 
-      const confirm = await this.utils.createCustomAlert({
-        type: 'error',
-        header: stat,
-        message: 'NFC tidak tersedia',
-        buttons: [
-          {
-            text: 'Tutup',
-            handler: () => confirm.dismiss()
-          }
-        ]
+      BarcodeScanner.startScan(options).then(async (result) => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
+
+        if (result.hasContent) {
+          // const alert = await this.alertCtrl.create({
+          //   header: 'Result',
+          //   message: result.content,
+          //   mode: 'ios',
+          //   cssClass: 'dark:ion-bg-gray-800',
+          //   buttons: [
+          //     {
+          //       text: 'Cancel',
+          //       role: 'cancel'
+          //     },
+          //     {
+          //       text: 'Copy',
+          //       handler: () => {
+          //         Clipboard.write({
+          //           // eslint-disable-next-line id-blacklist
+          //           string: result.content
+          //         });
+          //       }
+          //     }
+          //   ]
+          // });
+
+          // alert.present();
+          const key = 'assetId=';
+          const startIndex = result.content.indexOf(key) + key.length;
+
+          const assetId = result.content;
+          const data = JSON.stringify({
+            type: 'qr',
+            data: assetId
+          });
+          this.router.navigate(['change-rfid', { data }]);
+        }
       });
 
-      confirm.present();
-
-    } else {
-      const permission = await BarcodeScanner.checkPermission({ force: true });
-      if (permission.granted) {
-        BarcodeScanner.hideBackground();
-        document.body.classList.add('qrscanner');
-
-        const options: ScanOptions = {
-          targetedFormats: [SupportedFormat.QR_CODE]
-        };
-
-        BarcodeScanner.startScan(options).then(async (result) => {
-          this.utils.overrideBackButton();
-          document.body.classList.remove('qrscanner');
-
-          if (result.hasContent) {
-            // const alert = await this.alertCtrl.create({
-            //   header: 'Result',
-            //   message: result.content,
-            //   mode: 'ios',
-            //   cssClass: 'dark:ion-bg-gray-800',
-            //   buttons: [
-            //     {
-            //       text: 'Cancel',
-            //       role: 'cancel'
-            //     },
-            //     {
-            //       text: 'Copy',
-            //       handler: () => {
-            //         Clipboard.write({
-            //           // eslint-disable-next-line id-blacklist
-            //           string: result.content
-            //         });
-            //       }
-            //     }
-            //   ]
-            // });
-
-            // alert.present();
-            const key = 'assetId=';
-            const startIndex = result.content.indexOf(key) + key.length;
-
-            const assetId = result.content;
-            const data = JSON.stringify({
-              type: 'qr',
-              data: assetId
-            });
-            this.router.navigate(['change-rfid', { data }]);
-
-          }
-        });
-
-        this.utils.overrideBackButton(() => {
-          this.utils.overrideBackButton();
-          document.body.classList.remove('qrscanner');
-          BarcodeScanner.showBackground();
-          BarcodeScanner.stopScan();
-        });
-      }
-
+      this.utils.overrideBackButton(() => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
+        BarcodeScanner.showBackground();
+        BarcodeScanner.stopScan();
+      });
     }
   }
 
   async cekScan() {
-      const permission = await BarcodeScanner.checkPermission({ force: true });
-      if (permission.granted) {
-        BarcodeScanner.hideBackground();
-        document.body.classList.add('qrscanner');
+    const permission = await BarcodeScanner.checkPermission({ force: true });
+    if (permission.granted) {
+      BarcodeScanner.hideBackground();
+      document.body.classList.add('qrscanner');
 
-        const options: ScanOptions = {
-          targetedFormats: [SupportedFormat.QR_CODE]
-        };
+      const options: ScanOptions = {
+        targetedFormats: [SupportedFormat.QR_CODE]
+      };
 
-        BarcodeScanner.startScan(options).then(async (result) => {
-          this.utils.overrideBackButton();
-          document.body.classList.remove('qrscanner');
+      BarcodeScanner.startScan(options).then(async (result) => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
 
-          if (result.hasContent) {
-            const key = 'assetId=';
-            const startIndex = result.content.indexOf(key) + key.length;
+        if (result.hasContent) {
+          const key = 'assetId=';
+          const startIndex = result.content.indexOf(key) + key.length;
 
-            const assetId = result.content;
-            const data = JSON.stringify({
-              type: 'qr',
-              data: assetId
-            });
-            this.router.navigate(['asset-detail', { data }]);
+          const assetId = result.content;
+          const data = JSON.stringify({
+            type: 'qr',
+            data: assetId
+          });
+          this.router.navigate(['asset-detail', { data }]);
 
-          }
-        });
+        }
+      });
 
-        this.utils.overrideBackButton(() => {
-          this.utils.overrideBackButton();
-          document.body.classList.remove('qrscanner');
-          BarcodeScanner.showBackground();
-          BarcodeScanner.stopScan();
-        });
-      }
+      this.utils.overrideBackButton(() => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
+        BarcodeScanner.showBackground();
+        BarcodeScanner.stopScan();
+      });
+    }
   }
 
   async checkRecords() {
@@ -319,17 +285,7 @@ export class AdminPage implements OnInit {
       return this.confirmLogout();
     }
   }
-  async checkStatus() {
-    if (this.platform.is('capacitor')) {
-      try {
-        this.nfcStatus = await this.nfc1.enabled();
-      } catch (error) {
-        this.nfcStatus = error;
-      }
-    }
 
-    return this.nfcStatus;
-  }
   private async confirmLogout() {
     const confirm = await this.utils.createCustomAlert({
       color: 'danger',

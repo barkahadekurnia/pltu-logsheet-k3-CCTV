@@ -129,6 +129,32 @@ ion-popover.alert-popover {
     --max-height: 80vh;
 }
 
+ion-popover.picker-popover {
+    --backdrop-opacity: 0.5;
+    --min-width: 8rem;
+    --width: 80vw;
+    --max-width: 24rem;
+    --max-height: 50vh;
+    --border-radius: 12px;
+    border-radius: 12px;
+}
+
+ion-popover.picker-popover {
+    --backdrop-opacity: 0.5;
+    --min-width: 8rem;
+    --width: 80vw;
+    --max-width: 24rem;
+    --max-height: 50vh;
+    --border-radius: 12px;
+    border-radius: 12px;
+}
+ion-popover.picker-popover::part(content) {
+    border-radius: 12px;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+}
+
 ion-popover.select-popover {
     --backdrop-opacity: 0.5;
     --min-width: 8rem;
@@ -211,6 +237,3 @@ ion-loading.custom-loader {
         background: transparent !important;
     }
 }
-
-
-

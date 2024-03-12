@@ -126,6 +126,9 @@ export const environment = {
     get newAssets() {
       return this.base + '/api/asset/getAllDataAsset';
     },
+    get updateAsset() {
+      return this.base + '/api/asset/update_new';
+    },
   },
   values: {
     mapbox: 'pk.eyJ1IjoiYXJpc2NhYWJkdWxhaCIsImEiOiJja3Vuamc3eTgyNXMxMndteDI2MTY3NnBlIn0.7M2M8TyoZrrZuN85yrQPTQ',

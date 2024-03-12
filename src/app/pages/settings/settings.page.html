@@ -50,9 +50,9 @@
       </div>
     </div>
     <ion-list mode="ios">
-      <!-- <ion-list-header class="mb-2">
+      <ion-list-header class="mb-2">
         <p class="text-2xl font-bold">Options</p>
-      </ion-list-header> -->
+      </ion-list-header>
 
       <ion-item lines="none">
         <ion-icon slot="start" name="text-outline"></ion-icon>
@@ -78,37 +78,11 @@
         </ion-range>
       </ion-item>
 
-      <ion-item>
-        <ion-icon name="images-outline" slot="start" color="dark"></ion-icon>
-        <p class="text-lg font-semibold">Offline Images</p>
-
-        <ion-toggle slot="end" [checked]="offlinePhotos"
-          (ionChange)="onOfflinePhotosChanged($event)"></ion-toggle>
-      </ion-item>
-
-      <ion-item>
-        <ion-icon name="cloud-upload-outline" slot="start" color="dark"></ion-icon>
-        <p class="text-lg font-semibold">Auto upload</p>
-
-        <ion-toggle slot="end" [checked]="autoUpload"
-          (ionChange)="onAutoUploadChanged($event)"></ion-toggle>
-      </ion-item>
-
-      <!-- <ion-item class="dark:ion-border-gray-600" button [detail]="true" (click)="openPage(['attachment-settings'])">
-        <ion-icon name="extension-puzzle-outline" slot="start" color="dark"></ion-icon>
-        <ion-label>Attachment Config</ion-label>
-      </ion-item> -->
       <ion-item *ngIf="isAuthenticated" class="dark:ion-border-gray-600" button
         [detail]="true"
         (click)="openPage(['test-connection'])">
         <ion-icon name="globe-outline" slot="start" color="dark"></ion-icon>
         <p class="text-lg font-semibold">Test Connection</p>
-      </ion-item>
-
-      <ion-item class="dark:ion-border-gray-600" button [detail]="true"
-        (click)="openPage(['rfid-scan', { checkOnly: true }])">
-        <ion-icon name="card-outline" slot="start" color="dark"></ion-icon>
-        <p class="text-lg font-semibold">RFID Reader</p>
       </ion-item>
 
       <ion-item class="dark:ion-border-gray-600" button [detail]="true"

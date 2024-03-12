@@ -35,31 +35,20 @@ export class DatabaseService {
     return {
       schedule: `
         CREATE TABLE IF NOT EXISTS schedule(
+          scheduleTrxId TEXT,
+          idschedule TEXT,
           abbreviation TEXT,
           adviceDate TEXT,
           approvedAt TEXT,
           approvedBy TEXT,
           approvedNotes TEXT,
-          area TEXT,
-          areaId TEXT,
-          assetCategoryId TEXT,
-          assetCategoryName TEXT,
-          assetForm TEXT,
           assetId TEXT,
+          photo TEXT,
           assetNumber TEXT,
           assetStatusId TEXT,
           assetStatusName TEXT,
-          capacityValue TEXT,
           condition TEXT,
-          detailLocation TEXT,
-          created_at TEXT,
-          date TEXT,
-          deleted_at TEXT,
-          idschedule TEXT,
-          latitude TEXT,
-          longitude TEXT,
-          merk TEXT,
-          photo TEXT,
+          supplyDate TEXT,
           reportPhoto TEXT,
           scannedAccuration TEXT,
           scannedAt TEXT,
@@ -75,102 +64,76 @@ export class DatabaseService {
           schWeeks TEXT,
           scheduleFrom TEXT,
           scheduleTo TEXT,
-          scheduleTrxId TEXT,
-          supplyDate TEXT,
           syncAt TEXT,
           tagId TEXT,
           tagNumber TEXT,
           unit TEXT,
-          unitCapacity TEXT,
-          unitId TEXT
+          unitId TEXT,
+          area TEXT,
+          areaId TEXT,
+          location TEXT,
+          locationId TEXT,
+          detailLocation TEXT,
+          assetCategoryId TEXT,
+          assetCategoryName TEXT,
+          latitude TEXT,
+          longitude TEXT,
+          created_at TEXT,
+          deleted_at TEXT,
+          date TEXT,
+          assetForm TEXT
         )
       `,
       asset: `
         CREATE TABLE IF NOT EXISTS asset(
           assetId TEXT NOT NULL,
-          assetCategoryId TEXT NOT NULL,
-          assetCategoryName TEXT NOT NULL,
-          assetName TEXT,
           assetNumber TEXT,
-          mediaId TEXT,
-          mediaName TEXT,
-          photo TEXT,
+          assetForm TEXT,
           description TEXT,
+          expireDate TEXT,
+          historyActive TEXT,
+          ipAddress TEXT,
+          lastScannedAt TEXT,
+          lastScannedBy TEXT,
+          more TEXT,
+          password TEXT,
+          photo TEXT,
+          schFrequency TEXT,
           schManual TEXT,
           schType TEXT,
-          schWeekDays TEXT,
-          schWeeks TEXT,
           supplyDate TEXT,
-          schMonthly TEXT,
-          schFrequency TEXT,
-          schYearly TEXT,
-          reportPhoto TEXT,
-          assetStatusId TEXT,
-          assetStatusName TEXT,
-          abbreviation TEXT,
-          capacityId TEXT,
-          capacityValue TEXT,
-          unitCapacity TEXT,
-          merkName TEXT,
-          typeName TEXT,
-          tagId TEXT,
-          tagNumber TEXT,
-          typeTag TEXT,
-          areaId TEXT,
-          area TEXT,
-          unit TEXT,
-          unitId TEXT,
-          bangunan TEXT,
-          location TEXT,
-          detailLocation TEXT,
-          latitude TEXT,
-          longitude TEXT,
-          created_at TEXT,
-          cctvIP TEXT
-        )
-      `,
-      tag: `
-        CREATE TABLE IF NOT EXISTS tag(
-          tagId TEXT NOT NULL,
-          tagNumber TEXT
-        )
-      `,
-      tagLocation: `
-        CREATE TABLE IF NOT EXISTS tagLocation(
-          areaId TEXT NOT NULL,
-          UnitId TEXT NOT NULL,
-          area TEXT NOT NULL,
-          unit TEXT NOT NULL,
-          latitude TEXT,
-          longitude TEXT
+          username TEXT,
+          updatedAt TEXT,
+          isUploaded INTEGER NOT NULL
         )
       `,
       parameter: `
         CREATE TABLE IF NOT EXISTS parameter(
+          abnormal TEXT,
+          area TEXT,
+          areaId TEXT,
           assetId TEXT NOT NULL,
           assetNumber TEXT NOT NULL,
+          created_at TEXT,
+          deleted_at TEXT,
           description TEXT,
+          idx TEXT,
           inputType TEXT NOT NULL,
           max INTEGER,
           min INTEGER,
           normal TEXT,
-          abnormal TEXT,
           option TEXT,
+          parameterGroup TEXT,
           parameterId TEXT NOT NULL,
           parameterName TEXT NOT NULL,
           schType TEXT NOT NULL,
           showOn TEXT,
-          sortId INTEGER,
-          uom TEXT,
-          workInstruction TEXT,
-          tagId,
+          tagId TEXT,
           unit TEXT,
-          unitId INTEGER,
-          area TEXT,
-          areaId INTEGER,
-          created_at TEXT,
+          unitId TEXT,
+          uom TEXT,
           updated_at TEXT,
-          parameterGroup TEXT
+          work_instruction TEXT
         )
       `,
       assetTag: `
@@ -182,16 +145,6 @@ export class DatabaseService {
           description TEXT,
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL
-        )
-      `,
-      recordHold: `
-        CREATE TABLE IF NOT EXISTS recordHold(
-          assetId TEXT NOT NULL,
-          parameterId TEXT NOT NULL,
-          value TEXT NOT NULL,
-          scannedAt TEXT NOT NULL,
-          scannedWith TEXT NOT NULL,
-          scannedNotes TEXT
         )
       `,
       record: `
@@ -261,38 +214,6 @@ export class DatabaseService {
           assetCategoryType TEXT
         )
       `,
-      jumlah: `
-        CREATE TABLE IF NOT EXISTS jumlah(
-          jumlahId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          jumlahNama TEXT NOT NULL,
-          jumlahCount INTEGER
-        )
-      `,
-      assetsCCTV: `
-        CREATE TABLE IF NOT EXISTS assetsCCTV(
-          assetForm TEXT,
-          assetNumber TEXT,
-          expireDate TEXT,
-          assetId TEXT NOT NULL,
-          more TEXT,
-          photo TEXT,
-          qr TEXT,
-          supplyDate TEXT,
-          cctvIP TEXT
-        )
-      `,
-      recordAssetsCCTV: `
-        CREATE TABLE IF NOT EXISTS recordAssetsCCTV(
-          assetForm TEXT,
-          assetNumber TEXT,
-          expireDate TEXT,
-          assetId TEXT NOT NULL,
-          more TEXT,
-          photo TEXT,
-          supplyDate TEXT,
-          cctvIP TEXT
-        )
-      `,
       formAssetsCategory: `
         CREATE TABLE IF NOT EXISTS formAssetsCategory(
           formId TEXT,
@@ -307,19 +228,6 @@ export class DatabaseService {
           created_at TEXT,
           updated_at TEXT,
           deleted_at TEXT
-        )
-      `,
-      type: `
-        CREATE TABLE IF NOT EXISTS type(
-          id TEXT NOT NULL,
-          type_name TEXT,
-          description TEXT,
-          code TEXT,
-          assetCategory TEXT,
-          merk TEXT,
-          media TEXT,
-          kapasitas TEXT,
-          more TEXT   
         )
       `,
       unit: `
@@ -341,18 +249,8 @@ export class DatabaseService {
           updated_at TEXT
         )
       `,
-      // areaByUnit: `
-      //   CREATE TABLE IF NOT EXISTS area(
-      //     id TEXT NOT NULL,
-      //     idUnit TEXT,
-      //     area TEXT,
-      //     kode TEXT,
-      //     deskripsi TEXT,
-      //     updated_at TEXT
-      //   )
-      // `,
-      selectionTandaPemasangan: `
-        CREATE TABLE IF NOT EXISTS selectionTandaPemasangan(
+      markSign: `
+        CREATE TABLE IF NOT EXISTS markSign(
           id TEXT,  
           idArea TEXT, 
           tag_number TEXT,   
@@ -365,12 +263,19 @@ export class DatabaseService {
           longitude TEXT,  
           tagCategory TEXT,   
           more TEXT,
-          photos TEXT  
+          photos TEXT
+        )
+      `,
+      assetStatus: `
+        CREATE TABLE IF NOT EXISTS assetStatus(
+          abbreviation TEXT,
+          assetCategoryId TEXT,
+          asset_status_name TEXT,
+          description TEXT,
+          id TEXT
         )
       `,
     };
-
-
   }
 
   async executeSQL(querySet: QuerySet) {
@@ -419,6 +324,7 @@ export class DatabaseService {
     }
 
     const sqlStatements = querySets.map(querySet => [querySet.query, querySet.params]);
+
     return this.database.sqlBatch(sqlStatements);
   }
 

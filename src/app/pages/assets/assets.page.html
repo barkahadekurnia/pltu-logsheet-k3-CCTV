@@ -25,19 +25,13 @@
       <ion-toolbar class="ion-bg-white">
         <ion-buttons slot="start" class="p-2" mode="ios" *ngIf="!isSearchFocus">
           <ion-back-button defaultHref="/tabs" color="primary"></ion-back-button>
-          
         </ion-buttons>
-<!-- 
-        <ion-buttons slot="end" class="p-2" mode="ios" *ngIf="!isSearchFocus">
-          <button (click)="openPage(['add-cctv'])" 
-          class="px-4 p-2 bg-lime-500 rounded-lg"  >Add CCTV</button>
-        </ion-buttons> -->
 
         <ion-buttons slot="end" *ngIf="isSearchFocus">
           <ion-button (click)="dismissModal()">
             <ion-icon name="close" class="text-3xl" color="primary"></ion-icon>
           </ion-button>
-          
+
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -45,8 +39,8 @@
       <h4 class="text-2xl font-bold">List CCTV</h4>
     </div>
     <div class="px-6">
-      <ion-searchbar class="ion-no-margin ion-no-padding text-xs" placeholder="Search assets"
-       inputmode="text" type="text" mode="ios" (ionChange)="onSearch($event)" [(ngModel)]="searchTerm" #autoFocus></ion-searchbar>
+      <ion-searchbar class="ion-no-margin ion-no-padding text-xs" placeholder="Search assets" inputmode="text"
+        type="text" mode="ios" (ionChange)="onSearch($event)" [(ngModel)]="searchTerm" #autoFocus></ion-searchbar>
     </div>
   </div>
 
@@ -56,17 +50,18 @@
     description="Synchronize with server to get data">
   </app-screen-view>
 
-  <div *ngIf="!loading && sourceAssets?.length && filteredAssets.length === 0 " class="w-full min-h-full bg-white dark:bg-gray-900">
+  <div *ngIf="!loading && sourceAssets?.length && filteredAssets.length === 0 "
+    class="w-full min-h-full bg-white dark:bg-gray-900">
     {{loadingFalse()}}
     <ion-grid class="w-full p-2 pt-0">
       <ion-row class="justify-center">
         <ion-col size="12" sizeLg="8">
           <!-- <ion-row> -->
-            <!-- <ion-col size="12">
+          <!-- <ion-col size="12">
               <ion-searchbar class="ion-no-margin ion-no-padding text-xs" placeholder="Search assets"
                 inputmode="text" type="text" mode="ios" (ionChange)="onSearch($event)" [(ngModel)]="searchTerm" #autoFocus></ion-searchbar>
             </ion-col> -->
-            <!-- <ion-col size="4">
+          <!-- <ion-col size="4">
               <div class="w-full h-full flex flex-col justify-center items-center">
                 <button class="btn btn-ghost btn-sm btn-block h-9 bg-gray-200 capitalize space-x-1 focus:outline-none"
                   (click)="openFilter()">
@@ -89,16 +84,17 @@
     </ion-grid>
   </div>
 
-  <div *ngIf="!loading && sourceAssets?.length && filteredAssets.length "  class="w-full min-h-full bg-white dark:bg-gray-900">
+  <div *ngIf="!loading && sourceAssets?.length && filteredAssets.length "
+    class="w-full min-h-full bg-white dark:bg-gray-900">
     <ion-grid class="w-full p-2">
       <ion-row class="justify-center">
         <ion-col size="12" sizeLg="8">
           <!-- <ion-row> -->
-            <!-- <ion-col size="12">
+          <!-- <ion-col size="12">
               <ion-searchbar class="ion-no-margin ion-no-padding text-xs" placeholder="Search assets"
                 inputmode="text" type="text" mode="ios" (ionChange)="onSearch($event)" [(ngModel)]="searchTerm" #autoFocus></ion-searchbar>
             </ion-col> -->
-            <!-- <ion-col size="4">
+          <!-- <ion-col size="4">
               <div class="w-full h-full flex flex-col justify-center items-center">
                 <button class="btn btn-ghost btn-sm btn-block h-9 bg-gray-200 capitalize space-x-1 focus:outline-none"
                   (click)="openFilter()">
@@ -109,7 +105,7 @@
             </ion-col> -->
           <!-- </ion-row> -->
 
-          <ion-row *ngIf="filteredAssets.length === 0 " >
+          <ion-row *ngIf="filteredAssets.length === 0 ">
             <ion-col size="12">
               <app-screen-view type="no-data" message="Data Not found"></app-screen-view>
             </ion-col>
@@ -144,7 +140,8 @@
                   </ion-item>
                 </ion-list>
 
-                <button class="btn btn-sm btn-primary text-white btn-block rounded-lg space-x-1 focus:outline-none" (click)="showDetails(asset)">
+                <button class="btn btn-sm btn-primary text-white btn-block rounded-lg space-x-1 focus:outline-none"
+                  (click)="showDetails(asset)">
                   <p class="text-xs font-medium capitalize">Details</p>
                   <ion-icon name="chevron-forward-outline"></ion-icon>
                 </button>
@@ -156,7 +153,7 @@
     </ion-grid>
   </div>
 
-  <ion-infinite-scroll  *ngIf="!loading && filteredAssets?.length" (ionInfinite)="pushData($event)">
+  <ion-infinite-scroll *ngIf="!loading && filteredAssets?.length" (ionInfinite)="pushData($event)">
     <ion-infinite-scroll-content class="bg-white dark:bg-gray-900" loadingSpinner="dots"></ion-infinite-scroll-content>
   </ion-infinite-scroll>
 

@@ -25,8 +25,8 @@ import { MediaService } from 'src/app/services/media/media.service';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
-import { Asset } from 'src/app/interfaces/asset';
 import { Parameter } from 'src/app/interfaces/parameter';
+import { Assets } from 'src/app/interfaces/asset';
 
 @Component({
   selector: 'app-scan-form',
@@ -49,7 +49,7 @@ export class ScanFormPage implements OnInit {
   resultParam = [];
   attach = [];
   sch = [];
-  asset: Asset;
+  asset: any;
   param: Parameter;
   record: {
     scannedAt: string;

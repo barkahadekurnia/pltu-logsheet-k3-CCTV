@@ -177,21 +177,16 @@
             </ion-col>
           </ion-row>
 
-          <!-- <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center">
+          <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center">
             <ion-accordion-group class="w-full">
-              <ion-accordion *ngFor="let shift of dataShiftPerDay" [value]="shift.shift" class="rounded-xl mb-4"
+              <ion-accordion *ngFor="let shift of dataShiftPerDay; index as idx" [value]="idx" class="rounded-xl mb-4"
                 toggleIcon="chevron-down-circle">
-                <ng-container
-                  *ngIf="shift.teamData[shift.groupNameData[0].operatorGroupName][1].operatorUserNama === usersData.name || 
-                shift.teamData[shift.groupNameData[0].operatorGroupName][0].operatorUserNama === usersData.name || usersData.group === 'ADMIN'">
+                <ng-container>
                   <ion-item slot="header" color="dark">
                     <section class=" py-4">
                       <div class="flex mb-3 text-xs font-semibold">
                         <label class="p-1 px-2 mr-2 bg-primary text-white rounded-full">
                           {{shift.groupNameData[0].operatorGroupName}}
-                        </label>
-                        <label class="p-1 px-2 mr-2 bg-primary text-white rounded-full">
-                          {{shift.shift}}
                         </label>
                       </div>
                       <div class="mb-3 text-sm font-semibold">
@@ -205,12 +200,13 @@
                           </p>
                         </div>
                       </div>
-                      <div class="absolute top-5 right-5 text-white text-sm align-middle flex place-items-center"  >
-                          <div class="p-1 px-2 w-max h-5 flex justify-center items-center rounded-full bg-error ">Total : {{jumlahAssetShift(shift.detailLocationData)}} </div>
+                      <div class="absolute top-5 right-5 text-white text-sm align-middle flex place-items-center">
+                        <div class="p-1 px-2 w-max h-5 flex justify-center items-center rounded-full bg-error ">Total :
+                          {{jumlahAssetShift(shift.detailLocationData)}} </div>
                       </div>
                     </section>
                   </ion-item>
-                  <div class="ion-padding border border-gray-300 rounded-xl" slot="content">
+                  <div class="ion-padding border border-gray-300 rounded-b-xl -mt-2" slot="content">
                     <div class="text-black">
                       <h4 class="text-md font-semibold mb-2">
                         <ion-icon slot="icon-only" size="40px" name="location-outline" class="mr-1 pt-1"></ion-icon>
@@ -220,7 +216,8 @@
                       <ng-container *ngIf="shift.detailLocationData?.length > 0">
                         <div class="text-sm mb-1.5 font-semibold"
                           *ngFor="let dataLocation of shift.detailLocationData; index as idx;">
-                          <div class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
+                          <div
+                            class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
                             (click)="viewAssetsCategory('schedule-lokasi', dataLocation?.assetData, assetCategory)">
                             <div>
                               {{lowerCaseLetter(dataLocation.locationUnitNama)}}
@@ -228,7 +225,8 @@
                               ({{dataLocation.locationLokasiNama}})
                             </div>
                             <div class="align-middle flex place-items-center">
-                                <div class="p-1 w-max h-5 flex justify-center items-center rounded-full bg-error "> {{dataLocation.assetData.length}} </div>
+                              <div class="p-1 w-max h-5 flex justify-center items-center rounded-full bg-error ">
+                                {{dataLocation.assetData.length}} </div>
                             </div>
                           </div>
                         </div>
@@ -243,46 +241,43 @@
                 </ng-container>
               </ion-accordion>
             </ion-accordion-group>
-          </ion-row> -->
-
-          <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full px-3 justify-center items-center">  
-              <div *ngFor="let shift of dataShiftPerDay" class="rounded-xl w-full">
-                  <div class="border bg-slate-100 border-gray-300 rounded-xl w-full p-2"
-                  *ngIf="shift.teamData[shift.groupNameData[0].operatorGroupName][1].operatorUserNama === usersData.name || 
-                  shift.teamData[shift.groupNameData[0].operatorGroupName][0].operatorUserNama === usersData.name || usersData.group === 'ADMIN'">
-                    <div class="text-black">
-                      <h4 class="text-base font-semibold mb-2">
-                        <ion-icon slot="icon-only" size="40px" name="location-outline" class="mr-1 pt-1"></ion-icon>
-                        Daftar Lokasi
-                      </h4>
-                      <ng-container *ngIf="shift.detailLocationData?.length > 0">
-                        <div class="text-sm mb-1.5 font-semibold"
-                          *ngFor="let dataLocation of shift.detailLocationData; index as idx;">
-                          <div  
-                          *ngIf="dataLocation.assetData.length > 0"
-                          class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
-                            (click)="viewAssetsCategory('schedule-lokasi', dataLocation?.assetData, assetCategory)">
-                            <div>
-                              {{lowerCaseLetter(dataLocation.locationUnitNama)}}
-                              - {{dataLocation.locationLokasiDescription}}
-                              ({{dataLocation.locationLokasiNama}})
-                            </div>
-                            <div class="align-middle flex place-items-center">
-                                <div class="p-1 w-max h-5 flex justify-center items-center rounded-full bg-error "> {{dataLocation.assetData.length}} </div>
-                            </div>
-                          </div>
-                        </div>
-                      </ng-container>
-                      <ng-container *ngIf="shift.detailLocationData?.length === 0">
-                        <div class="p-4 text-center">
-                          <h4 class="font-light text-gray-400">- Tidak ada data -</h4>
-                        </div>
-                      </ng-container>
-                    </div>
-                  </div>
-              </div>
           </ion-row>
 
+          <!-- <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full px-3 justify-center items-center">
+            <div *ngFor="let shift of dataShiftPerDay" class="rounded-xl w-full">
+              <div class="border bg-slate-100 border-gray-300 rounded-xl w-full p-2">
+                <div class="text-black">
+                  <h4 class="text-base font-semibold mb-2">
+                    <ion-icon slot="icon-only" size="40px" name="location-outline" class="mr-1 pt-1"></ion-icon>
+                    Daftar Lokasi
+                  </h4>
+                  <ng-container *ngIf="shift.detailLocationData?.length > 0">
+                    <div class="text-sm mb-1.5 font-semibold"
+                      *ngFor="let dataLocation of shift.detailLocationData; index as idx;">
+                      <div *ngIf="dataLocation.assetData.length > 0"
+                        class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
+                        (click)="viewAssetsCategory('schedule-lokasi', dataLocation?.assetData, assetCategory)">
+                        <div>
+                          {{lowerCaseLetter(dataLocation.locationUnitNama)}}
+                          - {{dataLocation.locationLokasiDescription}}
+                          ({{dataLocation.locationLokasiNama}})
+                        </div>
+                        <div class="align-middle flex place-items-center">
+                          <div class="p-1 w-max h-5 flex justify-center items-center rounded-full bg-error ">
+                            {{dataLocation.assetData.length}} </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
+                  <ng-container *ngIf="shift.detailLocationData?.length === 0">
+                    <div class="p-4 text-center">
+                      <h4 class="font-light text-gray-400">- Tidak ada data -</h4>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </ion-row> -->
 
           <ion-row *ngIf="!selectedDate.schedules?.length">
             <ion-col size="12">

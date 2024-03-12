@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
@@ -5,15 +6,14 @@ const config: CapacitorConfig = {
   appName: 'CCTV Logsheet',
   webDir: 'www',
   plugins: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     LocalNotifications: {
       smallIcon: 'ic_stat_icon_config_sample',
       iconColor: '#488AFF',
       sound: 'beep.wav',
     },
-    // CapacitorHttp: {
-    //   enabled: true,
-    // },
+    CapacitorHttp: {
+      enabled: false,
+    },
   }
 };
 

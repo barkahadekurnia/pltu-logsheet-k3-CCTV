@@ -1,0 +1,61 @@
+<ion-content>
+  <div class="w-full min-h-full p-8 flex flex-col justify-start items-center space-x-8"
+    *ngIf="dataLoading; else dataLoaded">
+    <app-illustration-progress className="w-64 px-4 fill-current text-primary">
+    </app-illustration-progress>
+
+    <ion-spinner class="transform scale-150" name="dots" color="primary"></ion-spinner>
+  </div>
+  <ng-template #dataLoaded>
+    <ion-header mode="ios" class="sticky-header">
+      <ion-toolbar>
+        <h3 class="text-center font-semibold text-base capitalize">
+          Pilih {{pickerType === 'mark-sign' ? 'Tanda Pemasangan' : pickerType}}
+        </h3>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar animated="true" placeholder="Pencarian" mode="ios" (ionChange)="search($event)"
+          (ionClear)="resetSearch()"></ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <div class="main-list" *ngIf="searchInitated; else dataList">
+      <ion-list class="mb-0 animated">
+        <ion-item class="ion-no-padding px-2" *ngFor="let name of filteredData" lines="full" (click)="doSelection(name)"
+          [class.selected]="isSelected(name.id)">
+          <ion-avatar slot="start">
+            <ion-icon [name]="name?.photo" class="ml-2 text-primary h-8 w-8"></ion-icon>
+          </ion-avatar>
+          <ion-label>
+            <h3 class="text-sm font-medium">{{name?.name}}</h3>
+            <p class="text-gray-600 text-xs">{{name?.description}}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+    <ng-template #dataList>
+      <div class="main-list" *ngIf="dataResult.length">
+        <ion-list *ngFor="let item of dataResult" class="mb-0 animated">
+          <ion-item class="ion-no-padding px-2" *ngFor="let name of item[1]" lines="full" (click)="doSelection(name)"
+            [class.selected]="isSelected(name?.id)">
+            <ion-avatar slot="start">
+              <ion-icon [name]="name?.photo" class="ml-2 text-primary h-8 w-8"></ion-icon>
+            </ion-avatar>
+            <ion-label>
+              <h3 class="text-sm font-medium">{{name?.name}}</h3>
+              <p class="text-gray-600 text-xs">{{name?.description}}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
+      <div *ngIf="!dataResult.length" class="w-full min-h-full px-4 flex flex-col justify-start items-center">
+        <app-illustration-no-data className="w-64 px-4 fill-current text-primary">
+        </app-illustration-no-data>
+
+        <div class="w-full">
+          <h3 class="px-4 text-center text-lg font-semibold">Data Kosong</h3>
+          <p class="px-4 text-center text-sm text-gray-500">Belum ada data {{ pickerType }}</p>
+        </div>
+      </div>
+    </ng-template>
+  </ng-template>
+</ion-content>

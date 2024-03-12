@@ -10,13 +10,15 @@ import { AssetDetailPage } from './asset-detail.page';
 
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { PickerScreenComponentModule } from 'src/app/components/picker-screen/picker-screen.component.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    AssetDetailPageRoutingModule
+    AssetDetailPageRoutingModule,
+    PickerScreenComponentModule
   ],
   declarations: [AssetDetailPage],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]

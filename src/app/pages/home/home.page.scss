@@ -1,6 +1,120 @@
 .shadow {
-    box-shadow: 0px 0px 14px 0px rgba(0, 0, 0, 0.14) !important;
+  box-shadow: 0px 0px 14px 0px rgba(0, 0, 0, 0.14) !important;
 }
 ion-icon {
   font-size: 20px; //Preferred size here
+}
+
+.button {
+  outline: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #020281;
+  min-width: 160px;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  padding: 6px 20px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.button:focus .dropdown,
+.button:active .dropdown {
+  transform: translate(0, 20px);
+  opacity: 1;
+  visibility: visible;
+}
+
+.button .material-icons {
+  border-radius: 100%;
+  animation: ripple 0.6s linear infinite;
+}
+
+.button .dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #ffffff;
+  width: 100%;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.3s ease;
+}
+
+.button .dropdown:before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 20px;
+  width: 0;
+  height: 0;
+  box-shadow: 2px -2px 6px rgba(0, 0, 0, 0.05);
+  border-top: 6px solid #ffffff;
+  border-right: 6px solid #ffffff;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid transparent;
+  transform: rotate(-45deg);
+  mix-blend-mode: multiple;
+}
+
+.button .dropdown li {
+  z-index: 1;
+  position: relative;
+  background: #ffffff;
+  padding: 0 20px;
+  color: #666;
+}
+
+.button .dropdown li.active {
+  color: #5380f7;
+}
+
+.button .dropdown li:first-child {
+  border-radius: 4px 4px 0 0;
+}
+
+.button .dropdown li:last-child {
+  border-radius: 0 0 4px 4px;
+}
+
+.button .dropdown li:last-child a {
+  border-bottom: 0;
+}
+
+.button .dropdown a {
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 16px 0;
+  color: inherit;
+  font-size: 10px;
+  text-decoration: none;
+}
+
+@keyframes ripple {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(255, 255, 255, 0.1),
+      0 0 0 20px rgba(255, 255, 255, 0.1),
+      0 0 0 40px rgba(255, 255, 255, 0.1),
+      0 0 0 60px rgba(255, 255, 255, 0.1);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 20px rgba(255, 255, 255, 0.1),
+      0 0 0 40px rgba(255, 255, 255, 0.1),
+      0 0 0 60px rgba(255, 255, 255, 0.1),
+      0 0 0 80px rgba(255, 255, 255, 0);
+  }
 }

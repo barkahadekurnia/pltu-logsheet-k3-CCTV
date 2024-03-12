@@ -7,6 +7,12 @@
 			"smallIcon": "ic_stat_icon_config_sample",
 			"iconColor": "#488AFF",
 			"sound": "beep.wav"
+		},
+		"CapacitorHttp": {
+			"enabled": false
 		}
+	},
+	"server": {
+		"url": "http://172.20.10.2:8100"
 	}
 }

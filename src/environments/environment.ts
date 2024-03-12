@@ -6,132 +6,128 @@ export const environment = {
   production: false,
   url: {
     base: 'http://114.6.64.2:11241/api/logsheet_dev',
-    // base: 'http://114.6.64.2:11241/api/logsheet_new',
-    public: 'http://114.6.64.2:11231/',
     baseUrl: 'http://103.250.10.4/app/cctv',
+    telegramUrl: 'https://api.telegram.org',
 
     get login() {
-      return this.base + '/api/login';
+      return this.baseUrl + '/api/login';
     },
     get grupoperator() {
-      return this.base + `/api/group/getGroupOperatorByUserId/`;
+      return this.baseUrl + `/api/group/getGroupOperatorByUserId`;
     },
     get category() {
-      return this.base + `/api/category/asset/index?assetCategoryType=all`;
+      return this.baseUrl + `/api/category/asset/index?assetCategoryType=all`;
     },
     get assets() {
-      return this.base + '/api/transaction/schedule/detail';
+      return this.baseUrl + '/api/transaction/schedule/detail';
     },
     get assetsid() {
-      return this.base + '/api/asset/assetPerId';
+      return this.baseUrl + '/api/asset/assetPerId';
     },
     get assetsdetail() {
-      return this.base + '/api/asset/show';
+      return this.baseUrl + '/api/asset/show';
     },
     get changerfid() {
-      return this.base + '/api/rfid/change';
+      return this.baseUrl + '/api/rfid/change';
     },
     get countassets() {
-      return this.base + '/api/asset/jumlah';
+      return this.baseUrl + '/api/asset/jumlah';
     },
     get laporanpetugas() {
-      return this.base + '/api/transaction/schedule/indexTrxParent';
+      return this.baseUrl + '/api/transaction/schedule/indexTrxParent';
     },
     get detaillaporan() {
-      return this.base + '/api/transaction/schedule/viewTrxParent';
+      return this.baseUrl + '/api/transaction/schedule/viewTrxParent';
     },
     get kirimlaporan() {
-      return this.base + '/api/transaction/schedule/reportTrxParent';
+      return this.baseUrl + '/api/transaction/schedule/reportTrxParent';
     },
     get assetTags() {
-      return this.base + `/api/transaction/asset/tagging`;
+      return this.baseUrl + `/api/transaction/asset/tagging`;
     },
     get tags() {
-      return this.base + '/api/transaction/asset/tagging';
+      return this.baseUrl + '/api/transaction/asset/tagging';
     },
     get tagsscan() {
-      return this.base + '/api/transaction/assetTagging/byManyAsset';
+      return this.baseUrl + '/api/transaction/assetTagging/byManyAsset';
     },
     get attach() {
-      return this.base + '/api/transaction/attachment';
+      return this.baseUrl + '/api/transaction/attachment';
     },
     get parameters() {
-      return this.base + '/api/transaction/asset/param';
+      return this.baseUrl + '/api/transaction/asset/param';
     },
     get schedules() {
-      return this.base + `/api/transaction/schedule/detail`;
-    },
-    get schedulesnonsift() {
-      return this.base + `/api/transaction/schedule/nonShift`;
-    },
-    get schedulesnonmanual() {
-      return this.base + `/api/transaction/schedule/scheduleLK3`;
+      return this.baseUrl + `/api/transaction/schedule/detail`;
     },
     get records() {
-      return this.base + `/api/transaction/schedule/store`;
+      return this.baseUrl + `/api/transaction/schedule/store`;
     },
     get recordAttachment() {
-      return this.base + `/api/asset/parameter/uploadAttachmentParameter`;
+      return this.baseUrl + `/api/asset/parameter/uploadAttachmentParameter`;
     },
     get activityLogs() {
-      return this.base + `/api/log/activity`;
+      return this.baseUrl + `/api/log/activity`;
     },
     get jadwal() {
-      return this.base + '/api/schedule/data';
+      return this.baseUrl + '/api/schedule/data';
     },
     get jadwaldate() {
-      return this.base + '/api/schedule/getAssetByCategory';
+      return this.baseUrl + '/api/schedule/getAssetByCategory';
     },
-    get apar() {
-      return this.base + '/api/asset/index';
+    get allAssets() {
+      return this.baseUrl + '/api/asset/index';
+    },
+    get statusAsset() {
+      return this.baseUrl + '/api/asset/status/category-asset';
     },
     get updateLocation() {
-      return this.base + '/api/tag/updateDetailLocation';
+      return this.baseUrl + '/api/tag/updateDetailLocation';
     },
     get formAssetCategory() {
-      return this.base + '/api/assetform/assetCategory';
+      return this.baseUrl + '/api/assetform/assetCategory';
     },
     get formType() {
-      return this.base + '/api/type/getDataByForm';
+      return this.baseUrl + '/api/type/getDataByForm';
     },
     get uploadFormType() {
-      return this.base + '/api/asset/updateAssetType';
+      return this.baseUrl + '/api/asset/updateAssetType';
+    },
+    get updateDetailAsset() {
+      return this.baseUrl + '/api/asset/update';
     },
     get schedulesShift() {
-      return this.base + `/api/schedule/getTeamSchedule`;
+      return this.baseUrl + `/api/schedule/getTeamSchedule`;
     },
     get selectionUnit() {
       return this.baseUrl + '/api/unit';
     },
-    // + unitId (1)
     get selectionArea() {
       return this.baseUrl + '/api/area/show';
     },
-    // + areaId ()
     get selectionTandaPemasangan() {
-      return this.base + '/api/tag/getTagByArea?area=';
+      return this.baseUrl + '/api/tag/getTagByArea?area=';
     },
-    // ambil semua data tanda pemasangan ()
     get allTandaPemasangan() {
-      return this.base + '/api/tag/index?search=undefined';
+      return this.baseUrl + '/api/tag/index?search=undefined';
     },
-    //body tag id  pakai /assetId
     get updateAssetTag() {
-      return this.base + '/api/asset/updateAssetTag';
+      return this.baseUrl + '/api/asset/updateAssetTag';
     },
-    // +/trxparentId/scheduleTrxId
     get assetParameterTransaksi() {
-      return this.base + '/api/transaction/schedule/view';
+      return this.baseUrl + '/api/transaction/schedule/view';
     },
-    //get all asset 2k++
     get assetsAll() {
-      return this.base + '/api/asset/all';
+      return this.baseUrl + '/api/asset/all';
     },
     get newAssets() {
-      return this.base + '/api/asset/getAllDataAsset';
+      return this.baseUrl + '/api/asset/getAllDataAsset';
     },
     get formAssetCategoryAll() {
-      return this.base + '/api/assetform/index';
+      return this.baseUrl + '/api/assetform/index';
+    },
+    get updateAsset() {
+      return this.baseUrl + '/api/asset/update_new';
     },
   },
   values: {
@@ -141,7 +137,8 @@ export const environment = {
     token: 'auth__token',
     salt: 'nocola__digital_logsheet',
     secureKey: 'enc__secure_key',
-    secureIV: 'enc__secure_iv'
+    secureIV: 'enc__secure_iv',
+    telegramToken: '7113767015:AAEGZ4hc4asWKj43jciZbqoAdQL1wBQMP_Y',
   },
   codePushIosKey: 'KCpPn5o6yu-tc1-up8eqrw3-TxBbNHxd2t4GG'
 };

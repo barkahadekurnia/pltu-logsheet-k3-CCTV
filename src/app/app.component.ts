@@ -1,11 +1,11 @@
+/* eslint-disable radix */
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Platform, IonRouterOutlet, MenuController, AlertController, IonModal } from '@ionic/angular';
+import { Platform, IonRouterOutlet, MenuController } from '@ionic/angular';
 import { TextZoom } from '@capacitor/text-zoom';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
 import { ScreenOrientation } from '@awesome-cordova-plugins/screen-orientation/ngx';
-import { NfcService } from 'src/app/services/nfc/nfc.service';
 import { SharedService, UserData } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { environment } from 'src/environments/environment';
@@ -13,11 +13,7 @@ import Viewer from 'viewerjs';
 import * as mapboxgl from 'mapbox-gl';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Router } from '@angular/router';
-import { Keyboard } from '@capacitor/keyboard';
 import { HttpService } from './services/http/http.service';
-import { chain, filter, find, intersectionBy, intersectionWith, map, merge, some } from 'lodash';
-import { of } from 'rxjs';
-import { tap, map as rxjsMap } from 'rxjs/operators';
 
 import { register } from 'swiper/element/bundle';
 
@@ -72,12 +68,12 @@ export class AppComponent implements AfterViewInit {
   isReadOnly: boolean;
 
   dataFormDetailAsset: AssetDetails[] = [];
+  user: UserData;
+  formaset: any[];
 
   private map: mapboxgl.Map;
   private marker: mapboxgl.Marker;
   private permissions: { [key: string]: any }[];
-  user: UserData;
-  formaset: any[];
 
   constructor(
     private router: Router,
@@ -85,10 +81,8 @@ export class AppComponent implements AfterViewInit {
     private menuCtrl: MenuController,
     private androidPermissions: AndroidPermissions,
     private screenOrientation: ScreenOrientation,
-    private nfc: NfcService,
     public shared: SharedService,
     public utils: UtilsService,
-    private alertCtrl: AlertController,
     private http: HttpService
   ) {
     // this.user = this.shared.user;
@@ -141,12 +135,6 @@ export class AppComponent implements AfterViewInit {
 
       if (this.progress === 25) {
         await this.checkAppPermissions();
-      }
-
-      if (this.progress === 50) {
-        // if (this.platform.is('android')) {
-        //   await this.nfc.setup();
-        // }
       }
 
       if (this.progress === 90 && this.platform.is('capacitor')) {
@@ -263,14 +251,13 @@ export class AppComponent implements AfterViewInit {
         : 'mapbox://styles/mapbox/streets-v11'
     );
     // [109.0873408, -7.6847873]
-    parseInt(this.shared.asset.longitude)
-    parseInt(this.shared.asset.latitude)
+    parseInt(this.shared.asset.longitude);
+    parseInt(this.shared.asset.latitude);
     console.log('this shared asset', this.shared.asset);
     console.log('this asset di app comp', this.asset);
-    
+
     this.marker = new mapboxgl.Marker()
-   
-    
+
       .setLngLat([
         +this.shared.asset.longitude,
         +this.shared.asset.latitude

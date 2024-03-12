@@ -5,14 +5,13 @@ import { Platform, NavController } from '@ionic/angular';
 
 import { Capacitor } from '@capacitor/core';
 
-import { reduce, uniq, uniqBy } from 'lodash';
+import { uniq, uniqBy } from 'lodash';
 import * as moment from 'moment';
 
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { HttpService } from 'src/app/services/http/http.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-schedules',
@@ -46,7 +45,6 @@ export class SchedulesPage implements OnInit {
     private utils: UtilsService,
     private navCtrl: NavController,
     private http: HttpService,
-    private router: Router,
   ) {
     this.calendar = {
       date: null,
@@ -55,11 +53,6 @@ export class SchedulesPage implements OnInit {
       daysInNextMonth: [],
       title: '',
     };
-
-    // if (router.getCurrentNavigation()) {
-    //   const navValues = this.router.getCurrentNavigation();
-    //   console.log('navValues ', navValues);
-    // }
 
     this.schedules = [];
 
@@ -113,12 +106,10 @@ export class SchedulesPage implements OnInit {
     const dataGroupByAreaId = uniqBy(dataSchedulePerDay, 'areaId');
     this.selectedDate.lokasi = dataGroupByAreaId;
 
-    console.log('this selected date lokasi', this.selectedDate.lokasi)
+    console.log('this selected date lokasi', this.selectedDate.lokasi);
   }
-  
-  //barkah maintance add shift schedule
+
   async scheduleShift(item: any) {
-    console.log('item when select date' , item)
     if (item.schedules.length > 0) {
       const loader = await this.utils.presentLoader();
 
@@ -134,8 +125,6 @@ export class SchedulesPage implements OnInit {
         const bodyResponse = response.data?.data;
         this.dataShiftPerDay = bodyResponse;
         console.log('dataShiftPerDay', this.dataShiftPerDay);
-
-
       } catch (err) {
         console.error(err);
       } finally {
@@ -203,6 +192,39 @@ export class SchedulesPage implements OnInit {
     });
   }
 
+  //barkah maintance add shift schedule
+  lowerCaseLetter(str) {
+    let lower = '';
+    if (str) {
+      lower = str.toLowerCase();
+    }
+    return lower;
+  }
+
+  lowerCaseLetterUnit(str) {
+    const split = str.split(' ');
+
+    const depan = split[0].toLowerCase();
+    const belakang = split[1].toUpperCase();
+
+    const join = depan + ' ' + belakang;
+    return join;
+  }
+
+  jumlahAssetShift(shift) {
+    //const total = shift.assetData.reduce((a, b) => a + b);
+    let total = 0;
+
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let i = 0; i < shift.length; i++) {
+      total = total + shift[i].assetData.length;
+    }
+
+    //console.log('ini total shift di asset', shift.length);
+
+    return total;
+  }
+
   private async getKategori() {
     try {
       const result = await this.database.select('category', {
@@ -224,7 +246,7 @@ export class SchedulesPage implements OnInit {
             description: kat?.description,
             kode: kat?.kode,
             urlImage: kat?.urlImage,
-           urlOffline: Capacitor.convertFileSrc(kat?.urlOffline)
+            urlOffline: Capacitor.convertFileSrc(kat?.urlOffline)
             //urlOffline:  kat?.urlOffline
           };
           return data;
@@ -244,65 +266,13 @@ export class SchedulesPage implements OnInit {
     const now = this.utils.getTime();
 
     try {
-      const result = await this.database.select(
-        'schedule',
-        {
-          column: [
-            'idschedule',
-            'scheduleTrxId',
-            'abbreviation',
-            'adviceDate',
-            'approvedAt',
-            'approvedBy',
-            'approvedNotes',
-            'assetId',
-            'assetNumber',
-            'assetStatusId',
-            'assetStatusName',
-            'condition',
-            'merk',
-            'capacityValue',
-            'detailLocation',
-            'unitCapacity',
-            'supplyDate',
-            'reportPhoto',
-            'scannedAccuration',
-            'scannedAt',
-            'scannedBy',
-            'scannedEnd',
-            'scannedNotes',
-            'scannedWith',
-            'schDays',
-            'schFrequency',
-            'schManual',
-            'schType',
-            'schWeekDays',
-            'schWeeks',
-            'scheduleFrom',
-            'scheduleTo',
-            'syncAt',
-            'tagId',
-            'tagNumber',
-            'unit',
-            'unitId',
-            'area',
-            'areaId',
-            'latitude',
-            'longitude',
-            'created_at',
-            'deleted_at',
-            'date',
-            'assetCategoryId',
-            'assetCategoryName'
-          ],
-        }
-      );
-
+      const result = await this.database.select('schedule', {});
       const schedules = this.database.parseResult(result);
-      console.log('isi dari sql lite schedules', schedules)
+      console.log('isi dari sql lite schedules', schedules);
+
       const assetIds = uniq(schedules.map(schedule => schedule.assetId));
       const assetTags = await this.getAssetTags(assetIds);
-      const holdedRecords = await this.getHoldedRecords(assetIds);
+      // const holdedRecords = await this.getHoldedRecords(assetIds);
 
       const scheduleTrxIds = schedules.map(schedule => schedule.scheduleTrxId);
       const uploadedRecords = await this.getUploadedRecords(scheduleTrxIds);
@@ -310,55 +280,30 @@ export class SchedulesPage implements OnInit {
 
       for (const schedule of schedules) {
         const data = {
-          idschedule: schedule.idschedule,
-          scheduleTrxId: schedule.scheduleTrxId,
-          abbreviation: schedule.abbreviation,
-          approvedAt: schedule.approvedAt,
-          approvedBy: schedule.approvedBy,
-          approvedNotes: schedule.approvedNotes,
-          assetId: schedule.approvedBy,
-          areaId: schedule.areaId,
-          assetNumber: schedule.assetNumber,
-          assetName: schedule.assetNumber,
-          condition: schedule.condition,
-          supplyDate: schedule.supplyDate,
-          area: schedule.area,
-          latitude: schedule.latitude,
-          longitude: schedule.longitude,
-          detailLocation: schedule.detailLocation,
-          tagNumber: schedule.tagNumber,
-          scannedAt: schedule.scannedAt,
-          scannedBy: schedule.scannedBy,
-          scannedEnd: schedule.scannedEnd,
-          scannedNotes: schedule.scannedNotes,
-          scannedWith: schedule.scannedWith,
-          tagId: schedule.tagId,
-          unit: schedule.unit,
-          unitId: schedule.unitId,
-          assetStatusId: schedule.assetStatusId,
-          assetStatusName: schedule.assetStatusName,
-          assetTags: assetTags.filter(assetTag => assetTag.assetId === schedule.assetId),
-          scheduleFrom: moment(schedule.date).format('D MMMM YYYY HH:mm'),
-          scheduleTo: moment(schedule.scheduleTo).format('D MMMM YYYY HH:mm'),
           adviceDate: schedule.date
             ? moment(schedule.date).format('D MMMM YYYY')
             : moment(schedule.date).format('D MMMM YYYY'),
+          photo: this.utils.parseJson(schedule.photo),
+          assetId: schedule.approvedBy,
+          assetName: schedule.assetNumber,
+          assetTags: assetTags.filter(assetTag => assetTag.assetId === schedule.assetId),
+          scheduleFrom: moment(schedule.date).format('D MMMM YYYY HH:mm'),
+          scheduleTo: moment(schedule.scheduleTo).format('D MMMM YYYY HH:mm'),
+          assetForm: this.utils.parseJson(schedule.assetForm),
           isUploaded: false,
           isUnuploaded: false,
           hasPreview: false,
           hasRecordHold: false,
           hasCoordinatTagging: false,
           isUnscanned: false,
-          assetCategoryId: schedule.assetCategoryId,
-          assetCategoryName: schedule.assetCategoryName,
-          syncAt: schedule.syncAt
+          ...schedule,
         };
 
         const start = new Date(schedule.scheduleFrom).getTime();
         const end = new Date(schedule.scheduleTo).getTime();
         const isScheduleNow = moment(now).isBetween(start, end);
 
-        if (schedule.syncAt != null) { // Uploaded
+        if (schedule.syncAt !== null) { // Uploaded
           data.isUploaded = true;
           data.hasPreview = uploadedRecords.includes(schedule.scheduleTrxId);
           data.scannedEnd = moment(schedule.scannedEnd, 'YYYY-MM-DD HH:mm:ss')
@@ -372,9 +317,9 @@ export class SchedulesPage implements OnInit {
             data.scannedEnd = moment(scannedEnd, 'YYYY-MM-DD HH:mm:ss')
               .format('D MMMM YYYY HH:mm');
           }
-        } else if (holdedRecords.includes(schedule.assetId)) { // Holded
-          data.hasRecordHold = isScheduleNow;
-          data.isUnscanned = !data.hasRecordHold;
+          // } else if (holdedRecords.includes(schedule.assetId)) { // Holded
+          //   data.hasRecordHold = isScheduleNow;
+          //   data.isUnscanned = !data.hasRecordHold;
         } else { // Unscanned
           data.isUnscanned = true;
 
@@ -391,8 +336,8 @@ export class SchedulesPage implements OnInit {
 
         this.schedules.push(data);
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     } finally {
       if (this.calendar.date == null) {
         this.calendar.date = new Date(now);
@@ -460,7 +405,8 @@ export class SchedulesPage implements OnInit {
           .format('D MMMM YYYY');
 
         const schedulesPerDate = this.schedules
-          .filter(schedule => schedule.adviceDate === label);
+          .filter(schedule => moment(schedule.date).format('D MMMM YYYY') === label);
+        console.log('schedulesPerDate', schedulesPerDate);
 
         this.calendar.daysInThisMonth.push({
           date: i,
@@ -634,35 +580,4 @@ export class SchedulesPage implements OnInit {
     return unuploadedRecords;
   }
 
-  //barkah maintance add shift schedule
-  lowerCaseLetter(string) {
-    let lower = ''
-    if(string) {
-      lower = string.toLowerCase() 
-    } 
-    return lower
-  }
-
-  lowerCaseLetterUnit(string) {
-    let split = string.split(' ')
-
-    let depan = split[0].toLowerCase() 
-    let belakang = split[1].toUpperCase() 
-
-    let join = depan + ' ' + belakang
-    return join
-  }
-
-  jumlahAssetShift(shift) {
-    //const total = shift.assetData.reduce((a, b) => a + b);
-    let total = 0
-
-    for ( let i = 0 ; i < shift.length ; i++) {
-      total = total + shift[i].assetData.length
-    }
-
-    //console.log('ini total shift di asset', shift.length);
-    
-    return total
-  }
 }

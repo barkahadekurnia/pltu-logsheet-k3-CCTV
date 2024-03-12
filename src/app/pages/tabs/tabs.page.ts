@@ -1,8 +1,8 @@
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
-// import { UserData } from 'src/app/services/shared/shared.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
-
+import { BarcodeScanner, ScanOptions, SupportedFormat } from '@capacitor-community/barcode-scanner';
+import { UtilsService } from 'src/app/services/utils/utils.service';
 
 @Component({
   selector: 'app-tabs',
@@ -11,20 +11,43 @@ import { SharedService } from 'src/app/services/shared/shared.service';
 })
 export class TabsPage implements OnInit {
   gruprole = this.shared.user.group;
+
   constructor(
     private router: Router,
     private shared: SharedService,
-  ) {
+    private utils: UtilsService,
+  ) { }
 
-  }
+  ngOnInit() { }
 
-  ngOnInit() {
+  scanQrCode() {
+    BarcodeScanner.hideBackground();
+    document.body.classList.add('qrscanner');
 
-    console.log('cek grup user :', this.shared.user.group);
+    const options: ScanOptions = {
+      targetedFormats: [SupportedFormat.QR_CODE]
+    };
 
-  }
+    BarcodeScanner.startScan(options).then(async (result) => {
+      this.utils.overrideBackButton();
+      document.body.classList.remove('qrscanner');
 
-  openScanPage() {
-    return this.router.navigate(['rfid-scan']);
+      if (result.hasContent) {
+        const assetId = result.content;
+        const data = JSON.stringify({
+          type: 'qr',
+          data: assetId
+        });
+
+        this.router.navigate(['scan-form', { data }]);
+      }
+    });
+
+    this.utils.overrideBackButton(() => {
+      this.utils.overrideBackButton();
+      document.body.classList.remove('qrscanner');
+      BarcodeScanner.showBackground();
+      BarcodeScanner.stopScan();
+    });
   }
 }

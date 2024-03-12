@@ -13,7 +13,6 @@ import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions
 import { ForegroundService } from '@awesome-cordova-plugins/foreground-service/ngx';
 import { Media } from '@awesome-cordova-plugins/media/ngx';
 import { MediaCapture } from '@awesome-cordova-plugins/media-capture/ngx';
-import { NFC } from '@awesome-cordova-plugins/nfc/ngx';
 import { PhotoViewer } from '@awesome-cordova-plugins/photo-viewer/ngx';
 import { ScreenOrientation } from '@awesome-cordova-plugins/screen-orientation/ngx';
 import { SQLite } from '@awesome-cordova-plugins/sqlite/ngx';
@@ -84,7 +83,6 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
     ForegroundService,
     MediaCapture,
     Media,
-    NFC,
     PhotoViewer,
     ScreenOrientation,
     SQLite,

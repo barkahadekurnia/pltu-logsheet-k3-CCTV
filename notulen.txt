@@ -12,8 +12,17 @@ http://114.6.64.2:11241/api/logsheet_new/uploads/historyAsset/1680149350_9510739
 
 Notulen CCTV (17-02-24)
 - upload transaction dikasih notes dan mengirim notif telegram
-- pilihan unit, area dibuat search
+- pilihan unit, area dibuat search OK
 - notif scan setiap hari jam 8, klik > schedule (actived date)
 - status bisa diedit
 - tagging bisa diedit
 - scan bisa di tanggal berapapun dlm 1 bulan
+
+
+Synchronize
+- Offline asset update record
+- Online asset
+- Online asset detail
+- Offline inspection record
+- Online schedule
+- Log Activity

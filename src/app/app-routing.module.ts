@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AppGuard } from './guards/app/app.guard';
@@ -28,11 +29,6 @@ const routes: Routes = [
     path: 'test-connection',
     canActivate: [AppGuard],
     loadChildren: () => import('./pages/test-connection/test-connection.module').then(m => m.TestConnectionPageModule)
-  },
-  {
-    path: 'rfid-scan',
-    canActivate: [AppGuard],
-    loadChildren: () => import('./pages/rfid-scan/rfid-scan.module').then(m => m.RfidScanPageModule)
   },
   {
     path: 'app-information',
@@ -102,20 +98,12 @@ const routes: Routes = [
     loadChildren: () => import('./pages/jadwal/jadwal.module').then(m => m.JadwalPageModule)
   },
   {
-    path: 'rfid',
-    loadChildren: () => import('./pages/rfid/rfid.module').then(m => m.RfidPageModule)
-  },
-  {
     path: 'menu',
     loadChildren: () => import('./pages/menu/menu.module').then( m => m.MenuPageModule)
   },
   {
     path: 'admin',
     loadChildren: () => import('./pages/admin/admin.module').then( m => m.AdminPageModule)
-  },
-  {
-    path: 'change-rfid',
-    loadChildren: () => import('./pages/change-rfid/change-rfid.module').then( m => m.ChangeRfidPageModule)
   },
   {
     path: 'akun',
@@ -160,15 +148,11 @@ const routes: Routes = [
   {
     path: 'asset-detail',
     loadChildren: () => import('./pages/asset-detail/asset-detail.module').then( m => m.AssetDetailPageModule)
-  },  {
-    path: 'laporan-detail-transaction',
-    loadChildren: () => import('./pages/laporan-detail-transaction/laporan-detail-transaction.module').then( m => m.LaporanDetailTransactionPageModule)
   },
   {
-    path: 'add-cctv',
-    loadChildren: () => import('./pages/add-cctv/add-cctv.module').then( m => m.AddCctvPageModule)
+    path: 'laporan-detail-transaction',
+    loadChildren: () => import('./pages/laporan-detail-transaction/laporan-detail-transaction.module').then( m => m.LaporanDetailTransactionPageModule)
   }
-
 ];
 
 @NgModule({

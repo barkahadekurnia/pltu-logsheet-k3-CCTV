@@ -4,12 +4,10 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { MenuController, IonModal, IonContent, ActionSheetController, IonPopover } from '@ionic/angular';
+import { MenuController, IonModal, IonContent, ActionSheetController, IonPopover, PopoverController, PopoverOptions } from '@ionic/angular';
 
-import { Subscription, of } from 'rxjs';
 import Viewer from 'viewerjs';
-import { filter, find, findIndex, flow, intersectionWith, map, merge, partialRight, property, result, some } from 'lodash';
-import { map as rxjsMap, tap } from 'rxjs/operators';
+import { find, map, merge, result } from 'lodash';
 
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { HttpService } from 'src/app/services/http/http.service';
@@ -19,9 +17,21 @@ import { DatabaseService } from 'src/app/services/database/database.service';
 import { MediaService, PictureSource } from 'src/app/services/media/media.service';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
+import { PickerScreenComponent } from 'src/app/components/picker-screen/picker-screen.component';
 
-type NfcStatus = 'NO_NFC' | 'NFC_DISABLED' | 'NO_NFC_OR_NFC_DISABLED' | 'NFC_OK';
+interface AssetCredentials {
+  ipAddress: string,
+  username: string,
+  password: string,
+};
 
+interface AssetStatus {
+  id: string,
+  asset_status_name: string,
+  abbreviation: string,
+  assetCategoryId: string,
+  description: string,
+};
 
 @Component({
   selector: 'app-asset-detail',
@@ -36,8 +46,6 @@ export class AssetDetailPage implements OnInit {
 
   @ViewChild(IonModal) modal: IonModal;
   @ViewChild(IonPopover) popover: IonPopover;
-
-  subscription: Subscription;
 
   checkOnly: boolean;
 
@@ -60,9 +68,7 @@ export class AssetDetailPage implements OnInit {
     offset?: number;
   };
 
-  resultParam: AssetDetails;
-
-  nfcStatus: NfcStatus;
+  resultParam: any;
 
   slideOpts = {
     initialSlide: 1,
@@ -70,28 +76,33 @@ export class AssetDetailPage implements OnInit {
   };
 
   dataFormDetailAsset: AssetFormDetails[];
-  dataFormDetailLocation: DetailAssetTags;
+  dataFormDetailMarkSign: DetailAssetTags;
+
   selectionUnit: any[] = [];
   selectionArea: any[] = [];
-  selectionAreaKosong = false;
-  areaId: any;
-  selectionTandaPemasangan: any[] = [];
-  selectionTandaPemasanganKosong = false;
-  idTandaPemasangan: any;
+  selectionMarkSign: any[] = [];
+  filteredArea: any[] = [];
+  filteredMarkSign: any[] = [];
+  selectionStatus: AssetStatus[] = [];
+
   currentDetailLokasi: any;
   currentTandaPemasangan: any;
 
-  public isBeginning = true;
-  public slides?: string[];
-  public currentSlide?: string;
-  public isEnd: boolean;
-  public indexSlide: any;
-  public buttonChecked: boolean;
-  private assetId: any;
-  public databaseArea: any;
+  isPasswordVisible = false;
 
-  isOpen = false;
-  searchTerm = '';
+  asset: AssetCredentials = {
+    ipAddress: '',
+    username: '',
+    password: '',
+  };
+
+  assetStatus: AssetStatus = {
+    id: '',
+    asset_status_name: '',
+    abbreviation: '',
+    assetCategoryId: '',
+    description: '',
+  };
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -101,16 +112,17 @@ export class AssetDetailPage implements OnInit {
     private database: DatabaseService,
     private actionSheetCtrl: ActionSheetController,
     private media: MediaService,
+    private popoverCtrl: PopoverController,
   ) {
-    this.nfcStatus = 'NO_NFC';
     this.dataFormDetailAsset = [];
-    this.isBeginning = true;
   }
 
   async ngOnInit() {
     this.transitionData = this.utils.parseJson(
       this.activatedRoute.snapshot.paramMap.get('data')
     );
+    console.log('transitionData', this.transitionData);
+
 
     if (!this.transitionData) {
       return this.utils.back();
@@ -136,51 +148,109 @@ export class AssetDetailPage implements OnInit {
   }
 
   async showDataOffline() {
-    try {
-      console.log('transition data', this.transitionData);
+    const assetId = /[^/]*$/.exec(this.transitionData.data)[0];
+    console.log('assetId', assetId);
 
-      const resAssets = await this.database.select('assetsCCTV', {
+
+    try {
+      const resAssets = await this.database.select('asset', {
         column: [
           'assetId',
-          'assetForm',
           'assetNumber',
+          'assetForm',
+          'description',
           'expireDate',
+          'historyActive',
+          'ipAddress',
+          'lastScannedAt',
+          'lastScannedBy',
           'more',
+          'password',
           'photo',
+          'schFrequency',
+          'schManual',
+          'schType',
           'supplyDate',
-          'cctvIP'
+          'username',
+          'updatedAt',
+          'isUploaded',
         ],
         where: {
           query: 'assetId=?',
-          params: [this.transitionData.data]
+          params: [assetId]
         },
       });
 
       const parsedAssets = this.database.parseResult(resAssets);
-      const arrAssetAll: AssetDetails[] = parsedAssets
+      const arrAssetAll: any[] = parsedAssets
         ?.map(
           (asset: any) => ({
-            id: asset.assetId,
+            assetId: asset.assetId,
+            assetNumber: asset.assetNumber,
             assetForm: this.utils.parseJson(asset.assetForm),
-            asset_number: asset.assetNumber,
+            description: asset.description,
             expireDate: asset.expireDate,
+            historyActive: asset.history,
+            ipAddress: asset.ipAddress,
+            lastScannedAt: asset.lastScannedAt,
+            lastScannedBy: asset.lastScannedBy,
             more: this.utils.parseJson(asset.more),
+            password: asset.password,
             photo: this.utils.parseJson(asset.photo),
-            supply_date: asset.supplyDate,
-            cctvIP: asset.cctvIP,
+            schFrequency: asset.schFrequency,
+            schManual: asset.schManual,
+            schType: asset.schType,
+            supplyDate: asset.supplyDate,
+            username: asset.username,
+            updatedAt: asset.updatedAt,
+            isUploaded: asset.isUploaded,
           })
         );
 
-      console.log('parsed result arr AssetAll', parsedAssets);
       console.log('arrAssetAll', arrAssetAll);
 
       this.resultParam = arrAssetAll[0];
+      console.log('resultParam', this.resultParam);
+
+      this.asset.ipAddress = this.resultParam?.ipAddress;
+      this.asset.username = this.resultParam?.username;
+      this.asset.password = this.resultParam?.password;
+
+      this.assetStatus.id = this.resultParam?.more.status.id;
+      this.assetStatus.asset_status_name = this.resultParam?.more.status.name;
+      this.assetStatus.description = this.resultParam?.more.status.name;
+      this.assetStatus.abbreviation = this.resultParam?.more.status.abbreviation;
+      this.assetStatus.assetCategoryId = this.resultParam?.more.category.id;
       console.log('this result param', this.resultParam);
 
-      // simpen asset id
-      if (arrAssetAll.length >= 1) {
-        this.assetId = arrAssetAll[0].id;
-      }
+      const resStatus = await this.database.select('assetStatus', {
+        column: [
+          'abbreviation',
+          'assetCategoryId',
+          'asset_status_name',
+          'description',
+          'id',
+        ],
+        where: {
+          query: 'assetCategoryId=?',
+          params: [this.resultParam?.more.category?.id]
+        },
+      });
+
+      const parsedStatus = this.database.parseResult(resStatus);
+      const arrStatus: any[] = parsedStatus
+        ?.map(
+          (status: any) => ({
+            id: status.id,
+            asset_status_name: status.asset_status_name,
+            abbreviation: status.abbreviation,
+            assetCategoryId: status.assetCategoryId,
+            description: status.description,
+          })
+        );
+
+      this.selectionStatus = arrStatus;
+      console.log('arrStatus', arrStatus);
     } catch (err) {
       console.error(err);
     }
@@ -228,314 +298,194 @@ export class AssetDetailPage implements OnInit {
     actionSheet.present();
   }
 
-  getDataEditForms() {
-    this.getDataInputForms();
-    this.getDataLokasi();
-  }
-
-  async getDataInputForms() {
+  async getDataEditForms() {
     const loader = await this.utils.presentLoader();
 
     try {
-      const resFormAssetsCategory = await this.database.select('formAssetsCategory', {
-        column: [
-          'formId',
-          'idx',
-          'formLabel',
-          'formName',
-          'formType',
-          'formOption',
-          'assetCategoryId',
-          'assetCategoryCode',
-          'assetCategoryName',
-          'created_at',
-          'updated_at',
-          'deleted_at'
-        ],
-        where: {
-          query: 'assetCategoryId=?',
-          params: [this.resultParam.more.category?.id]
-        },
-      });
+      await this.getDataInputForms();
+      await this.getDataMarkSign();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      await loader.dismiss();
+    }
+  }
 
-      const parsedFormAssetsCategory = this.database.parseResult(resFormAssetsCategory);
-      const assetFormCategoryAllSQL: any[] = [];
+  async getDataInputForms() {
+    const resFormAssetsCategory = await this.database.select('formAssetsCategory', {
+      column: [
+        'formId',
+        'idx',
+        'formLabel',
+        'formName',
+        'formType',
+        'formOption',
+        'assetCategoryId',
+        'assetCategoryCode',
+        'assetCategoryName',
+        'created_at',
+        'updated_at',
+        'deleted_at'
+      ],
+      where: {
+        query: 'assetCategoryId=?',
+        params: [this.resultParam.more.category?.id]
+      },
+    });
 
-      for (const asset of parsedFormAssetsCategory) {
-        const data = {
+    const parsedFormAssetsCategory = this.database.parseResult(resFormAssetsCategory);
+    const assetFormCategoryAllSQL: any[] = parsedFormAssetsCategory
+      .map(
+        (asset) => ({
           formId: asset.formId,
           idx: asset.idx,
           formLabel: asset.formLabel,
           formName: asset.formName,
           formType: asset.formType,
-          formOption: JSON.parse(asset.formOption),
+          formOption: this.utils.parseJson(asset.formOption),
           assetCategoryId: asset.assetCategoryId,
           assetCategoryCode: asset.assetCategoryCode,
           assetCategoryName: asset.assetCategoryName,
           created_at: asset.created_at,
           updated_at: asset.updated_at,
           deleted_at: asset.deleted_at,
-        };
-        assetFormCategoryAllSQL.push(data);
-      }
-
-      const bodyformAssetDetail = this.resultParam;
-
-      let mappedArray: any[] = map(assetFormCategoryAllSQL, (form, idx) => {
-        const resultX = intersectionWith(
-          this.utils.parseJson(form?.formOption),
-          this.resultParam.assetForm,
-          (a: any, b: any) => a?.id === b?.formValue
-        );
-
-        return {
-          ...form,
-          formOption: this.utils.parseJson(form?.formOption),
-          selected: resultX.length ? true : false,
-          value: resultX[0].id,
-          assetFormId: bodyformAssetDetail.assetForm[idx]?.id,
-          disabled: (form.assetCategoryCode === 'PH' && (form.formName === 'kapasitas')) ? true :
-            (form.assetCategoryCode === 'HB' && (form.formName === 'tipekonektor')) ? true :
-              (form.assetCategoryCode === 'DV' && (form.formName === 'diameter' || form.formName === 'jenis')) ? true :
-                (form.assetCategoryCode === 'FT' && (form.formName === 'kapasitas' || form.formName === 'jenis')) ? true :
-                  (form.assetCategoryCode === 'PH' && (form.formName === 'merk' || form.formName === 'tipekonektor')) ? true :
-                    (form.assetCategoryCode === 'AP' && (form.formName === 'merk' || form.formName === 'kapasitas')) ? true : false
-        };
-      });
-
-      const initData = mappedArray?.filter?.(
-        (item) =>
-          item.assetCategoryCode === 'PH' && item.formName === 'jenis' ||
-          item.assetCategoryCode === 'HB' && item.formName === 'jenis' ||
-          item?.assetCategoryCode === 'DV' && item?.formName === 'merk' ||
-          item.assetCategoryCode === 'FT' && item.formName === 'merk' ||
-          item.assetCategoryCode === 'PTD' && item.formName === 'jenis' ||
-          item.assetCategoryCode === 'AP' && item.formName === 'media'
-      );
-
-      let dataFormTypeAsset: TypeForm[] = [];
-
-      if (mappedArray.length && initData.length && bodyformAssetDetail) {
-        const formValue = initData[0].value;
-        const response = await this.http.getAnyData(`${environment.url.formType}/${formValue}`);
-
-        if (![200, 201].includes(response.status)) {
-          throw response;
-        }
-
-        const bodyResponse = response.data?.data;
-        dataFormTypeAsset = bodyResponse;
-
-        const mappedAssetDetail: AssetFormDetails = {
-          assetCategoryCode: null,
-          assetCategoryId: null,
-          assetCategoryName: null,
-          created_at: null,
-          deleted_at: null,
-          formId: bodyformAssetDetail.id,
-          formLabel: 'Type',
-          formName: 'type',
-          formOption: dataFormTypeAsset,
-          formType: 'select',
-          index: (mappedArray.length + 1)?.toString(),
-          selected: typeof bodyformAssetDetail.more?.type === 'object' ? true : false,
-          updated_at: null,
-          value: this.resultParam.more.type.id || null,
+          selected: true,
+          value: this.resultParam.assetForm[0].formValue,
+          assetFormId: this.resultParam.assetForm[0].id,
           disabled: false,
-        };
-
-        const idxDataMerk = findIndex(mappedArray, (obj: any) => obj.idx?.includes('2'));
-
-        mappedArray = mappedArray.sort((a, b) => a.idx - b.idx);
-
-        // add object (mappedAssetDetail) to index (idxDataMerk) of array (mappedArray)
-        of(mappedArray)
-          .pipe(
-            rxjsMap(arr => [...arr.slice(0, idxDataMerk), mappedAssetDetail, ...arr.slice(1)]),
-            tap(updatedArray => {
-              mappedArray.length = 0;
-              Array.prototype.push.apply(mappedArray, updatedArray);
-            })
-          ).subscribe();
-      }
-
-      this.dataFormDetailAsset = mappedArray;
-    }
-    catch (err) {
-      console.error(err);
-    } finally {
-      await loader.dismiss();
-    }
-  }
-
-  async getDataLokasi() {
-    const loader = await this.utils.presentLoader();
-
-    try {
-      const resultUnit = await this.database.select('unit', {
-        column: [
-          'id',
-          'unit',
-          'kode',
-          'deskripsi',
-          'updated_at',
-        ]
-      });
-
-      const parsedUnit = this.database.parseResult(resultUnit);
-
-      const resultArea = await this.database.select('area', {
-        column: [
-          'id',
-          'idUnit',
-          'area',
-          'kode',
-          'deskripsi',
-          'updated_at',
-        ]
-      });
-
-      const parsedArea = this.database.parseResult(resultArea);
-
-      this.databaseArea = parsedArea;
-
-      this.selectionUnit = parsedUnit;
-      this.selectionArea = parsedArea;
-
-      this.dataFormDetailLocation = this.resultParam.more.tag[0];
-
-      this.areaId = this.dataFormDetailLocation.areaId;
-      this.idTandaPemasangan = this.dataFormDetailLocation.id;
-    } catch (err) {
-      console.error(err);
-    } finally {
-      await loader.dismiss();
-      this.getSelectionTandaPemasangan();
-    }
-  }
-
-  async getSelectionArea(event?: any) {
-    let unitId = null;
-
-    if (event) {
-      unitId = event.detail.value;
-    } else {
-      unitId = this.dataFormDetailLocation.unitId;
-    }
-
-    const selectionArea: any = [];
-
-    try {
-      for (const data of this.databaseArea) {
-        if (data.idUnit === unitId) {
-          selectionArea.push(data);
-        }
-      }
-
-      this.selectionArea = selectionArea;
-
-      if (unitId === '4') {
-        this.selectionArea = this.databaseArea;
-      }
-      this.selectionAreaKosong = false;
-
-      if (this.selectionArea?.length === 0) {
-        this.selectionAreaKosong = true;
-      }
-
-      console.log('selectionArea', this.selectionArea);
-
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  async getSelectionTandaPemasangan(event?: any) {
-    const loader = await this.utils.presentLoader();
-
-    if (event) {
-      this.areaId = event.detail.value;
-    }
-
-    try {
-      const selectionTandaPemasangan = await this.database.select('selectionTandaPemasangan', {
-        column: [
-          'id',
-          'idArea',
-          'tag_number',
-          'unit',
-          'area',
-          'type_tag',
-          'location',
-          'detail_location',
-          'latitude',
-          'longitude',
-          'tagCategory',
-          'more',
-          'photos',
-        ],
-        where: {
-          query: 'idArea=?',
-          params: [this.areaId]
-        },
-      });
-
-      const parsedSelectionTandaPemasangan: any[] = this.database.parseResult(selectionTandaPemasangan);
-
-      const selectionTandaPemasanganAll: any[] = parsedSelectionTandaPemasangan?.map(
-        (asset: any) => ({
-          id: asset.id,
-          areaId: asset.idArea,
-          tag_number: asset.tag_number,
-          unit: asset.unit,
-          area: asset.area,
-          type_tag: asset.type_tag,
-          location: asset.location,
-          detail_location: asset.detail_location,
-          latitude: asset.latitude,
-          longitude: asset.longitude,
-          tagCategory: asset.tagCategory,
-          more: this.utils.parseJson(asset.more),
-          photos: this.utils.parseJson(asset.photos),
         })
       );
 
-      this.selectionTandaPemasangan = selectionTandaPemasanganAll;
+    const bodyformAssetDetail = this.resultParam;
 
-      this.selectionTandaPemasanganKosong = false;
+    console.log('assetFormCategoryAllSQL', assetFormCategoryAllSQL);
 
-      if (this.selectionTandaPemasangan.length === 0) {
-        this.selectionTandaPemasanganKosong = true;
-      } else {
-        const resArea = selectionTandaPemasanganAll.find((el) => el.areaId === this.areaId);
-        this.dataFormDetailLocation.tag_number = resArea?.tag_number;
-        this.dataFormDetailLocation.id = resArea?.id;
-        this.idTandaPemasangan = resArea?.id;
+    if (assetFormCategoryAllSQL.length) {
+      const formValue = this.resultParam.assetForm[0].formValue;
+      const response = await this.http.getAnyData(`${environment.url.formType}/${formValue}`);
+
+      if (![200, 201].includes(response.status)) {
+        throw response;
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      await loader.dismiss();
-      this.getSelectionIdTandaPemasangan();
+
+      const dataFormTypeAsset: TypeForm[] = response.data?.data;
+
+      const dataFormType: AssetFormDetails = {
+        assetCategoryCode: null,
+        assetCategoryId: null,
+        assetCategoryName: null,
+        created_at: null,
+        deleted_at: null,
+        formId: bodyformAssetDetail.id,
+        formLabel: 'Type',
+        formName: 'type',
+        formOption: dataFormTypeAsset,
+        formType: 'select',
+        index: '2',
+        selected: true,
+        updated_at: null,
+        value: this.resultParam.more.type.id,
+        disabled: false,
+      };
+
+      assetFormCategoryAllSQL.push(dataFormType);
     }
+
+    this.dataFormDetailAsset = assetFormCategoryAllSQL;
+    console.log('dataFormDetailAsset', assetFormCategoryAllSQL);
   }
 
-  async getSelectionIdTandaPemasangan(event?: any) {
-    const loader = await this.utils.presentLoader();
+  async getDataMarkSign() {
+    const resultUnit = await this.database.select('unit', {
+      column: [
+        'id',
+        'unit',
+        'deskripsi',
+      ]
+    });
 
-    if (event) {
-      this.idTandaPemasangan = event.detail.value;
+    const resultArea = await this.database.select('area', {
+      column: [
+        'id',
+        'idUnit',
+        'area',
+        'deskripsi',
+      ]
+    });
+
+    const resultMarkSign = await this.database.select('markSign', {
+      column: [
+        'id',
+        'idArea',
+        'tag_number',
+        'location',
+        'detail_location',
+      ]
+    });
+
+    const parsedArea: any[] = this.database.parseResult(resultArea);
+    const parsedUnit: any[] = this.database.parseResult(resultUnit);
+    const parsedMarkSign: any[] = this.database.parseResult(resultMarkSign);
+
+    this.dataFormDetailMarkSign = this.resultParam.more.tag[0];
+
+    this.selectionUnit = parsedUnit;
+    this.selectionArea = parsedArea;
+    this.selectionMarkSign = parsedMarkSign;
+
+    this.filteredArea = this.selectionArea
+      .filter((item) => item.idUnit === this.dataFormDetailMarkSign.unitId);
+    this.filteredMarkSign = this.selectionMarkSign
+      .filter((item) => item.idArea === this.dataFormDetailMarkSign.areaId);
+  }
+
+  getSelectionArea(data?: any) {
+    if (data) {
+      this.dataFormDetailMarkSign.unitId = data.ids[0];
+      this.dataFormDetailMarkSign.unit = data.texts[0];
     }
 
-    try {
-      const lokasi = this.selectionTandaPemasangan.find((el) => el.id === this.idTandaPemasangan);
-      this.dataFormDetailLocation.location = lokasi.location;
-      this.dataFormDetailLocation.detail_location = lokasi.detail_location;
-    } catch (err) {
-      console.error(err);
-    } finally {
-      await loader.dismiss();
+    const idUnit = this.dataFormDetailMarkSign.unitId;
+
+    this.filteredArea = this.selectionArea
+      .filter((item) => item.idUnit === idUnit);
+
+    this.dataFormDetailMarkSign.areaId = null;
+    this.dataFormDetailMarkSign.area = null;
+    this.dataFormDetailMarkSign.tag_number = null;
+    this.dataFormDetailMarkSign.id = null;
+    this.dataFormDetailMarkSign.location = null;
+    this.dataFormDetailMarkSign.detail_location = null;
+  }
+
+  getSelectionMarkSign(data?: any) {
+    if (data) {
+      this.dataFormDetailMarkSign.areaId = data.ids[0];
+      this.dataFormDetailMarkSign.area = data.desc[0];
     }
+
+    const idArea = this.dataFormDetailMarkSign.areaId;
+
+    this.filteredMarkSign = this.selectionMarkSign
+      .filter((item) => item.idArea === idArea);
+
+    this.dataFormDetailMarkSign.tag_number = null;
+    this.dataFormDetailMarkSign.id = null;
+    this.dataFormDetailMarkSign.location = null;
+    this.dataFormDetailMarkSign.detail_location = null;
+  }
+
+  getSelectionLocation(data?: any) {
+    if (data) {
+      this.dataFormDetailMarkSign.id = data.ids[0];
+      this.dataFormDetailMarkSign.tag_number = data.texts[0];
+    }
+
+    const idMarkSign = this.dataFormDetailMarkSign.id;
+    const location = this.filteredMarkSign.find((item) => item.id === idMarkSign);
+
+    this.dataFormDetailMarkSign.location = location?.location;
+    this.dataFormDetailMarkSign.detail_location = location?.detail_location;
   }
 
   async fetchFormType(ev) {
@@ -552,6 +502,9 @@ export class AssetDetailPage implements OnInit {
       if (![200, 201].includes(response.status)) {
         throw response;
       }
+
+      console.log('fetchFormType', response);
+
 
       const bodyFormType = response.data?.data;
 
@@ -594,19 +547,41 @@ export class AssetDetailPage implements OnInit {
     } else {
       this.dataFormDetailAsset = this.dataFormDetailAsset;
     }
+
+    console.log('fetchAdditionalData', this.dataFormDetailAsset);
   }
 
-  selectUnit(ev: Event) {
-    this.popover.event = ev;
-    this.getSelectionArea();
-    this.isOpen = true;
-    console.log('selectionUnit', this.selectionUnit);
+  async openPicker(type: string, source: any[], multi: boolean, index?: any) {
+    const popoverOptions: PopoverOptions = {
+      component: PickerScreenComponent,
+      componentProps: {
+        pickerType: type,
+        pickerData: source,
+        multiselect: multi,
+      },
+      cssClass: 'picker-popover',
+      // backdropDismiss: false,
+    };
 
-  }
+    const popover = await this.popoverCtrl.create(popoverOptions);
+    popover.onDidDismiss()
+      .then((res) => {
+        const data = res.data;
 
-  selectItemUnit(item) {
-    console.log('selectItemUnit', item);
-    this.isOpen = false;
+        if (!data) {
+          return;
+        }
+
+        if (type === 'unit') {
+          this.getSelectionArea(data);
+        } else if (type === 'area') {
+          this.getSelectionMarkSign(data);
+        } else if (type === 'mark-sign') {
+          this.getSelectionLocation(data);
+        }
+      });
+
+    return await popover.present();
   }
 
   async confirmSubmitForm(modal?: IonModal) {
@@ -667,11 +642,11 @@ export class AssetDetailPage implements OnInit {
       }
 
       // console.log('resultParam', this.resultParam);
-      // console.log('dataFormDetailLocation', this.dataFormDetailLocation);
+      // console.log('dataFormDetailLocation', this.dataFormDetailMarkSign);
       // console.log('selectionArea', this.selectionArea);
 
-      const findArea = find(this.selectionArea, { id: this.dataFormDetailLocation.areaId });
-      this.dataFormDetailLocation.area = findArea.deskripsi;
+      const findArea = find(this.selectionArea, { id: this.dataFormDetailMarkSign.areaId });
+      this.dataFormDetailMarkSign.area = findArea.deskripsi;
 
       const filteredObject = find(dataFormType.formOption, { id: dataFormType.value });
 
@@ -680,58 +655,73 @@ export class AssetDetailPage implements OnInit {
         name: filteredObject.type_name,
       };
 
+      if (this.assetStatus.id) {
+        const selected = this.selectionStatus.find((status) => status.id === this.assetStatus.id);
+        console.log('selected', selected);
+
+        this.resultParam.more.status.id = selected.id;
+        this.resultParam.more.status.name = selected.asset_status_name;
+        this.resultParam.more.status.abbreviation = selected.abbreviation;
+      }
+
       const storedMore = {
         category: this.resultParam.more.category,
         status: this.resultParam.more.status,
-        tag: [this.dataFormDetailLocation],
+        tag: [this.dataFormDetailMarkSign],
         tagging: this.resultParam.more.tagging,
         type: storedType,
       };
 
       const updatedRow = {
+        assetId: this.resultParam.assetId,
         assetForm: dataFormTypeToStore,
-        assetNumber: this.resultParam.asset_number,
+        assetNumber: this.resultParam.assetNumber,
+        description: this.resultParam.description,
         expireDate: this.resultParam.expireDate,
-        assetId: this.resultParam.id,
+        historyActive: this.resultParam.historyActive,
+        ipAddress: this.asset.ipAddress,
+        lastScannedAt: this.resultParam.lastScannedAt,
+        lastScannedBy: this.resultParam.lastScannedBy,
         more: storedMore,
+        password: this.asset.password,
         photo: this.resultParam.photo,
-        supplyDate: this.resultParam.supply_date,
-        cctvIP: this.resultParam.cctvIP,
+        schFrequency: this.resultParam.schFrequency,
+        schManual: this.resultParam.schManual,
+        schType: this.resultParam.schType,
+        supplyDate: this.resultParam.supplyDate,
+        username: this.asset.username,
+        updatedAt: this.resultParam.updatedAt,
+        isUploaded: false,
       };
 
       console.log('updatedRow', updatedRow);
 
       this.database.update(
-        'assetsCCTV',
+        'asset',
         {
+          assetId: this.resultParam.assetId,
           assetForm: JSON.stringify(dataFormTypeToStore),
-          assetNumber: this.resultParam.asset_number,
+          description: this.resultParam.description,
           expireDate: this.resultParam.expireDate,
-          assetId: this.resultParam.id,
+          historyActive: this.resultParam.historyActive,
+          ipAddress: this.asset.ipAddress,
+          lastScannedAt: this.resultParam.lastScannedAt,
+          lastScannedBy: this.resultParam.lastScannedBy,
           more: JSON.stringify(storedMore),
+          password: this.asset.password,
           photo: JSON.stringify(this.resultParam.photo),
-          supplyDate: this.resultParam.supply_date,
-          cctvIP: this.resultParam.cctvIP,
+          schFrequency: this.resultParam.schFrequency,
+          schManual: this.resultParam.schManual,
+          schType: this.resultParam.schType,
+          supplyDate: this.resultParam.supplyDate,
+          username: this.asset.username,
+          updatedAt: this.resultParam.updatedAt,
+          isUploaded: false,
         },
         {
           query: 'assetId=?',
-          params: [this.resultParam.id]
+          params: [this.resultParam.assetId]
         }
-      );
-
-      this.database.insert(
-        'recordAssetsCCTV', [
-        {
-          assetForm: JSON.stringify(dataFormTypeToStore),
-          assetNumber: this.resultParam.asset_number,
-          expireDate: this.resultParam.expireDate,
-          assetId: this.resultParam.id,
-          more: JSON.stringify(storedMore),
-          photo: JSON.stringify(this.resultParam.photo),
-          supplyDate: this.resultParam.supply_date,
-          cctvIP: this.resultParam.cctvIP,
-        }
-      ]
       );
 
       const success = await this.utils.createCustomAlert({
@@ -797,25 +787,48 @@ export class AssetDetailPage implements OnInit {
   }
 
   private async updatePictures(attachment) {
+    const loader = await this.utils.presentLoader();
+
     try {
       const { uri } = await Filesystem.writeFile({
-        path: `recordAssetsCCTV/${attachment.name}`,
+        path: `recordAssets/${attachment.name}`,
         data: attachment.filePath,
         directory: Directory.Data,
         recursive: true,
       });
 
-      if (uri) {
-        this.resultParam.photo[0].path = Capacitor.convertFileSrc(uri);
-        this.resultParam.photo[0].photo = attachment.name;
+      if (this.resultParam.photo?.length) {
+        const primary = this.resultParam.photo.find((item) => item.assetPhotoType === 'primary');
+        primary.path = Capacitor.convertFileSrc(uri);
+        primary.photo = attachment.name;
+      } else {
+        const data = {
+          assetPhotoType: 'primary',
+          path: Capacitor.convertFileSrc(uri),
+          photo: attachment.name,
+          assetPhotoId: null,
+          historyId: null,
+        };
+
+        const lastIndex = this.resultParam.photo?.length - 1;
+
+        if (lastIndex >= 0) {
+          this.resultParam.photo[lastIndex].assetPhotoType = 'media';
+          this.resultParam.photo?.push(data);
+        } else {
+          this.resultParam.photo?.push(data);
+        }
       }
     } catch (err) {
       console.error(err);
-      await Filesystem.mkdir({
-        path: 'recordAssetsCCTV',
-        directory: Directory.Data,
-      });
+    } finally {
+      await loader.dismiss();
     }
+  }
+
+  setPrimary(arr) {
+    const primary = arr?.find((item) => item.assetPhotoType === 'primary');
+    return primary.path;
   }
 
 }

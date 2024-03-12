@@ -4,12 +4,13 @@ import { CategoryParameters } from './category-parameters';
 export interface AssetDetails {
     assetForm: AssetForm[];
     asset_number: string;
-    description?: string;
+    description: string;
     expireDate: string;
-    historyActive?: string;
+    historyActive: string;
     id: string;
-    lastScannedAt?: string;
-    lastScannedBy?: string;
+    ip: string;
+    lastScannedAt: string;
+    lastScannedBy: string;
     more: AssetCategoryAndStatus;
     parameter?: {
         day: CategoryParameters[];
@@ -20,13 +21,16 @@ export interface AssetDetails {
         week: CategoryParameters[];
         yearly: CategoryParameters[];
     };
+    password: string;
     photo: Photo[];
     qr?: string;
-    sch_frequency?: string;
-    sch_manual?: string;
-    sch_type?: string;
+    sch_frequency: string;
+    sch_manual: string;
+    sch_type: string;
     supply_date: string;
-    cctvIP?: string;
+    username: string;
+    updated_at: string;
+    isUploaded: boolean;
 }
 
 export interface AssetFormDetails {
@@ -63,7 +67,7 @@ export interface TypeForm {
 }
 
 interface AssetForm {
-    assetcategoryid: string;
+    assetCategoryId: string;
     assetId: string;
     created_at?: string;
     deleted_at?: string;
@@ -86,6 +90,7 @@ interface AssetCategoryAndStatus {
     };
     status: {
         abbreviation: string;
+        description: string;
         id: string;
         name: string;
     };
@@ -116,7 +121,7 @@ export interface DetailAssetTags {
 }
 
 interface Photo {
-    assetphotoid: string;
+    assetPhotoId: string;
     assetPhotoType: string;
     created_at?: string;
     historyId: string;

@@ -24,6 +24,7 @@ import {
   CustomAlertComponent,
   CustomAlertOptions
 } from 'src/app/components/custom-alert/custom-alert.component';
+import { PickerScreenComponent } from 'src/app/components/picker-screen/picker-screen.component';
 
 export interface MyAlertOptions extends CustomAlertOptions {
   backdropDismiss?: boolean;

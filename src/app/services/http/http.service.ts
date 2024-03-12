@@ -243,7 +243,7 @@ export class HttpService {
 
     return CapacitorHttp.get(options);
   }
-  getAssetsDetail(params: string) {
+  getAssetDetails(params: string) {
     const options: HttpOptions = {
       url: environment.url.assetsdetail + '/' + params,
       headers: {
@@ -318,9 +318,10 @@ export class HttpService {
 
     return CapacitorHttp.get(options);
   }
-  getapar() {
+
+  getAllAssets(params: string) {
     const options: HttpOptions = {
-      url: environment.url.apar,
+      url: `${environment.url.allAssets}/${params}?search=undefined&unitId=undefined`,
       headers: {
         Authorization: `Bearer ${this.token}`
       },
@@ -329,6 +330,7 @@ export class HttpService {
 
     return CapacitorHttp.get(options);
   }
+
   changerfid(params: string, data: Rfid) {
     const options: HttpOptions = {
       url: environment.url.changerfid + '/' + params,
@@ -380,8 +382,6 @@ export class HttpService {
   // }
 
   getParameters(data: AssetIdToType) {
-    console.log(data);
-
     const options: HttpOptions = {
       url: environment.url.parameters,
       headers: {
@@ -421,52 +421,6 @@ export class HttpService {
     return CapacitorHttp.get(options);
   }
 
-  getSchedulesnonsift(params: { userId?: string } = {}) {
-    const options: HttpOptions = {
-      url: environment.url.schedulesnonsift,
-      headers: {
-        Authorization: `Bearer ${this.token}`
-      },
-      params,
-      responseType: 'json'
-    };
-
-    return CapacitorHttp.get(options);
-  }
-  getSchedulesnonsiftadmin() {
-    const options: HttpOptions = {
-      url: environment.url.schedulesnonsift,
-      headers: {
-        Authorization: `Bearer ${this.token}`
-      },
-      responseType: 'json'
-    };
-
-    return CapacitorHttp.get(options);
-  }
-  getSchedulesManual(params: { userId?: string } = {}) {
-    const options: HttpOptions = {
-      url: environment.url.schedulesnonmanual,
-      headers: {
-        Authorization: `Bearer ${this.token}`
-      },
-      params,
-      responseType: 'json'
-    };
-
-    return CapacitorHttp.get(options);
-  }
-  getSchedulesManualadmin() {
-    const options: HttpOptions = {
-      url: environment.url.schedulesnonmanual,
-      headers: {
-        Authorization: `Bearer ${this.token}`
-      },
-      responseType: 'json'
-    };
-
-    return CapacitorHttp.get(options);
-  }
   //http://114.6.64.2:11241/api/logsheet_dev/api/transaction/schedule/nonShift?userId=6596
   //http://114.6.64.2:11241/api/logsheet_new/api/transaction/schedule/viewTrxParent/
   getGroupOperator(params) {

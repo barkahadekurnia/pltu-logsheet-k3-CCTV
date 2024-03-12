@@ -23,10 +23,15 @@
         <ion-icon name="pricetag-outline"></ion-icon>
         {{ resultParam?.more.category.name }}
       </h3>
-      <div *ngIf="resultParam?.photo[0]?.path" class="text-center">
-        <div class="pt-3 w-40 md:w-20  rounded-2xl mx-auto">
-          <img [src]="resultParam?.photo[0]?.path" (click)="showImageViewer($event)" alt="Avatar user"
-            class="mx-auto rounded-lg border-2" />
+      <div *ngIf="resultParam?.photo?.length" class="text-center">
+        <div class="pt-3 w-40 md:w-20 rounded-2xl mx-auto">
+          <img [src]="setPrimary(resultParam.photo)" (click)="showImageViewer($event)" alt="Avatar user"
+            class="mx-auto rounded-lg border-2 w-40 h-52" />
+        </div>
+      </div>
+      <div *ngIf="!resultParam?.photo?.length" class="text-center">
+        <div class="pt-3 w-40 md:w-20 rounded-2xl mx-auto">
+          <img src="assets/img/empty.jpg" alt="Avatar user" class="mx-auto rounded-lg border-2" />
         </div>
       </div>
 
@@ -34,7 +39,7 @@
         <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>No {{ resultParam?.more?.category?.name }}</ion-label></ion-col>
-            <ion-col>{{ resultParam?.asset_number || '-' }}</ion-col>
+            <ion-col>{{ resultParam?.assetNumber || '-' }}</ion-col>
           </ion-row>
         </ion-grid>
         <ion-grid class="w-full space-y-4 text-white">
@@ -61,12 +66,30 @@
             <ion-col>{{ resultParam?.lastScannedBy || '-' }}</ion-col>
           </ion-row>
         </ion-grid>
-        <!-- <ion-grid class="w-full space-y-4 text-white">
+        <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-            <ion-col><ion-label>CCTV IP</ion-label></ion-col>
-            <ion-col>{{ resultParam?.lastScannedBy }}</ion-col>
+            <ion-col><ion-label>IP Address</ion-label></ion-col>
+            <ion-col>{{ resultParam?.ipAddress || '-' }}</ion-col>
           </ion-row>
-        </ion-grid> -->
+        </ion-grid>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>Username</ion-label></ion-col>
+            <ion-col>{{ resultParam?.username || '-' }}</ion-col>
+          </ion-row>
+        </ion-grid>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>Password</ion-label></ion-col>
+            <ion-col>{{ resultParam?.password || '-' }}</ion-col>
+          </ion-row>
+        </ion-grid>
+        <ion-grid class="w-full space-y-4 text-white">
+          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
+            <ion-col><ion-label>Tgl Update Terakhir</ion-label></ion-col>
+            <ion-col>-</ion-col>
+          </ion-row>
+        </ion-grid>
       </div>
     </div>
     <br>
@@ -93,13 +116,6 @@
             <ion-col>{{ resultParam?.more?.tag[0]?.detail_location || '-' }}</ion-col>
           </ion-row>
         </ion-grid>
-        <!-- <div class="mt-4 justify-center items-center text-center">
-          <button class="btn btn-block btn-sm btn-info rounded-btn text-white no-animation"
-            (click)="editDetailLocation()">
-            <ion-icon slot="start" name="create-outline" class="mr-2"></ion-icon>
-            Edit Detail Lokasi (default)
-          </button>
-        </div> -->
       </div>
     </div>
     <br>
@@ -109,13 +125,6 @@
         <h3 class="text-white pb-2"><ion-icon class="" name="unlink-outline"></ion-icon> Lainnya</h3>
         <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-            <ion-col><ion-label>Alamat IP CCTV</ion-label></ion-col>
-            <!-- <ion-col>{{ resultParam?.more?.status?.name }}</ion-col> -->
-            <ion-col>192.168.2.80</ion-col>
-          </ion-row>
-        </ion-grid>
-        <ion-grid class="w-full space-y-4 text-white">
-          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>Status</ion-label></ion-col>
             <ion-col>{{ resultParam?.more?.status?.name || '-' }}</ion-col>
           </ion-row>
@@ -123,7 +132,7 @@
         <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>Tanggal Pengadaan</ion-label></ion-col>
-            <ion-col>{{ resultParam?.supply_date || '-' }}</ion-col>
+            <ion-col>{{ resultParam?.supplyDate || '-' }}</ion-col>
           </ion-row>
         </ion-grid>
         <ion-grid class="w-full space-y-4 text-white">
@@ -132,22 +141,10 @@
             <ion-col>{{ resultParam?.expireDate || '-' }}</ion-col>
           </ion-row>
         </ion-grid>
-        <ion-grid *ngIf="resultParam?.sch_type" class="w-full space-y-4 text-white">
+        <ion-grid *ngIf="resultParam?.schType" class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>Type Pengecekan</ion-label></ion-col>
-            <ion-col class="!capitalize">{{ utils.parseJson(resultParam?.sch_type) || '-' }}</ion-col>
-          </ion-row>
-        </ion-grid>
-        <ion-grid class="w-full space-y-4 text-white" *ngFor="let tagging of resultParam?.more?.tagging">
-          <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
-            <ion-col>
-              <ion-label>{{ tagging?.type }}</ion-label>
-            </ion-col>
-            <div *ngIf="resultParam?.qr">
-              <ion-col *ngIf="tagging?.type === 'qr'">
-                <img [src]="resultParam?.qr" (click)="showImageViewer($event)"></ion-col>
-            </div>
-            <ion-col *ngIf="tagging?.type !== 'qr'">{{ tagging?.value || '-' }}</ion-col>
+            <ion-col class="!capitalize">{{ utils.parseJson(resultParam?.schType) || '-' }}</ion-col>
           </ion-row>
         </ion-grid>
       </div>
@@ -161,7 +158,7 @@
       <ion-header class="ion-no-border ion-no-shading">
         <ion-toolbar color="content">
           <ion-buttons slot="start">
-            <ion-button (click)="modal.dismiss()">Batal</ion-button>
+            <ion-button fill="clear" color="danger" (click)="modal.dismiss()">Batal</ion-button>
           </ion-buttons>
           <ion-buttons slot="end">
             <ion-button color="primary" (click)="confirmSubmitForm(modal)">
@@ -179,7 +176,7 @@
                   Edit Detail Asset
                 </h2>
                 <span class="text-sm font-semibold text-gray-500">
-                  {{resultParam?.asset_number}}
+                  {{resultParam?.assetNumber}}
                 </span>
               </div>
             </ion-col>
@@ -188,18 +185,26 @@
             <ion-col size="12">
               <div *ngIf="resultParam?.photo?.length" class="justify-center items-center mb-10 px-2">
                 <div class="pt-3 w-40 md:w-20 h-52 rounded-2xl mx-auto" #imageViewer>
-                  <img [src]="resultParam.photo[0].path" (click)="selectMedia()" alt="Avatar user"
+                  <img [src]="setPrimary(resultParam.photo)" (click)="selectMedia()" alt="Avatar user"
+                    class="mx-auto rounded-lg border-2 w-40 h-52" />
+                </div>
+              </div>
+              <div *ngIf="!resultParam?.photo?.length" class="justify-center items-center mb-10 px-2">
+                <div class="pt-3 w-40 md:w-20 h-52 rounded-2xl mx-auto" #imageViewer>
+                  <img src="assets/img/empty.jpg" (click)="selectMedia()" alt="Avatar user"
                     class="mx-auto rounded-lg border-2 w-40 h-52" />
                 </div>
               </div>
             </ion-col>
+          </ion-row>
+
+          <ion-row *ngIf="dataFormDetailAsset.length">
+            <ion-chip color="primary" mode="ios">
+              <ion-icon name="pricetag-outline"></ion-icon>
+              <h3>{{ resultParam?.more.category.name }}</h3>
+            </ion-chip>
 
             <ion-col size="12">
-              <ion-chip color="primary" mode="ios">
-                <ion-icon name="pricetag-outline"></ion-icon>
-                <h3>{{ resultParam?.more.category.name }}</h3>
-              </ion-chip>
-
               <div class="px-2 py-1" *ngFor="let form of dataFormDetailAsset; index as idx">
                 <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[
                                     !form.value ? 'border-error' : 'border-gray-300'
@@ -232,10 +237,100 @@
                   </div>
                 </div>
               </div>
+
+              <div class="px-2 py-1">
+                <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[
+                !asset.ipAddress ? 'border-error' : 'border-gray-300'
+              ]">
+                  <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                    <div class="flex justify-start items-center space-x-2">
+                      <div class="flex-grow flex flex-col justify-start items-start">
+                        <p class="text-sm font-semibold">
+                          IP Address
+                        </p>
+                      </div>
+                    </div>
+
+                    <ion-input class="ion-no-padding min-w-12 flex-grow text-sm text-right" type="text"
+                      placeholder="IP Address" [(ngModel)]="asset.ipAddress">
+                    </ion-input>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-2 py-1">
+                <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[
+                  !asset.username ? 'border-error' : 'border-gray-300'
+                ]">
+                  <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                    <div class="flex justify-start items-center space-x-2">
+                      <div class="flex-grow flex flex-col justify-start items-start">
+                        <p class="text-sm font-semibold">
+                          Username
+                        </p>
+                      </div>
+                    </div>
+
+                    <ion-input class="ion-no-padding min-w-12 flex-grow text-sm text-right" type="text"
+                      placeholder="Username" [(ngModel)]="asset.username">
+                    </ion-input>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-2 py-1">
+                <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[
+                  !asset.password ? 'border-error' : 'border-gray-300'
+                ]">
+                  <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                    <div class="flex justify-start items-center space-x-2">
+                      <div class="flex-grow flex flex-col justify-start items-start">
+                        <p class="text-sm font-semibold">
+                          Password
+                        </p>
+                      </div>
+                    </div>
+
+                    <ion-input class="ion-no-padding min-w-12 flex-grow text-sm text-right"
+                      [type]="isPasswordVisible ? 'text' : 'password'" placeholder="Password" clearOnEdit="false"
+                      [(ngModel)]="asset.password">
+                    </ion-input>
+
+                    <button class="btn btn-ghost btn-xs btn-circle -my-2 -mr-2 text-lg focus:outline-none"
+                      (click)="isPasswordVisible = !isPasswordVisible">
+                      <ion-icon [name]="isPasswordVisible ? 'eye-outline' : 'eye-off-outline'" color="dark"></ion-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-2 py-1">
+                <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[
+                  !assetStatus.id ? 'border-error' : 'border-gray-300'
+                ]">
+                  <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                    <div class="flex justify-start items-center space-x-2">
+                      <div class="flex-grow flex flex-col justify-start items-start">
+                        <p class="text-sm font-semibold">
+                          Status
+                        </p>
+                      </div>
+                    </div>
+
+                    <ion-select class="ion-no-padding min-w-12 flex-grow text-sm text-right" interface="alert"
+                      [interfaceOptions]="{header: 'Pilih', mode: 'ios'}" placeholder="Pilih" multiple="false"
+                      [(ngModel)]="assetStatus.id" cancelText="Batal" okText="Pilih">
+                      <ion-select-option *ngFor="let status of selectionStatus" [value]="status.id">
+                        {{status.asset_status_name}}
+                      </ion-select-option>
+                    </ion-select>
+                  </div>
+                </div>
+              </div>
             </ion-col>
           </ion-row>
 
-          <ion-row class="px-2 h-full" *ngIf="dataFormDetailLocation">
+          <ion-row class="px-2 h-full" *ngIf="dataFormDetailMarkSign">
             <ion-chip color="primary" mode="ios">
               <ion-icon name="pin-outline"></ion-icon>
               <h3>Tanda Pemasangan</h3>
@@ -243,7 +338,7 @@
 
             <ion-col size="12">
               <div class="w-full bg-white border overflow-hidden rounded-xl"
-                [ngClass]="[!dataFormDetailLocation.unitId ? 'border-error' : 'border-gray-300']">
+                [ngClass]="[!dataFormDetailMarkSign.unitId ? 'border-error' : 'border-gray-300']">
                 <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
                   <div class="flex justify-start items-center space-x-2">
                     <div class="flex-grow flex flex-col justify-start items-start">
@@ -252,24 +347,16 @@
                       </p>
                     </div>
                   </div>
-                  <ion-input class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right" type="text"
-                    placeholder="Pilih" readonly="true" [(ngModel)]="dataFormDetailLocation.unitId"
-                    (click)="selectUnit($event)"></ion-input>
-                  <!-- <ion-select class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
-                    [interfaceOptions]="{header: 'Pilih', mode: 'ios'}" label="Fixed label" label-placement="fixed"
-                    placeholder="Pilih" cancelText="Batal" okText="Pilih" (ionChange)="getSelectionArea($event)"
-                    [(ngModel)]="dataFormDetailLocation.unitId">
-                    <ion-select-option [value]='unit.id' *ngFor="let unit of selectionUnit">
-                      {{unit.deskripsi}}
-                    </ion-select-option>
-                  </ion-select> -->
+                  <ion-input class="ion-no-padding min-w-12 flex-grow text-sm font-light text-right" type="text"
+                    placeholder="Pilih" readonly="true" [(ngModel)]="dataFormDetailMarkSign.unit"
+                    (click)="openPicker('unit', selectionUnit, false)"></ion-input>
                 </div>
               </div>
             </ion-col>
 
             <ion-col size="12">
               <div class="w-full bg-white border overflow-hidden rounded-xl"
-                [ngClass]="[!dataFormDetailLocation.areaId ? 'border-error' : 'border-gray-300']">
+                [ngClass]="[!dataFormDetailMarkSign.areaId ? 'border-error' : 'border-gray-300']">
                 <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
                   <div class="flex justify-start items-center space-x-2">
                     <div class="flex-grow flex flex-col justify-start items-start">
@@ -278,26 +365,17 @@
                       </p>
                     </div>
                   </div>
-                  <ion-select class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
-                    [interfaceOptions]="{header: 'Pilih', mode: 'ios'}" label="Fixed label" label-placement="fixed"
-                    placeholder="Pilih" cancelText="Batal" okText="Pilih"
-                    (ionChange)="getSelectionTandaPemasangan($event)" [(ngModel)]="dataFormDetailLocation.areaId">
 
-                    <ion-select-option [value]='area.id' *ngFor="let area of selectionArea">
-                      {{area.deskripsi}}
-                    </ion-select-option>
-
-                    <ion-select-option class="text-center" *ngIf="selectionAreaKosong" [disabled]="true">
-                      - Data Kosong -
-                    </ion-select-option>
-                  </ion-select>
+                  <ion-input class="ion-no-padding min-w-12 flex-grow text-sm font-light text-right" type="text"
+                    placeholder="Pilih" readonly="true" [(ngModel)]="dataFormDetailMarkSign.area"
+                    (click)="openPicker('area', filteredArea, false)"></ion-input>
                 </div>
               </div>
             </ion-col>
 
             <ion-col size="12">
               <div class="w-full bg-white border overflow-hidden rounded-xl" [ngClass]="[
-                !dataFormDetailLocation.id ? 'border-error' : 'border-gray-300'
+                !dataFormDetailMarkSign.id ? 'border-error' : 'border-gray-300'
               ]">
                 <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
                   <div class="flex justify-start items-center space-x-2">
@@ -307,17 +385,10 @@
                       </p>
                     </div>
                   </div>
-                  <ion-select class="ion-no-padding min-w-12 flex-grow text-sm font-semibold text-right"
-                    [interfaceOptions]="{header: 'Pilih', mode: 'ios'}" label="Fixed label" label-placement="fixed"
-                    placeholder="Pilih" cancelText="Batal" okText="Pilih"
-                    (ionChange)="getSelectionIdTandaPemasangan($event)" [(ngModel)]="dataFormDetailLocation.id">
-                    <ion-select-option [value]="tp.id" *ngFor="let tp of selectionTandaPemasangan">
-                      {{tp.tag_number}}
-                    </ion-select-option>
-                    <ion-select-option class="text-center" *ngIf="!selectionTandaPemasangan.length" [disabled]="true">
-                      - Data Kosong -
-                    </ion-select-option>
-                  </ion-select>
+
+                  <ion-input class="ion-no-padding min-w-12 flex-grow text-sm font-light text-right" type="text"
+                    placeholder="Pilih" readonly="true" [(ngModel)]="dataFormDetailMarkSign.tag_number"
+                    (click)="openPicker('mark-sign', filteredMarkSign, false)"></ion-input>
                 </div>
               </div>
             </ion-col>
@@ -329,7 +400,7 @@
 
             <ion-col size="12">
               <div class="w-full bg-white border overflow-hidden rounded-xl"
-                [ngClass]="[!dataFormDetailLocation.location ? 'border-error' : 'border-gray-300']">
+                [ngClass]="[!dataFormDetailMarkSign.location ? 'border-error' : 'border-gray-300']">
                 <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
                   <div class="flex justify-start items-center space-x-2">
                     <div class="flex-grow flex flex-col justify-start items-start">
@@ -340,7 +411,7 @@
                   </div>
                   <ion-input type="text" [disabled]="true"
                     class="ion-no-padding min-w-12 flex-grow text-xs font-normal text-right"
-                    *ngIf="dataFormDetailLocation" [(ngModel)]="dataFormDetailLocation.location">
+                    *ngIf="dataFormDetailMarkSign" [(ngModel)]="dataFormDetailMarkSign.location">
                   </ion-input>
                 </div>
               </div>
@@ -348,7 +419,7 @@
 
             <ion-col size="12">
               <div class="w-full bg-white border rounded-xl"
-                [ngClass]="[!dataFormDetailLocation.location ? 'border-error' : 'border-gray-300']">
+                [ngClass]="[!dataFormDetailMarkSign.location ? 'border-error' : 'border-gray-300']">
                 <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
                   <div class="flex justify-start items-center space-x-2">
                     <div class="flex-grow flex flex-col justify-start items-start">
@@ -358,7 +429,25 @@
                     </div>
                   </div>
                   <ion-textarea class="ion-no-padding min-w-12 pl-4 flex-grow text-sm font-light text-right"
-                    *ngIf="dataFormDetailLocation" [(ngModel)]="dataFormDetailLocation.detail_location">
+                    *ngIf="dataFormDetailMarkSign" [(ngModel)]="dataFormDetailMarkSign.detail_location">
+                  </ion-textarea>
+                </div>
+              </div>
+            </ion-col>
+
+            <ion-col size="12">
+              <div class="w-full bg-white border rounded-xl"
+                [ngClass]="[!dataFormDetailMarkSign.location ? 'border-error' : 'border-gray-300']">
+                <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
+                  <div class="flex justify-start items-center space-x-2">
+                    <div class="flex-grow flex flex-col justify-start items-start">
+                      <p class="text-sm font-semibold">
+                        Detail Lokasi
+                      </p>
+                    </div>
+                  </div>
+                  <ion-textarea class="ion-no-padding min-w-12 pl-4 flex-grow text-sm font-light text-right"
+                    *ngIf="dataFormDetailMarkSign" [(ngModel)]="dataFormDetailMarkSign.detail_location">
                   </ion-textarea>
                 </div>
               </div>
@@ -371,18 +460,3 @@
   </ion-modal>
   <!-- End modal edit asset -->
 </ion-content>
-
-<ion-popover #popover [isOpen]="isOpen">
-  <ion-toolbar>
-    <ion-searchbar animated="true" mode="ios" [(ngModel)]="searchTerm"></ion-searchbar>
-  </ion-toolbar>
-
-  <ion-list>
-    <ion-item class="ion-border" *ngFor="let item of selectionUnit" (click)="selectItemUnit(item)" tappable>
-      <ion-avatar slot="start">
-        <img src="assets/icon/report.png" />
-      </ion-avatar>
-      <ion-label> {{ item?.deskripsi }}</ion-label>
-    </ion-item>
-  </ion-list>
-</ion-popover>
