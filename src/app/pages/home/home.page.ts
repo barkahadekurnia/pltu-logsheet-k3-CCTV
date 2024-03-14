@@ -108,6 +108,12 @@ export class HomePage implements OnInit {
   idArea: any = []
   idUnit: any = []
 
+
+  schedules:any;
+  schedulePerDate:any[]= [];
+  scheduleIdPerDate:any[]= [];
+  dataShiftPerDay:any[]=[];
+
   constructor(
     private router: Router,
     private modalCtrl: ModalController,
@@ -176,6 +182,9 @@ export class HomePage implements OnInit {
   }
 
   ngOnInit() {
+
+    console.log( 'user detail: ', this.shared.userdetail)
+    console.log( 'user: ', this.shared.user)
     this.platform.ready().then(() => {
       this.user = this.shared.user;
       this.detailuser = this.shared.userdetail;
@@ -254,11 +263,11 @@ export class HomePage implements OnInit {
       //   status: 'loading',
       //   message: 'Periksa record attachments...',
       // },
-      // schedules: {
-      //   label: 'Schedules',
-      //   status: 'loading',
-      //   message: 'Mengambil data schedules...',
-      // },
+      schedules: {
+        label: 'Schedules',
+        status: 'loading',
+        message: 'Mengambil data schedules...',
+      },
       assets: {
         label: 'Online Assets',
         status: 'loading',
@@ -289,8 +298,8 @@ export class HomePage implements OnInit {
             // this.syncJob.order.recordAttachments.request = () =>
             //   this.uploadRecordAttachments(subscriber, loader);
 
-            // this.syncJob.order.schedules.request = () =>
-            //   this.getSchedules(subscriber, loader);
+            this.syncJob.order.schedules.request = () =>
+              this.getSchedules(subscriber, loader);
 
             this.syncJob.order.assets.request = () =>
               this.getAssets(subscriber, loader);
@@ -1341,6 +1350,10 @@ export class HomePage implements OnInit {
           );
 
           console.log('schedules', schedules);
+          this.schedules = schedules
+
+          await this.scheduleShift(schedules);
+          await this.getScheduleShift();
 
           const assetIdSchedule = [];
           const assetIdType = [];
@@ -1476,6 +1489,120 @@ export class HomePage implements OnInit {
         this.onProcessFinished(subscriber, loader);
       },
     });
+  }
+
+  async scheduleShift(schedules:any){
+    const loader = await this.utils.presentLoader();
+    const now = this.utils.getTime();
+    const date = new Date(now);
+    let dataShift:any[] = []
+    const thisMonthDays = new Date(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      0
+    ).getDate();
+    
+   
+    try{
+      console.log('this month days',thisMonthDays)
+      this.schedulePerDate = []
+      this.scheduleIdPerDate = []
+      for (let i = 1; i <= thisMonthDays; i++) {
+        const label:string = moment()
+          .year(date.getFullYear())
+          .month(date.getMonth())
+          .date(i)
+          .format('YYYY-MM-DD');
+        // console.log('label', label)
+        // console.log('this schedule' , this.schedules)
+        const schedulesPerDate = schedules
+          .filter(schedule => schedule.date == label);
+          //.map(schedule => console.log(schedule.date));
+       
+        //console.log('schedule per date' , schedulesPerDate)
+        if(schedulesPerDate.length>0){
+          this.schedulePerDate.push(schedulesPerDate)
+          this.scheduleIdPerDate.push(schedulesPerDate[0]?.idschedule)
+        }
+      }
+
+      console.log('this schedule per date', this.schedulePerDate)
+      console.log('this schedule ID per date', this.scheduleIdPerDate)
+      this.dataShiftPerDay = []
+
+      for(let i = 0 ; i <this.scheduleIdPerDate.length ; i++) {
+       
+        
+        console.log('looping ke ',i ,this.scheduleIdPerDate[i] )
+        if(this.scheduleIdPerDate[i] !== undefined) {
+          const response = await this.http.getSchedulesShift(this.scheduleIdPerDate[i])
+          console.log('response get shift',response)
+
+          if (![200, 201].includes(response.status)) {
+            throw response;
+          }
+
+          const bodyResponse = response.data?.data;
+          this.dataShiftPerDay = bodyResponse;
+          console.log('dataShiftPerDay', this.dataShiftPerDay);
+
+          const data:any = {
+            idschedule : this.scheduleIdPerDate[i],
+            data : JSON.stringify(this.dataShiftPerDay)
+          }
+
+          console.log('ini data sebelum di push ke sql lite' , data)
+
+          await dataShift.push(data)
+        } 
+        // else if(this.scheduleIdPerDate[i] == undefined){
+        //   const data:any = {
+        //     idschedule : "",
+        //     data : JSON.stringify(this.dataShiftPerDay)
+        //   }
+
+        //   await dataShift.push(data)
+
+        // }
+      }
+
+    } catch (err) {
+      console.log('error', err)
+    } finally {
+
+      console.log('data semua shift schedule' , dataShift)
+      
+      // const check = await this.database.checkTable('shift')
+      // console.log('check', check)
+
+      await this.database.emptyTable('shift').then( async ()  => 
+
+       await this.database.insert('shift', dataShift)
+
+      )
+      
+      loader.dismiss()
+    }
+    
+  }
+
+  async getScheduleShift() {
+     const result = await this.database.select('shift' , {
+        column:[
+          'idschedule',
+          'data'
+        ],
+        // where: {
+        //   query: 'idschedule=?' ,
+        //   params: this.scheduleIdPerDate[0]
+        // }
+      })
+
+      console.log('result', result)
+
+      const data : any= this.database.parseResult(result);
+     
+       console.log('this result database SQL Lite shift',data);
   }
 
   private async getAssets(

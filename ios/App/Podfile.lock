@@ -146,11 +146,11 @@ SPEC CHECKSUMS:
   CapacitorTextZoom: bd623313a291bc1f38cdc01bd94c39b2b48d794a
   CapawesomeCapacitorFilePicker: 41f486cb4a89c6a7c8a4f5d683dbf96658894182
   CordovaPlugins: e4eb5c360e2e1af04fcd43b2fcb9a7c75d0c7bf1
-  CordovaPluginsResources: 1b3992e05cb6336d2850cd77dd5e3054f2f76f96
+  CordovaPluginsResources: 0c211f770ed91763a179ebcd9b9346e120b70662
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   HiloenergieCapacitorPluginSafeArea: 61909095f2f57e2ac15b6f519841bac3527f9621
   RobingenzCapacitorAppUpdate: 70fc70cf92a11cd4cb055396590a6bea2b48e8c3
 
 PODFILE CHECKSUM: f2c4220c7079b3dad2027aa938b7b0b135bc642f
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2

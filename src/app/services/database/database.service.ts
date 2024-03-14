@@ -275,6 +275,12 @@ export class DatabaseService {
           id TEXT
         )
       `,
+      shift: `
+        CREATE TABLE IF NOT EXISTS shift(
+          idschedule TEXT PRIMARY KEY NOT NULL,
+          data TEXT NOT NULL
+        )
+      `,
     };
   }
 

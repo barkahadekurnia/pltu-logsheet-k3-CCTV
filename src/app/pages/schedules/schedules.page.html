@@ -33,7 +33,7 @@
 
   <div *ngIf="!loading" class="w-full min-h-full pb-24 bg-white dark:bg-gray-900">
     <ion-grid class="w-full space-y-4">
-      <ion-row class="justify-center">
+      <ion-row class="justify-center" *ngIf="dataShift as shift" >
         <ion-col size="12" sizeLg="12">
           <ion-row class="justify-center">
             <ion-col size="12">
@@ -134,13 +134,13 @@
 
             <ion-col *ngFor="let item of calendar?.daysInThisMonth" class="col-1/7">
               <div class="group relative h-14 flex flex-col justify-center items-center cursor-pointer"
-                (click)="selectDate(item)">
+                (click)="selectDate(item)" >
                 <p class="relative z-10 text-center text-sm">{{ item.date }}</p>
 
-                <div
+                <div 
                   class="absolute z-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-md flex justify-center items-end space-x-1"
                   [ngClass]="{'bg-opacity': item.selected}">
-                  <div
+                  <div 
                     class="absolute left-1/2 -bottom-2 transform -translate-x-1/2 flex justify-center items-center space-x-1">
                     <div *ngIf="item.hasUnscanned" class="w-1 h-1 bg-error rounded-full"></div>
                     <div *ngIf="item.hasRecordHold" class="w-1 h-1 bg-warning rounded-full"></div>
@@ -179,9 +179,11 @@
 
           <ion-row *ngIf="selectedDate?.lokasi?.length" class="w-full px-4 pt-3 justify-center items-center">
             <ion-accordion-group class="w-full">
-              <ion-accordion *ngFor="let shift of dataShiftPerDay; index as idx" [value]="idx" class="rounded-xl mb-4"
+              <ion-accordion *ngIf="dataShift as shift;" class="rounded-xl mb-4"
                 toggleIcon="chevron-down-circle">
-                <ng-container>
+              <!-- <ion-accordion *ngFor="let shift of dataShiftPerDay; index as idx" [value]="idx" class="rounded-xl mb-4"
+                toggleIcon="chevron-down-circle"> -->
+                <ng-container *ngIf="jumlahAssetShift(shift.detailLocationData)">
                   <ion-item slot="header" color="dark">
                     <section class=" py-4">
                       <div class="flex mb-3 text-xs font-semibold">
@@ -216,7 +218,7 @@
                       <ng-container *ngIf="shift.detailLocationData?.length > 0">
                         <div class="text-sm mb-1.5 font-semibold"
                           *ngFor="let dataLocation of shift.detailLocationData; index as idx;">
-                          <div
+                          <div *ngIf="dataLocation.assetData.length > 0"
                             class="bg-primary border border-gray-300 rounded-btn p-2 text-white flex justify-between capitalize"
                             (click)="viewAssetsCategory('schedule-lokasi', dataLocation?.assetData, assetCategory)">
                             <div>
