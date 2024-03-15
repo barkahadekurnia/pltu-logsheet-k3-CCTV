@@ -319,7 +319,6 @@ export class DatabaseService {
       querySets.push(...this.buildInsertQuery(table, sliced));
     }
 
-
     if (querySets.length > 1) {
       return this.executeSQLBatch(querySets);
     }
