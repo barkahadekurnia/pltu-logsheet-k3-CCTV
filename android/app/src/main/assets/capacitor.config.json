@@ -11,8 +11,5 @@
 		"CapacitorHttp": {
 			"enabled": false
 		}
-	},
-	"server": {
-		"url": "http://172.20.10.2:8100"
 	}
 }

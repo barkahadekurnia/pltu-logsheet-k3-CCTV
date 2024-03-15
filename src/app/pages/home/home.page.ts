@@ -254,11 +254,11 @@ export class HomePage implements OnInit {
       //   status: 'loading',
       //   message: 'Periksa record attachments...',
       // },
-      // schedules: {
-      //   label: 'Schedules',
-      //   status: 'loading',
-      //   message: 'Mengambil data schedules...',
-      // },
+      schedules: {
+        label: 'Schedules',
+        status: 'loading',
+        message: 'Mengambil data schedules...',
+      },
       assets: {
         label: 'Online Assets',
         status: 'loading',
@@ -289,8 +289,8 @@ export class HomePage implements OnInit {
             // this.syncJob.order.recordAttachments.request = () =>
             //   this.uploadRecordAttachments(subscriber, loader);
 
-            // this.syncJob.order.schedules.request = () =>
-            //   this.getSchedules(subscriber, loader);
+            this.syncJob.order.schedules.request = () =>
+              this.getSchedules(subscriber, loader);
 
             this.syncJob.order.assets.request = () =>
               this.getAssets(subscriber, loader);
@@ -1495,10 +1495,10 @@ export class HomePage implements OnInit {
 
         await this.downloadCategory();
         await this.summaryAssets();
-        await this.assetFormCategory();
-        await this.selectionUnit();
-        await this.selectionAreaByUnit();
-        await this.selectionTandaPemasangan();
+        // await this.assetFormCategory();
+        // await this.selectionUnit();
+        // await this.selectionAreaByUnit();
+        // await this.selectionTandaPemasangan();
 
         this.syncJob.order.assets.status = 'success';
         this.syncJob.order.assets.message = 'Berhasil mendapatkan online assets';
@@ -1559,6 +1559,7 @@ export class HomePage implements OnInit {
         body.append('ip', record.ipAddress);
         body.append('username', record.username);
         body.append('password', record.password);
+        body.append('updatedAt', record.updatedAt);
 
         const response = await this.http.postAnyData(`${environment.url.updateDetailAsset}/${record.assetId}`, body);
 
@@ -1635,8 +1636,6 @@ export class HomePage implements OnInit {
 
   async summaryAssets() {
     const dataAssets: any[] = [];
-    const now = this.utils.getTime();
-    const updatedAt = moment(now).format('YYYY-MM-DD HH:mm:ss');
 
     const responseCategory = await this.http.getCategory();
 
@@ -1675,7 +1674,7 @@ export class HomePage implements OnInit {
                 schType: asset.sch_type,
                 supplyDate: asset.supply_date,
                 username: asset.username,
-                updatedAt,
+                updatedAt: asset.updated_at,
                 isUploaded: true,
               };
               dataAssets.push(data);
@@ -2176,45 +2175,45 @@ export class HomePage implements OnInit {
   }
 
   async cekScan() {
-    const data = JSON.stringify({
-      type: 'qr',
-      data: 'https://cctv.chimney.id/#/assets/detail/42337cd5-dc65-4b6b-9750-1e4c50afe6d5/519033e1-ae0b-4194-8b5f-2a9ff370e0db',
-    });
+    // const data = JSON.stringify({
+    //   type: 'qr',
+    //   data: 'https://cctv.chimney.id/#/assets/detail/42337cd5-dc65-4b6b-9750-1e4c50afe6d5/33d63f74-ab08-4c29-b86b-63f6e99d6c48',
+    // });
 
-    this.router.navigate(['asset-detail', { data }]);
+    // this.router.navigate(['asset-detail', { data }]);
 
-    // const permission = await BarcodeScanner.checkPermission({ force: true });
-    // if (permission.granted) {
-    //   BarcodeScanner.hideBackground();
-    //   document.body.classList.add('qrscanner');
+    const permission = await BarcodeScanner.checkPermission({ force: true });
+    if (permission.granted) {
+      BarcodeScanner.hideBackground();
+      document.body.classList.add('qrscanner');
 
-    //   const options: ScanOptions = {
-    //     targetedFormats: [SupportedFormat.QR_CODE],
-    //   };
+      const options: ScanOptions = {
+        targetedFormats: [SupportedFormat.QR_CODE],
+      };
 
-    //   BarcodeScanner.startScan(options).then(async (result) => {
-    //     this.utils.overrideBackButton();
-    //     document.body.classList.remove('qrscanner');
+      BarcodeScanner.startScan(options).then(async (result) => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
 
-    //     if (result.hasContent) {
-    //       const assetId = /[^/]*$/.exec(result.content)[0];
+        if (result.hasContent) {
+          const assetId = /[^/]*$/.exec(result.content)[0];
 
-    //       const data = JSON.stringify({
-    //         type: 'qr',
-    //         data: assetId,
-    //       });
+          const data = JSON.stringify({
+            type: 'qr',
+            data: assetId,
+          });
 
-    //       this.router.navigate(['asset-detail', { data }]);
-    //     }
-    //   });
+          this.router.navigate(['asset-detail', { data }]);
+        }
+      });
 
-    //   this.utils.overrideBackButton(() => {
-    //     this.utils.overrideBackButton();
-    //     document.body.classList.remove('qrscanner');
-    //     BarcodeScanner.showBackground();
-    //     BarcodeScanner.stopScan();
-    //   });
-    // }
+      this.utils.overrideBackButton(() => {
+        this.utils.overrideBackButton();
+        document.body.classList.remove('qrscanner');
+        BarcodeScanner.showBackground();
+        BarcodeScanner.stopScan();
+      });
+    }
   }
 
   async openScan() {
