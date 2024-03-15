@@ -43,6 +43,7 @@ export class DatabaseService {
           approvedBy TEXT,
           approvedNotes TEXT,
           assetId TEXT,
+          merk TEXT,
           photo TEXT,
           assetNumber TEXT,
           assetStatusId TEXT,
@@ -98,6 +99,7 @@ export class DatabaseService {
           more TEXT,
           password TEXT,
           photo TEXT,
+          merkName TEXT,
           schFrequency TEXT,
           schManual TEXT,
           schType TEXT,
@@ -162,6 +164,16 @@ export class DatabaseService {
           trxId TEXT NOT NULL,
           value TEXT NOT NULL,
           isUploaded INTEGER NOT NULL
+        )
+      `,
+      recordHold: `
+        CREATE TABLE IF NOT EXISTS recordHold(
+          assetId TEXT NOT NULL,
+          parameterId TEXT NOT NULL,
+          value TEXT NOT NULL,
+          scannedAt TEXT NOT NULL,
+          scannedWith TEXT NOT NULL,
+          scannedNotes TEXT
         )
       `,
       recordAttachment: `
@@ -273,6 +285,12 @@ export class DatabaseService {
           asset_status_name TEXT,
           description TEXT,
           id TEXT
+        )
+      `,
+      shift: `
+        CREATE TABLE IF NOT EXISTS shift(
+          idschedule TEXT PRIMARY KEY NOT NULL,
+          data TEXT NOT NULL
         )
       `,
     };

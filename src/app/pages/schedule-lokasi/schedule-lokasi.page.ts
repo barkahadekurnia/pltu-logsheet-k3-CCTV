@@ -40,7 +40,7 @@ export class ScheduleLokasiPage implements OnInit {
       console.log('navValues ', navValues);
       console.log('navValues LIAT ', this.router.getCurrentNavigation());
       this.assetCategory = navValues?.assetCategory;
-
+      console.log('isi this asset category' , this.assetCategory)
       const dataSchedules = navValues?.schedulePerDay;
       this.parseSchedulePerDay(dataSchedules);
     } else {

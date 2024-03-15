@@ -31,12 +31,14 @@ export class SchedulesPage implements OnInit {
   assetCategory: any[];
   schedules: any[];
   dataShiftPerDay: any[];
+  dataShift:any
 
   isHeaderVisible: boolean;
   loading: boolean;
   selectedDate: any;
 
   usersData: any;
+  shiftOperator: any;
 
   constructor(
     private platform: Platform,
@@ -67,6 +69,8 @@ export class SchedulesPage implements OnInit {
     await this.platform.ready();
     await this.getManualSchedules();
     await this.getKategori();
+    await this.getScheduleShift();
+    console.log('users data: ', this.usersData )
   }
 
   async ionViewWillEnter() {
@@ -110,21 +114,83 @@ export class SchedulesPage implements OnInit {
   }
 
   async scheduleShift(item: any) {
+    console.log('item: ', item)
     if (item.schedules.length > 0) {
       const loader = await this.utils.presentLoader();
 
       const idScheduleShift = item.schedules[0].idschedule;
+      console.log("idScheduleShift : ",idScheduleShift)
 
       try {
-        const response = await this.http.getSchedulesShift(idScheduleShift);
+        //online mode
+        // const response = await this.http.getSchedulesShift(idScheduleShift);
 
-        if (![200, 201].includes(response.status)) {
-          throw response;
+        // if (![200, 201].includes(response.status)) {
+        //   throw response;
+        // }
+
+        // const bodyResponse = response.data?.data;
+        // this.dataShiftPerDay = bodyResponse;
+        // console.log('dataShiftPerDay', this.dataShiftPerDay);
+
+
+        //offline mode
+        const shiftOffline = this.shiftOperator.filter(data => data.idschedule == idScheduleShift)
+        console.log('shift operator all offline : ' ,this.shiftOperator)
+        console.log('shift offline', shiftOffline)
+        const dataOfline = shiftOffline[0].data
+        const dataShiftOffline:any = JSON.parse(dataOfline)
+        console.log('data shift offline', dataShiftOffline)
+
+        this.dataShiftPerDay = dataShiftOffline;
+        console.log('dataShiftPerDay', this.dataShiftPerDay);
+
+        const teamData = Object.values(this.dataShiftPerDay[0].teamData)
+
+
+        console.log('data operator pada shift: ' , teamData[0])
+        const team:any = teamData[0]
+        let namaOperator : string
+        let dataShift:any[] = []
+        
+        for( let i = 0 ; i < this.dataShiftPerDay.length ; i++) {
+         const teamData = Object.values(this.dataShiftPerDay[i].teamData)
+         const team:any = teamData[0]
+         if(teamData){
+            dataShift = []
+            for(let x = 0 ; x < team.length ; x++){
+              console.log('x',x)
+              console.log('i',i)
+             console.log ('ope name inside for: ',  team[x].operatorUserNama)
+             
+             if(this.usersData.name == team[x].operatorUserNama){
+               namaOperator =  team[x].operatorUserNama
+               this.dataShift = this.dataShiftPerDay[i]
+              console.log(this.dataShiftPerDay[i])
+               console.log('ope name after for: ', namaOperator)
+               console.log('data shift: ',this.dataShift)
+               break;
+             } 
+           }
+         }
+ 
+         
         }
 
-        const bodyResponse = response.data?.data;
-        this.dataShiftPerDay = bodyResponse;
-        console.log('dataShiftPerDay', this.dataShiftPerDay);
+        // this.dataShift = dataShift
+
+        // if(teamData){
+        //    for(let i = 0 ; i < team.length ; i++){
+        //     console.log ('ope name inside for: ',  team[i].operatorUserNama)
+            
+        //     if(this.usersData.name == team[i].operatorUserNama){
+        //       namaOperator =  team[i].operatorUserNama
+        //     }
+        //   }
+        // }
+
+        // console.log('ope name after for: ', namaOperator)
+      
       } catch (err) {
         console.error(err);
       } finally {
@@ -134,6 +200,27 @@ export class SchedulesPage implements OnInit {
       console.log('schedule belum ada, silahkan tanyakan pada admin');
     }
   }
+
+  async getScheduleShift() {
+    const result = await this.database.select('shift' , {
+       column:[
+         'idschedule',
+         'data'
+       ],
+       // where: {
+       //   query: 'idschedule=?' ,
+       //   params: this.scheduleIdPerDate[0]
+       // }
+     })
+
+     console.log('result', result)
+
+     const data : any= this.database.parseResult(result);
+    
+      console.log('this result database SQL Lite shift',data);
+
+     this.shiftOperator = data
+ }
 
   showNextMonth(item?: any) {
     let date = item?.date;
@@ -246,8 +333,8 @@ export class SchedulesPage implements OnInit {
             description: kat?.description,
             kode: kat?.kode,
             urlImage: kat?.urlImage,
-            urlOffline: Capacitor.convertFileSrc(kat?.urlOffline)
-            //urlOffline:  kat?.urlOffline
+            //urlOffline: Capacitor.convertFileSrc(kat?.urlOffline)
+            urlOffline: 'assets/icon/cctvCamera.png'
           };
           return data;
         });

@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { MenuController } from '@ionic/angular';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { SharedService } from 'src/app/services/shared/shared.service';
+import { BarcodeScanner, ScanOptions, SupportedFormat } from '@capacitor-community/barcode-scanner';
+import { UtilsService } from 'src/app/services/utils/utils.service';
 
 @Component({
   selector: 'app-schedule-detail',
@@ -32,6 +34,7 @@ export class ScheduleDetailPage implements OnInit {
     private database: DatabaseService,
     private menuCtrl: MenuController,
     private shared: SharedService,
+    private utils:UtilsService,
   ) {
     this.segment = 'scanned';
     this.searchTerm = '';
@@ -78,6 +81,37 @@ export class ScheduleDetailPage implements OnInit {
   openScanPage() {
     return this.router.navigate(['rfid-scan']);
   } 
+
+  scanQrCode() {
+    BarcodeScanner.hideBackground();
+    document.body.classList.add('qrscanner');
+
+    const options: ScanOptions = {
+      targetedFormats: [SupportedFormat.QR_CODE]
+    };
+
+    BarcodeScanner.startScan(options).then(async (result) => {
+      this.utils.overrideBackButton();
+      document.body.classList.remove('qrscanner');
+      console.log('result;' ,result)
+      if (result.hasContent) {
+        const assetId = result.content;
+        const data = JSON.stringify({
+          type: 'qr',
+          data: assetId
+        });
+
+        this.router.navigate(['scan-form', { data }]);
+      }
+    });
+
+    this.utils.overrideBackButton(() => {
+      this.utils.overrideBackButton();
+      document.body.classList.remove('qrscanner');
+      BarcodeScanner.showBackground();
+      BarcodeScanner.stopScan();
+    });
+  }
   
   onSegmentChanged(event: any) {
     this.segment = event.detail.value;
