@@ -9,6 +9,8 @@ import {
   LoadingController,
   PopoverController,
   AlertOptions,
+  ModalController,
+  ModalOptions,
 } from '@ionic/angular';
 
 import { App } from '@capacitor/app';
@@ -24,7 +26,6 @@ import {
   CustomAlertComponent,
   CustomAlertOptions
 } from 'src/app/components/custom-alert/custom-alert.component';
-import { PickerScreenComponent } from 'src/app/components/picker-screen/picker-screen.component';
 
 export interface MyAlertOptions extends CustomAlertOptions {
   backdropDismiss?: boolean;
@@ -34,13 +35,13 @@ export interface MyAlertOptions extends CustomAlertOptions {
   providedIn: 'root'
 })
 export class UtilsService {
+  alertCtrl: any;
   private alert: HTMLIonAlertElement | HTMLIonPopoverElement;
   private interval: any;
   private secureKey: string;
   private secureIV: string;
   private routerOutlet: IonRouterOutlet;
   private isBackButtonEnabled: boolean;
-  alertCtrl: any;
 
   constructor(
     private injector: Injector,
@@ -50,6 +51,7 @@ export class UtilsService {
     private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController,
     private aes256: AES256,
+    private modalCtrl: ModalController,
   ) {
     this.isBackButtonEnabled = true;
   }
@@ -71,11 +73,22 @@ export class UtilsService {
 
     return this.popoverCtrl.create(popoverOptions);
   }
+
+  createCustomPicker(popoverOptions: PopoverOptions) {
+    return this.popoverCtrl.create(popoverOptions);
+  }
+
   async createAlert(options: AlertOptions) {
     const alert = await this.alertCtrl.create(options);
     alert.present();
 
     return alert;
+  }
+  async createModal(options: ModalOptions) {
+    const modal = await this.modalCtrl.create(options);
+    modal.present();
+
+    return modal;
   }
   async presentLoader() {
     const loader = await this.loadingCtrl.create({
@@ -157,7 +170,7 @@ export class UtilsService {
   getTime() {
     try {
       const shared = this.injector.get(SharedService);
-      moment.locale('id')
+      moment.locale('id');
 
       if (!shared.isAuthenticated) {
         throw new Error();
@@ -184,7 +197,7 @@ export class UtilsService {
   getTimeNow() {
     try {
       const shared = this.injector.get(SharedService);
-      moment.locale('id')
+      moment.locale('id');
 
       if (!shared.isAuthenticated) {
         throw new Error();
@@ -275,7 +288,7 @@ export class UtilsService {
     }
   }
 
-  
+
   delay(delay: number) {
     return new Promise<void>(resolve => {
       setTimeout(() => resolve(), delay);

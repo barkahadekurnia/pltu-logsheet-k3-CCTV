@@ -102,6 +102,8 @@ export class AppComponent implements AfterViewInit {
       { name: this.androidPermissions.PERMISSION.CAMERA },
       { name: this.androidPermissions.PERMISSION.NFC },
       { name: this.androidPermissions.PERMISSION.POST_NOTIFICATIONS },
+      { name: this.androidPermissions.PERMISSION.ACCESS_COARSE_LOCATION },
+      { name: this.androidPermissions.PERMISSION.ACCESS_FINE_LOCATION },
     ];
 
     this.initializeApp();

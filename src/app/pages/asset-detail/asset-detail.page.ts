@@ -12,17 +12,23 @@ import { find, map, merge, result } from 'lodash';
 import { UtilsService } from 'src/app/services/utils/utils.service';
 import { HttpService } from 'src/app/services/http/http.service';
 import { environment } from 'src/environments/environment';
-import { AssetDetails, AssetFormDetails, DetailAssetTags, TypeForm } from 'src/app/interfaces/asset-details';
+import { AssetFormDetails, DetailAssetTags, TypeForm } from 'src/app/interfaces/asset-details';
 import { DatabaseService } from 'src/app/services/database/database.service';
 import { MediaService, PictureSource } from 'src/app/services/media/media.service';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { PickerScreenComponent } from 'src/app/components/picker-screen/picker-screen.component';
+import { Geolocation } from '@capacitor/geolocation';
+import { MapPickerComponent } from 'src/app/components/map-picker/map-picker.component';
+import * as moment from 'moment';
 
-interface AssetCredentials {
+export interface AssetCredentials {
   ipAddress: string,
   username: string,
   password: string,
+  latitude: number,
+  longitude: number,
+  locationStatus: string,
 };
 
 interface AssetStatus {
@@ -94,6 +100,9 @@ export class AssetDetailPage implements OnInit {
     ipAddress: '',
     username: '',
     password: '',
+    latitude: null,
+    longitude: null,
+    locationStatus: '',
   };
 
   assetStatus: AssetStatus = {
@@ -118,6 +127,19 @@ export class AssetDetailPage implements OnInit {
   }
 
   async ngOnInit() {
+    const { coords } = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      maximumAge: 10000,
+      timeout: 2000
+    });
+
+    if (!coords) {
+      return;
+    }
+
+    this.asset.latitude = coords.latitude;
+    this.asset.longitude = coords.longitude;
+
     this.transitionData = this.utils.parseJson(
       this.activatedRoute.snapshot.paramMap.get('data')
     );
@@ -150,7 +172,6 @@ export class AssetDetailPage implements OnInit {
   async showDataOffline() {
     const assetId = /[^/]*$/.exec(this.transitionData.data)[0];
     console.log('assetId', assetId);
-
 
     try {
       const resAssets = await this.database.select('asset', {
@@ -551,8 +572,23 @@ export class AssetDetailPage implements OnInit {
     console.log('fetchAdditionalData', this.dataFormDetailAsset);
   }
 
-  async openPicker(type: string, source: any[], multi: boolean, index?: any) {
-    const popoverOptions: PopoverOptions = {
+  async setModalLocationOpen() {
+    const popover = await this.utils.createCustomPicker({
+      component: MapPickerComponent,
+      componentProps: {
+        asset: this.asset,
+      },
+      cssClass: 'picker-popover'
+    });
+
+    await popover.present();
+
+    const { data, role } = await popover.onDidDismiss();
+    console.log(data, role);
+  }
+
+  async openPicker(type: string, source: any[], multi: boolean) {
+    const popover = await this.utils.createCustomPicker({
       component: PickerScreenComponent,
       componentProps: {
         pickerType: type,
@@ -560,35 +596,30 @@ export class AssetDetailPage implements OnInit {
         multiselect: multi,
       },
       cssClass: 'picker-popover',
-      // backdropDismiss: false,
-    };
+    });
 
-    const popover = await this.popoverCtrl.create(popoverOptions);
-    popover.onDidDismiss()
-      .then((res) => {
-        const data = res.data;
+    await popover.present();
 
-        if (!data) {
-          return;
-        }
+    const { data } = await popover.onDidDismiss();
 
-        if (type === 'unit') {
-          this.getSelectionArea(data);
-        } else if (type === 'area') {
-          this.getSelectionMarkSign(data);
-        } else if (type === 'mark-sign') {
-          this.getSelectionLocation(data);
-        }
-      });
+    if (!data) {
+      return;
+    }
 
-    return await popover.present();
+    if (type === 'unit') {
+      this.getSelectionArea(data);
+    } else if (type === 'area') {
+      this.getSelectionMarkSign(data);
+    } else if (type === 'mark-sign') {
+      this.getSelectionLocation(data);
+    }
   }
 
   async confirmSubmitForm(modal?: IonModal) {
     const alert = await this.utils.createCustomAlert({
       type: 'warning',
       header: 'Konfirmasi',
-      message: `Apakah Anda yakin untuk menyimpan data asset ${this.resultParam.asset_number} ?`,
+      message: `Apakah Anda yakin untuk menyimpan data asset ${this.resultParam.assetNumber} ?`,
       buttons: [
         {
           text: 'Simpan',
@@ -664,6 +695,9 @@ export class AssetDetailPage implements OnInit {
         this.resultParam.more.status.abbreviation = selected.abbreviation;
       }
 
+      const now = this.utils.getTime();
+      const updatedAt = moment(now).format('YYYY-MM-DD HH:mm:ss');
+
       const storedMore = {
         category: this.resultParam.more.category,
         status: this.resultParam.more.status,
@@ -690,7 +724,7 @@ export class AssetDetailPage implements OnInit {
         schType: this.resultParam.schType,
         supplyDate: this.resultParam.supplyDate,
         username: this.asset.username,
-        updatedAt: this.resultParam.updatedAt,
+        updatedAt,
         isUploaded: false,
       };
 
@@ -715,7 +749,7 @@ export class AssetDetailPage implements OnInit {
           schType: this.resultParam.schType,
           supplyDate: this.resultParam.supplyDate,
           username: this.asset.username,
-          updatedAt: this.resultParam.updatedAt,
+          updatedAt,
           isUploaded: false,
         },
         {

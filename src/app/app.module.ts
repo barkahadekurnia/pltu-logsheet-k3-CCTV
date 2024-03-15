@@ -38,6 +38,7 @@ import { UploadRecordsComponentModule } from './components/upload-records/upload
 import { StreamingMedia } from '@awesome-cordova-plugins/streaming-media/ngx';
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { MapPickerComponentModule } from './components/map-picker/map-picker.component.module';
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -71,7 +72,8 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
     SaveOptionsComponentModule,
     ScreenViewComponentModule,
     SynchronizeCardComponentModule,
-    UploadRecordsComponentModule
+    UploadRecordsComponentModule,
+    MapPickerComponentModule
   ],
   providers: [
     {

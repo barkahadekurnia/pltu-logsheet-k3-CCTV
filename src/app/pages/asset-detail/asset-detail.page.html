@@ -54,7 +54,7 @@
             <ion-col>{{ jenis?.optionName || '-' }}</ion-col>
           </ion-row>
         </ion-grid>
-        <ion-grid class="w-full space-y-4 text-white">
+        <!-- <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>Tanggal Scan Terakhir</ion-label></ion-col>
             <ion-col>{{ resultParam?.lastScannedAt || '-' }}</ion-col>
@@ -65,7 +65,7 @@
             <ion-col><ion-label>Petugas Scan Terakhir</ion-label></ion-col>
             <ion-col>{{ resultParam?.lastScannedBy || '-' }}</ion-col>
           </ion-row>
-        </ion-grid>
+        </ion-grid> -->
         <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>IP Address</ion-label></ion-col>
@@ -87,7 +87,7 @@
         <ion-grid class="w-full space-y-4 text-white">
           <ion-row class="w-full rounded-3xl text-xs dark:ion-border-gray-600">
             <ion-col><ion-label>Tgl Update Terakhir</ion-label></ion-col>
-            <ion-col>-</ion-col>
+            <ion-col>{{resultParam?.updatedAt || '-'}}</ion-col>
           </ion-row>
         </ion-grid>
       </div>
@@ -436,19 +436,20 @@
             </ion-col>
 
             <ion-col size="12">
-              <div class="w-full bg-white border rounded-xl"
-                [ngClass]="[!dataFormDetailMarkSign.location ? 'border-error' : 'border-gray-300']">
+              <div class="w-full bg-white border overflow-hidden rounded-xl"
+                [ngClass]="[!asset.latitude ? 'border-error' : 'border-gray-300']" (click)="setModalLocationOpen()">
                 <div class="w-full p-3 pr-4 flex justify-between items-center space-x-2">
                   <div class="flex justify-start items-center space-x-2">
                     <div class="flex-grow flex flex-col justify-start items-start">
                       <p class="text-sm font-semibold">
-                        Detail Lokasi
+                        Lokasi Pemasangan
                       </p>
                     </div>
                   </div>
-                  <ion-textarea class="ion-no-padding min-w-12 pl-4 flex-grow text-sm font-light text-right"
-                    *ngIf="dataFormDetailMarkSign" [(ngModel)]="dataFormDetailMarkSign.detail_location">
-                  </ion-textarea>
+                  <ion-input type="text" [disabled]="true"
+                    class="ion-no-padding min-w-12 flex-grow text-xs font-normal text-success text-right"
+                    [(ngModel)]="asset.locationStatus">
+                  </ion-input>
                 </div>
               </div>
             </ion-col>

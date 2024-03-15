@@ -1,0 +1,17 @@
+<ion-header class="ion-no-border ion-no-shading">
+  <ion-toolbar color="content">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" color="danger" (click)="dismiss()">Batal</ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button color="primary" (click)="select()">
+        <ion-label class="!font-bold">Simpan</ion-label>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content color="content">
+  <ng-container *ngIf="asset.latitude">
+    <div id="mapElement" class="w-full h-64 bg-gray-100"></div>
+  </ng-container>
+</ion-content>
