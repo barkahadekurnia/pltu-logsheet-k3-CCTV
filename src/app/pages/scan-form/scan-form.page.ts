@@ -184,7 +184,7 @@ export class ScanFormPage implements OnInit {
     this.buttonChecked = true;
   }
 
-  ngOnInit() {
+  async  ngOnInit() {
     this.transitionData = this.utils.parseJson(
       this.activatedRoute.snapshot.paramMap.get('data')
     );
@@ -194,6 +194,21 @@ export class ScanFormPage implements OnInit {
     }
 
     console.log('1. transitionData hasil scan:', this.transitionData);
+   
+    //ambil asset id dari link scan qr
+    if(this.transitionData) {
+    const split = this.transitionData.data.split('/')
+
+    const index = split.length - 1
+
+    const assetId = split[index]
+
+    console.log('assetId', assetId)
+
+    this.transitionData.data = assetId
+    }
+
+   
 
     this.platform.ready().then(() => {
       this.getAsset().finally(() => {
@@ -207,6 +222,8 @@ export class ScanFormPage implements OnInit {
         }
       });
     });
+
+    this.checkAll()
   }
 
   ionViewWillEnter() {
@@ -242,6 +259,9 @@ export class ScanFormPage implements OnInit {
     this.currentSlide = this.slides[this.indexSlide];
     this.isBeginning = await this.ionSlides.isBeginning();
     this.isEnd = await this.ionSlides.isEnd();
+
+
+    this.checkAll()
   }
 
   onSlidesDidChange() {
@@ -259,6 +279,8 @@ export class ScanFormPage implements OnInit {
     console.log('ini schedule ', this.schedule);
     console.log('asset when button touched', this.asset);
 
+    //this.checked[this.indexSlide] = true
+    //this.checkedValue()
 
     const index = await this.ionSlides.getActiveIndex();
 
@@ -1124,6 +1146,15 @@ export class ScanFormPage implements OnInit {
                 console.log('this result params', this.resultParam);
                 console.log(this.asset.assetId);
 
+
+               
+                
+                for(let i = 0 ; i < this.resultParam.length ; i++){
+                  this.checked.push(true)
+                }
+
+                this.checkAll()
+
                 console.log(chain(ak).groupBy('parameterGroup').map(res => res).value());
 
                 const dataSlides = Object.keys(groupBy(ak, 'parameterGroup'));
@@ -1546,13 +1577,27 @@ export class ScanFormPage implements OnInit {
     return false;
   }
 
+
+  checkAll() {
+    this.resultParam[this.indexSlide].map(item => {
+      if (item.inputType === 'select') {
+        item.value = item.option.split(',')[0]; //diisi dengan index 0 (kiri samping koma)
+      } else {
+        item.value = ''
+      }
+      console.log('result params map true', item)    
+    })
+  }
+
   //checklist smua yg default
   checkedValue(): void {
     this.checked[this.indexSlide] = !this.checked[this.indexSlide];
     console.log("checked: " + this.checked[this.indexSlide]);//it is working !!
+    console.log("this index slide: ",this.indexSlide)
     //when checked true do set value and deviation
     if (this.checked[this.indexSlide]) {
-      console.log('ini checked bang')
+      console.log('ini checked bang: ',this.checked)
+      console.log("this index slide: ",this.indexSlide)
       this.resultParam[this.indexSlide].map(item => {
         if (item.inputType === 'select') {
           item.value = item.option.split(',')[0]; //diisi dengan index 0 (kiri samping koma)
@@ -1577,6 +1622,8 @@ export class ScanFormPage implements OnInit {
       console.log('sekarang berada di slide nomor', this.indexSlide)
     }
     //this.checked[this.indexSlide]=false
+
+    return
 
   }
 

@@ -333,8 +333,8 @@ export class SchedulesPage implements OnInit {
             description: kat?.description,
             kode: kat?.kode,
             urlImage: kat?.urlImage,
-            urlOffline: Capacitor.convertFileSrc(kat?.urlOffline)
-            //urlOffline:  kat?.urlOffline
+            //urlOffline: Capacitor.convertFileSrc(kat?.urlOffline)
+            urlOffline: 'assets/icon/cctvCamera.png'
           };
           return data;
         });
