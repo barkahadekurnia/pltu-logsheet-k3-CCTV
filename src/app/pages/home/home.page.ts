@@ -109,10 +109,10 @@ export class HomePage implements OnInit {
   idUnit: any = []
 
 
-  schedules:any;
-  schedulePerDate:any[]= [];
-  scheduleIdPerDate:any[]= [];
-  dataShiftPerDay:any[]=[];
+  schedules: any;
+  schedulePerDate: any[] = [];
+  scheduleIdPerDate: any[] = [];
+  dataShiftPerDay: any[] = [];
 
   constructor(
     private router: Router,
@@ -183,8 +183,8 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
 
-    console.log( 'user detail: ', this.shared.userdetail)
-    console.log( 'user: ', this.shared.user)
+    console.log('user detail: ', this.shared.userdetail)
+    console.log('user: ', this.shared.user)
     this.platform.ready().then(() => {
       this.user = this.shared.user;
       this.detailuser = this.shared.userdetail;
@@ -1491,24 +1491,24 @@ export class HomePage implements OnInit {
     });
   }
 
-  async scheduleShift(schedules:any){
+  async scheduleShift(schedules: any) {
     const loader = await this.utils.presentLoader();
     const now = this.utils.getTime();
     const date = new Date(now);
-    let dataShift:any[] = []
+    let dataShift: any[] = []
     const thisMonthDays = new Date(
       date.getFullYear(),
       date.getMonth() + 1,
       0
     ).getDate();
-    
-   
-    try{
-      console.log('this month days',thisMonthDays)
+
+
+    try {
+      console.log('this month days', thisMonthDays)
       this.schedulePerDate = []
       this.scheduleIdPerDate = []
       for (let i = 1; i <= thisMonthDays; i++) {
-        const label:string = moment()
+        const label: string = moment()
           .year(date.getFullYear())
           .month(date.getMonth())
           .date(i)
@@ -1517,10 +1517,10 @@ export class HomePage implements OnInit {
         // console.log('this schedule' , this.schedules)
         const schedulesPerDate = schedules
           .filter(schedule => schedule.date == label);
-          //.map(schedule => console.log(schedule.date));
-       
+        //.map(schedule => console.log(schedule.date));
+
         //console.log('schedule per date' , schedulesPerDate)
-        if(schedulesPerDate.length>0){
+        if (schedulesPerDate.length > 0) {
           this.schedulePerDate.push(schedulesPerDate)
           this.scheduleIdPerDate.push(schedulesPerDate[0]?.idschedule)
         }
@@ -1530,13 +1530,13 @@ export class HomePage implements OnInit {
       console.log('this schedule ID per date', this.scheduleIdPerDate)
       this.dataShiftPerDay = []
 
-      for(let i = 0 ; i <this.scheduleIdPerDate.length ; i++) {
-       
-        
-        console.log('looping ke ',i ,this.scheduleIdPerDate[i] )
-        if(this.scheduleIdPerDate[i] !== undefined) {
+      for (let i = 0; i < this.scheduleIdPerDate.length; i++) {
+
+
+        console.log('looping ke ', i, this.scheduleIdPerDate[i])
+        if (this.scheduleIdPerDate[i] !== undefined) {
           const response = await this.http.getSchedulesShift(this.scheduleIdPerDate[i])
-          console.log('response get shift',response)
+          console.log('response get shift', response)
 
           if (![200, 201].includes(response.status)) {
             throw response;
@@ -1546,15 +1546,15 @@ export class HomePage implements OnInit {
           this.dataShiftPerDay = bodyResponse;
           console.log('dataShiftPerDay', this.dataShiftPerDay);
 
-          const data:any = {
-            idschedule : this.scheduleIdPerDate[i],
-            data : JSON.stringify(this.dataShiftPerDay)
+          const data: any = {
+            idschedule: this.scheduleIdPerDate[i],
+            data: JSON.stringify(this.dataShiftPerDay)
           }
 
-          console.log('ini data sebelum di push ke sql lite' , data)
+          console.log('ini data sebelum di push ke sql lite', data)
 
           await dataShift.push(data)
-        } 
+        }
         // else if(this.scheduleIdPerDate[i] == undefined){
         //   const data:any = {
         //     idschedule : "",
@@ -1570,39 +1570,39 @@ export class HomePage implements OnInit {
       console.log('error', err)
     } finally {
 
-      console.log('data semua shift schedule' , dataShift)
-      
+      console.log('data semua shift schedule', dataShift)
+
       // const check = await this.database.checkTable('shift')
       // console.log('check', check)
 
-      await this.database.emptyTable('shift').then( async ()  => 
+      await this.database.emptyTable('shift').then(async () =>
 
-       await this.database.insert('shift', dataShift)
+        await this.database.insert('shift', dataShift)
 
       )
-      
+
       loader.dismiss()
     }
-    
+
   }
 
   async getScheduleShift() {
-     const result = await this.database.select('shift' , {
-        column:[
-          'idschedule',
-          'data'
-        ],
-        // where: {
-        //   query: 'idschedule=?' ,
-        //   params: this.scheduleIdPerDate[0]
-        // }
-      })
+    const result = await this.database.select('shift', {
+      column: [
+        'idschedule',
+        'data'
+      ],
+      // where: {
+      //   query: 'idschedule=?' ,
+      //   params: this.scheduleIdPerDate[0]
+      // }
+    })
 
-      console.log('result', result)
+    console.log('result', result)
 
-      const data : any= this.database.parseResult(result);
-     
-       console.log('this result database SQL Lite shift',data);
+    const data: any = this.database.parseResult(result);
+
+    console.log('this result database SQL Lite shift', data);
   }
 
   private async getAssets(
@@ -1725,6 +1725,8 @@ export class HomePage implements OnInit {
         const tagId = record.more.tag[0].id;
         const body = {
           detailLocation: record.more.tag[0].detail_location,
+          // latitude: record.latitude,
+          // longitude: record.longitude,
         };
 
         const response = await this.http.uploadDetailLocation(tagId, body);
