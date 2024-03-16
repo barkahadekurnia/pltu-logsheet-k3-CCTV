@@ -106,7 +106,9 @@ export class DatabaseService {
           supplyDate TEXT,
           username TEXT,
           updatedAt TEXT,
-          isUploaded INTEGER NOT NULL
+          isUploaded INTEGER NOT NULL,
+          latitude TEXT,
+          longitude TEXT
         )
       `,
       parameter: `
@@ -318,7 +320,6 @@ export class DatabaseService {
       const sliced = data.slice(i, i + chunkSize);
       querySets.push(...this.buildInsertQuery(table, sliced));
     }
-
 
     if (querySets.length > 1) {
       return this.executeSQLBatch(querySets);

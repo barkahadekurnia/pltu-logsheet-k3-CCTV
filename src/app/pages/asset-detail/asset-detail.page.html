@@ -181,7 +181,7 @@
               </div>
             </ion-col>
           </ion-row>
-          <ion-row *ngIf="dataFormDetailAsset.length">
+          <ion-row >
             <ion-col size="12">
               <div *ngIf="resultParam?.photo?.length" class="justify-center items-center mb-10 px-2">
                 <div class="pt-3 w-40 md:w-20 h-52 rounded-2xl mx-auto" #imageViewer>
@@ -198,7 +198,7 @@
             </ion-col>
           </ion-row>
 
-          <ion-row *ngIf="dataFormDetailAsset.length">
+          <ion-row>
             <ion-chip color="primary" mode="ios">
               <ion-icon name="pricetag-outline"></ion-icon>
               <h3>{{ resultParam?.more.category.name }}</h3>

@@ -934,6 +934,8 @@ export class HomePage implements OnInit {
           'supplyDate',
           'username',
           'updatedAt',
+          'longitude',
+          'latitude',
           'isUploaded',
         ]
       });
@@ -961,6 +963,8 @@ export class HomePage implements OnInit {
             supplyDate: asset.supplyDate,
             username: asset.username,
             updatedAt: asset.updatedAt,
+            longitude: asset.longitude,
+            latitude: asset.latitude,
             isUploaded: asset.isUploaded,
           })
         );
@@ -1622,7 +1626,7 @@ export class HomePage implements OnInit {
 
         await this.downloadCategory();
         await this.summaryAssets();
-        // await this.assetFormCategory();
+       await this.assetFormCategory();
         // await this.selectionUnit();
         // await this.selectionAreaByUnit();
         // await this.selectionTandaPemasangan();
@@ -1724,9 +1728,10 @@ export class HomePage implements OnInit {
       .map(async (record) => {
         const tagId = record.more.tag[0].id;
         const body = {
-          detailLocation: record.more.tag[0].detail_location,
-          // latitude: record.latitude,
-          // longitude: record.longitude,
+          detailLocation: record.more.tag[0].detail_location, 
+          latitude: record.latitude,
+          longitude: record.longitude
+
         };
 
         const response = await this.http.uploadDetailLocation(tagId, body);
@@ -1743,7 +1748,7 @@ export class HomePage implements OnInit {
 
   uploadAssetPhoto(records: any[]) {
     const body: FormData = new FormData();
-
+    let i = 0
     const requests = records
       .map(async (record) => {
         const resultPhoto = record.photo?.find((item) => item.assetPhotoType === 'primary');
@@ -1757,7 +1762,10 @@ export class HomePage implements OnInit {
           return;
         }
 
+        console.log('upload asset photo ke: ' ,i, response)
+        i++
         return response.body;
+       
       });
 
     return requests;
@@ -1804,7 +1812,10 @@ export class HomePage implements OnInit {
                 supplyDate: asset.supply_date,
                 username: asset.username,
                 updatedAt: asset.updated_at,
+                latitude: asset.latitude,
+                longitude: asset.longitude,
                 isUploaded: true,
+
               };
               dataAssets.push(data);
             }

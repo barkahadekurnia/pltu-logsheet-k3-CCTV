@@ -106,6 +106,7 @@ export class AssetsPage implements OnInit {
       this.shared.filterOptions.keyword = event.detail.value;
     }
 
+    console.log('this source asset: ', this.sourceAssets)
     this.filteredAssets = this.sourceAssets.filter((sch) => {
       let condition = {
         assetNumber: sch.assetNumber,
@@ -144,6 +145,9 @@ export class AssetsPage implements OnInit {
     });
 
     this.filteredAssets = this.filteredAssets.slice(0, 10);
+
+    console.log('search: ',event?.detail?.value)
+    console.log('this filtered Asset', this.filteredAssets)
   }
 
   loadingFalse() {
@@ -205,6 +209,8 @@ export class AssetsPage implements OnInit {
       });
 
       this.assetAll = this.database.parseResult(result);
+
+      console.log('this.assetAll', this.assetAll)
     } catch (error) {
       console.error(error);
     }
@@ -285,6 +291,8 @@ export class AssetsPage implements OnInit {
 
       this.sourceAssets = assets;
       this.filteredAssets = this.sourceAssets.slice(0, this.loaded);
+
+      console.log('this.filteredAssets', this.filteredAssets)
     } catch (error) {
       console.error(error);
     } finally {

@@ -30,6 +30,8 @@ export interface AssetDetails {
     supply_date: string;
     username: string;
     updated_at: string;
+    latitude: string;
+    longitude: string;
     isUploaded: boolean;
 }
 
