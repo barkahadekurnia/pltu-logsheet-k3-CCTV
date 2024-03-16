@@ -106,7 +106,9 @@ export class DatabaseService {
           supplyDate TEXT,
           username TEXT,
           updatedAt TEXT,
-          isUploaded INTEGER NOT NULL
+          isUploaded INTEGER NOT NULL,
+          latitude TEXT,
+          longitude TEXT
         )
       `,
       parameter: `

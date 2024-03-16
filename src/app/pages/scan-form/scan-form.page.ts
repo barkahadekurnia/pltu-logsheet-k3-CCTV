@@ -1579,7 +1579,8 @@ export class ScanFormPage implements OnInit {
 
 
   checkAll() {
-    this.resultParam[this.indexSlide].map(item => {
+    const resultParam = this.resultParam[this.indexSlide]
+    resultParam.map(item => {
       if (item.inputType === 'select') {
         item.value = item.option.split(',')[0]; //diisi dengan index 0 (kiri samping koma)
       } else {

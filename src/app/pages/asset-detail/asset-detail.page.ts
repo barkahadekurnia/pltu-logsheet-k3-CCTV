@@ -194,6 +194,8 @@ export class AssetDetailPage implements OnInit {
           'supplyDate',
           'username',
           'updatedAt',
+          'longitude',
+          'latitude',
           'isUploaded',
         ],
         where: {
@@ -225,6 +227,8 @@ export class AssetDetailPage implements OnInit {
             username: asset.username,
             updatedAt: asset.updatedAt,
             isUploaded: asset.isUploaded,
+            longitude: asset.longitude,
+            latitude: asset.latitude
           })
         );
 
@@ -276,6 +280,7 @@ export class AssetDetailPage implements OnInit {
       console.error(err);
     }
   }
+
 
   showImageViewer({ target }: Event) {
     const options: Viewer.Options = {
@@ -333,6 +338,7 @@ export class AssetDetailPage implements OnInit {
   }
 
   async getDataInputForms() {
+    console.log('this result param',this.resultParam)
     const resFormAssetsCategory = await this.database.select('formAssetsCategory', {
       column: [
         'formId',
@@ -354,7 +360,12 @@ export class AssetDetailPage implements OnInit {
       },
     });
 
+    console.log('resFormAssetsCategory',resFormAssetsCategory)
+
+
+    
     const parsedFormAssetsCategory = this.database.parseResult(resFormAssetsCategory);
+    console.log('parsedFormAssetsCategory',parsedFormAssetsCategory)
     const assetFormCategoryAllSQL: any[] = parsedFormAssetsCategory
       .map(
         (asset) => ({
@@ -585,6 +596,8 @@ export class AssetDetailPage implements OnInit {
 
     const { data, role } = await popover.onDidDismiss();
     console.log(data, role);
+
+    this.asset = data
   }
 
   async openPicker(type: string, source: any[], multi: boolean) {
@@ -639,8 +652,10 @@ export class AssetDetailPage implements OnInit {
   async submitFormUpdate(modal?: IonModal) {
     const loader = await this.utils.presentLoader();
 
+    console.log('this.dataFormDetailAsset',this.dataFormDetailAsset)
     const body = new FormData();
     const dataFormType = this.dataFormDetailAsset?.filter(item => item.formName === 'type')[0];
+    console.log('dataformtype: ', dataFormType)
 
     try {
       // const dataExcludeFormType = this.dataFormDetailAsset
@@ -666,7 +681,7 @@ export class AssetDetailPage implements OnInit {
           }
         });
 
-      if (dataFormType.value) {
+      if (dataFormType?.value) {
         body.append('typeId', dataFormType.value);
       } else {
         throw new Error('Data yang Anda masukkan tidak valid, silahkan dicoba kembali.');
@@ -676,8 +691,14 @@ export class AssetDetailPage implements OnInit {
       // console.log('dataFormDetailLocation', this.dataFormDetailMarkSign);
       // console.log('selectionArea', this.selectionArea);
 
-      const findArea = find(this.selectionArea, { id: this.dataFormDetailMarkSign.areaId });
-      this.dataFormDetailMarkSign.area = findArea.deskripsi;
+      if(this.selectionArea?.length > 0){
+          const findArea = find(this.selectionArea, { id: this.dataFormDetailMarkSign.areaId });
+          
+          console.log('find area : ' , findArea)
+          console.log('this selection area: ', this.selectionArea)
+          console.log('this.dataFormDetailMarkSign',this.dataFormDetailMarkSign)
+          this.dataFormDetailMarkSign.area = findArea.deskripsi;
+      }
 
       const filteredObject = find(dataFormType.formOption, { id: dataFormType.value });
 
@@ -725,6 +746,8 @@ export class AssetDetailPage implements OnInit {
         supplyDate: this.resultParam.supplyDate,
         username: this.asset.username,
         updatedAt,
+        latitude: this.asset.latitude,
+        longitude: this.asset.longitude,
         isUploaded: false,
       };
 
@@ -750,6 +773,8 @@ export class AssetDetailPage implements OnInit {
           supplyDate: this.resultParam.supplyDate,
           username: this.asset.username,
           updatedAt,
+          latitude: this.asset.latitude,
+          longitude: this.asset.longitude,
           isUploaded: false,
         },
         {
